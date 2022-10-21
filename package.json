@@ -1,0 +1,12 @@
+{
+  "name": "withtyped",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
+  "engines": {
+    "node": "^16.0.0 || ^18.0.0",
+    "pnpm": "^7"
+  }
+}

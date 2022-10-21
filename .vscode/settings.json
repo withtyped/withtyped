@@ -1,0 +1,21 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.workingDirectories": [{
+    "pattern": "./packages/*",
+  }],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  },
+  "cSpell.words": [
+    "pnpm",
+    "silverhand",
+    "slonik",
+    "withtyped",
+  ],
+}
