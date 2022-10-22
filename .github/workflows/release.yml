@@ -22,7 +22,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/withtyped/withtyped
+            ghcr.io/withtyped/sample
           # https://github.com/docker/metadata-action#typesemver
           tags: |
             type=edge
