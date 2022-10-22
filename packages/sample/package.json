@@ -1,5 +1,5 @@
 {
-  "name": "@withtyped/server",
+  "name": "@withtyped/sample",
   "version": "0.1.0",
   "author": "Gao Sun",
   "license": "MIT",
@@ -22,5 +22,10 @@
   "eslintConfig": {
     "extends": "@silverhand"
   },
-  "prettier": "@silverhand/eslint-config/.prettierrc"
+  "prettier": "@silverhand/eslint-config/.prettierrc",
+  "dependencies": {
+    "@withtyped/server": "workspace:^0.1.0",
+    "nanoid": "^4.0.0",
+    "slonik": "^32.0.0"
+  }
 }

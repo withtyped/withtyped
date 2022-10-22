@@ -31,9 +31,13 @@ const createRequestListener =
 
     const string = await readRequest(request);
 
-    await handler?.(string, request);
-
-    response.writeHead(204).end();
+    try {
+      await handler?.(string, request);
+      response.writeHead(204).end();
+    } catch (error: unknown) {
+      console.error('Request error', error);
+      response.writeHead(400).end();
+    }
   };
 
 export type CreateServer = {
@@ -58,5 +62,3 @@ export default function createServer({
     },
   };
 }
-
-createServer().listen();
