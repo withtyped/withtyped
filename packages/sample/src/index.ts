@@ -2,9 +2,11 @@ import createServer from '@withtyped/server';
 import { nanoid } from 'nanoid';
 import { createPool, sql } from 'slonik';
 
-const pool = await createPool(process.env.DB_URL ?? 'postgresql://localhost/sample');
+const { DB_URL, PORT } = process.env;
+const pool = await createPool(DB_URL ?? 'postgresql://localhost/sample');
 
 createServer({
+  port: PORT ? Number(PORT) : undefined,
   handler: async (body, request) => {
     console.log('Received', body);
     await pool.query(sql`

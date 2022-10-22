@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "pnpm build && node lib/index.js",
+    "dev": "pnpm build --watch --preserveWatchOutput --incremental",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
