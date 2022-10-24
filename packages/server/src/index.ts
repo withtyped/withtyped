@@ -1,4 +1,4 @@
-import http, { IncomingMessage } from 'node:http';
+import http from 'node:http';
 
 const readRequest = async (request: http.IncomingMessage) =>
   new Promise<string>((resolve, reject) => {

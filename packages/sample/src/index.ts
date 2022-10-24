@@ -10,6 +10,7 @@ createServer({
   handler: async (body, request, response) => {
     const headers = {
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
       'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
       'Access-Control-Max-Age': 2_592_000, // 30 days
     };
