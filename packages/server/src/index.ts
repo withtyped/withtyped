@@ -18,12 +18,20 @@ const readRequest = async (request: http.IncomingMessage) =>
       });
   });
 
-type RequestHandler = (body: string, request: http.IncomingMessage) => void | Promise<void>;
+type RequestHandler = (
+  body: string,
+  request: http.IncomingMessage,
+  response: http.ServerResponse & { req: http.IncomingMessage }
+) => void | Promise<void>;
+
+const allowedMethods = new Set(['POST', 'OPTIONS']);
 
 const createRequestListener =
   (handler?: RequestHandler): http.RequestListener =>
   async (request, response) => {
-    if (request.method !== 'POST') {
+    const { method } = request;
+
+    if (!method || !allowedMethods.has(method)) {
       response.writeHead(405).end();
 
       return;
@@ -32,7 +40,7 @@ const createRequestListener =
     const string = await readRequest(request);
 
     try {
-      await handler?.(string, request);
+      await handler?.(string, request, response);
       response.writeHead(204).end();
     } catch (error: unknown) {
       console.error('Request error', error);
