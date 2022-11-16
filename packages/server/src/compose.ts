@@ -41,6 +41,7 @@ const buildNext = (
     return next;
   }
 
+  // Business need
   // eslint-disable-next-line @silverhand/fp/no-let
   let called = false;
 
@@ -67,6 +68,10 @@ const createComposer = function <
   InputContext extends BaseContext,
   OutputContext extends BaseContext
 >(functions: Readonly<T>): Composer<T, InputContext, OutputContext> {
+  /**
+   * TypeScript won't derive the same type after spreading an array.
+   * It'll be great to figure out the root cause, but not worthy to be a blocker.
+   */
   // eslint-disable-next-line no-restricted-syntax
   const _functions = Object.freeze([...functions]) as Readonly<T>;
 
@@ -75,12 +80,13 @@ const createComposer = function <
     ComposerProperties<T, InputContext, OutputContext>
   >(
     async function (context, next) {
-      return buildNext(
-        // eslint-disable-next-line no-restricted-syntax
-        _functions as Readonly<MiddlewareFunction[]>,
-        // eslint-disable-next-line no-restricted-syntax
-        next as NextFunction
-      )(context);
+      /**
+       * `buildNext()` doesn't care about the context type,
+       * and it's also hard to derive the strict context with a generic array type.
+       * Thus it's OK to use `as` I think.
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      return buildNext(_functions as Readonly<MiddlewareFunction[]>, next as NextFunction)(context);
     },
     {
       get functions() {
