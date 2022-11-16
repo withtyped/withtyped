@@ -1,6 +1,6 @@
 import type {
   BaseContext,
-  ExtractContextInput,
+  ExtractInputContext,
   HttpContext,
   MiddlewareFunction,
   NextFunction,
@@ -8,25 +8,25 @@ import type {
 
 export type ComposerProperties<
   MiddlewareFunctions extends unknown[],
-  ContextInput extends BaseContext,
-  ContextOutput extends BaseContext
+  InputContext extends BaseContext,
+  OutputContext extends BaseContext
 > = {
   functions: Readonly<MiddlewareFunctions>;
   and: <Context extends BaseContext>(
-    middleware: MiddlewareFunction<ContextOutput, Context>
+    middleware: MiddlewareFunction<OutputContext, Context>
   ) => Composer<
-    [...MiddlewareFunctions, MiddlewareFunction<ContextOutput, Context>],
-    ContextInput,
+    [...MiddlewareFunctions, MiddlewareFunction<OutputContext, Context>],
+    InputContext,
     Context
   >;
 };
 
 export type Composer<
   MiddlewareFunctions extends unknown[],
-  ContextInput extends BaseContext,
-  ContextOutput extends BaseContext
-> = MiddlewareFunction<ContextInput, ContextOutput> &
-  ComposerProperties<MiddlewareFunctions, ContextInput, ContextOutput>;
+  InputContext extends BaseContext,
+  OutputContext extends BaseContext
+> = MiddlewareFunction<InputContext, OutputContext> &
+  ComposerProperties<MiddlewareFunctions, InputContext, OutputContext>;
 
 export class ComposeError extends Error {
   constructor(public type: 'next_call_twice') {
@@ -47,7 +47,7 @@ const buildNext = (
   // eslint-disable-next-line @silverhand/fp/no-let
   let called = false;
 
-  return async (context: ExtractContextInput<typeof first>) => {
+  return async (context: ExtractInputContext<typeof first>) => {
     if (called) {
       throw new ComposeError('next_call_twice');
     }

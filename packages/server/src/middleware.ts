@@ -1,8 +1,10 @@
-import type { IncomingMessage, ServerResponse } from 'http';
+import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 
 export type BaseContext<Status extends number = number, ResponseBody = unknown> = {
+  request?: unknown;
   status?: Status;
   json?: ResponseBody;
+  headers?: OutgoingHttpHeaders;
 };
 
 export type NextFunction<Context extends BaseContext = BaseContext> = (
@@ -15,25 +17,20 @@ export type HttpContext = {
 };
 
 export type MiddlewareFunction<
-  ContextInput extends BaseContext = BaseContext,
-  ContextOutput extends BaseContext = ContextInput
-> = (context: ContextInput, next: NextFunction<ContextOutput>, http: HttpContext) => Promise<void>;
+  InputContext extends BaseContext = BaseContext,
+  OutputContext extends BaseContext = InputContext
+> = (context: InputContext, next: NextFunction<OutputContext>, http: HttpContext) => Promise<void>;
 
-export type ExtractContextInput<Middleware> = Middleware extends MiddlewareFunction<
+export type ExtractInputContext<Middleware> = Middleware extends MiddlewareFunction<
   infer Input,
   BaseContext
 >
   ? Input
   : never;
 
-export type ExtractContextOutput<Middleware> = Middleware extends MiddlewareFunction<
+export type ExtractOutputContext<Middleware> = Middleware extends MiddlewareFunction<
   BaseContext,
   infer Output
 >
   ? Output
   : never;
-
-export const withStatus =
-  <Status extends number>(status: Status): MiddlewareFunction<BaseContext, BaseContext<Status>> =>
-  async (context, next) =>
-    next({ ...context, status });
