@@ -3,11 +3,8 @@ import type { BaseContext, NextFunction } from '../middleware.js';
 /**
  * DON'T USE. This is a naive version of CORS. For test purpose only.
  */
-export default function withCors() {
-  return async <InputContext extends BaseContext>(
-    context: InputContext,
-    next: NextFunction<InputContext>
-  ) =>
+export default function withCors<InputContext extends BaseContext>() {
+  return async (context: InputContext, next: NextFunction<InputContext>) =>
     next({
       ...context,
       headers: {

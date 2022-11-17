@@ -1,7 +1,9 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 
 export type BaseContext<Status extends number = number, ResponseBody = unknown> = {
-  request?: unknown;
+  // `{}` can help us to get the correct type
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  request?: {};
   status?: Status;
   json?: ResponseBody;
   headers?: OutgoingHttpHeaders;

@@ -1,72 +1,62 @@
 import http from 'node:http';
+import { promisify } from 'node:util';
 
-const readRequest = async (request: http.IncomingMessage) =>
-  new Promise<string>((resolve, reject) => {
-    const body: Uint8Array[] = [];
-    // eslint-disable-next-line @silverhand/fp/no-mutating-methods
-    const pushToBody = (chunk: Uint8Array) => body.push(chunk);
+import type { Composer } from './compose.js';
+import compose from './compose.js';
+import type { BaseContext } from './middleware.js';
 
-    request
-      .on('data', pushToBody)
-      .once('end', () => {
-        request.removeListener('data', pushToBody);
-        resolve(Buffer.concat(body).toString());
-      })
-      .once('error', (error) => {
-        request.removeListener('data', pushToBody);
-        reject(error);
-      });
-  });
-
-type RequestHandler = (
-  body: string,
-  request: http.IncomingMessage,
-  response: http.ServerResponse & { req: http.IncomingMessage }
-) => void | Promise<void>;
-
-const allowedMethods = new Set(['POST', 'OPTIONS']);
-
-const createRequestListener =
-  (handler?: RequestHandler): http.RequestListener =>
-  async (request, response) => {
-    const { method } = request;
-
-    if (!method || !allowedMethods.has(method)) {
-      response.writeHead(405).end();
-
-      return;
-    }
-
-    const string = await readRequest(request);
-
-    try {
-      await handler?.(string, request, response);
-      response.writeHead(204).end();
-    } catch (error: unknown) {
-      console.error('Request error', error);
-      response.writeHead(400).end();
-    }
-  };
-
-export type CreateServer = {
+export type CreateServer<
+  T extends unknown[],
+  InputContext extends BaseContext,
+  OutputContext extends BaseContext
+> = {
   port?: number;
-  handler?: RequestHandler;
+  composer?: Composer<T, InputContext, OutputContext>;
 };
 
-const createServerDefault: CreateServer = { port: 9001 };
+// eslint-disable-next-line @typescript-eslint/ban-types
+type ErrorCallback = (error?: Error | null) => void;
 
-export default function createServer({
-  port = createServerDefault.port,
-  handler,
-}: CreateServer = createServerDefault) {
-  const server = http.createServer(createRequestListener(handler)).on('listening', () => {
-    console.log('Server is listening port', port);
+export default function createServer<T extends unknown[], OutputContext extends BaseContext>({
+  port = 9001,
+  composer,
+}: CreateServer<T, BaseContext, OutputContext>) {
+  const composed = composer ?? compose();
+  const server = http.createServer(async (request, response) => {
+    await composed(
+      {},
+      async ({ status, json, headers }) => {
+        // Send status along with headers
+        if (!response.headersSent) {
+          response.writeHead(status ?? 404, headers);
+        }
+
+        // Send JSON body
+        if (json) {
+          const write = promisify((chunk: unknown, callback: ErrorCallback) =>
+            response.write(chunk, callback)
+          );
+          await write(json);
+        }
+
+        // End
+        const end = promisify((callback: ErrorCallback) => response.end(callback));
+        await end();
+      },
+      { request, response }
+    );
   });
 
   return {
     server,
-    listen: () => {
+    listen: (listener?: (port: number) => void) => {
       server.listen(port);
+
+      if (listener) {
+        server.on('listening', () => {
+          listener(port);
+        });
+      }
     },
   };
 }

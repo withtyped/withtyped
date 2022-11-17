@@ -99,7 +99,9 @@ const createComposer = function <
       get functions() {
         return _functions;
       },
-      and<Context extends BaseContext>(middleware: MiddlewareFunction<OutputContext, Context>) {
+      and<Context extends BaseContext = OutputContext>(
+        middleware: MiddlewareFunction<OutputContext, Context>
+      ) {
         return createComposer<[...T, typeof middleware], InputContext, Context>(
           Object.freeze([..._functions, middleware] as const)
         );
@@ -134,11 +136,10 @@ function compose<InputContext extends BaseContext, OutputContext extends BaseCon
   middleware: MiddlewareFunction<InputContext, OutputContext>
 ): Composer<[MiddlewareFunction<InputContext, OutputContext>], InputContext, OutputContext>;
 
-function compose<InputContext extends BaseContext = BaseContext>(): Composer<
-  EmptyArray,
-  InputContext,
-  InputContext
->;
+function compose<
+  InputContext extends BaseContext = BaseContext,
+  OutputContext extends BaseContext = InputContext
+>(): Composer<EmptyArray, InputContext, OutputContext>;
 
 function compose<
   InputContext extends BaseContext = BaseContext,

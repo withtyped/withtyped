@@ -1,17 +1,13 @@
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-
-export type MergeRequestContext<InputContext extends BaseContext, MergeType> = Omit<
-  InputContext,
-  'request'
-> & { request: InputContext['request'] & MergeType };
+import type { MergeRequestContext } from './with-request.js';
 
 export type WithBodyContext<InputContext extends BaseContext> = MergeRequestContext<
   InputContext,
-  { body: Buffer }
+  { body: unknown }
 >;
 
-export default function withBody() {
-  return async <InputContext extends BaseContext>(
+export default function withBody<InputContext extends BaseContext>() {
+  return async (
     context: InputContext,
     next: NextFunction<WithBodyContext<InputContext>>,
     { request }: HttpContext
@@ -34,6 +30,8 @@ export default function withBody() {
           });
       });
 
-    return next({ ...context, request: { body: await readBody() } });
+    const raw = await readBody();
+
+    return next({ ...context, request: { ...context.request, body: JSON.parse(raw.toString()) } });
   };
 }
