@@ -1,34 +1,43 @@
 import createServer from '@withtyped/server';
+import compose from '@withtyped/server/lib/compose.js';
+import withBody from '@withtyped/server/lib/middleware/with-body.js';
+import withCors from '@withtyped/server/lib/middleware/with-cors.js';
+import withRequest, { RequestMethod } from '@withtyped/server/lib/middleware/with-request.js';
 import { nanoid } from 'nanoid';
 import { createPool, sql } from 'slonik';
 
 const { DB_URL, PORT } = process.env;
 const pool = await createPool(DB_URL ?? 'postgresql://localhost/sample');
 
-createServer({
+const server = createServer({
   port: PORT ? Number(PORT) : undefined,
-  handler: async (body, request, response) => {
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-      'Access-Control-Max-Age': 2_592_000, // 30 days
-    };
+  composer: compose()
+    .and(withRequest())
+    .and(withBody())
+    .and(withCors())
+    .and(async (context, next) => {
+      const {
+        request: { body, method, remoteAddress, rawHeaders },
+      } = context;
 
-    for (const [key, value] of Object.entries(headers)) {
-      response.setHeader(key, value);
-    }
+      if (method === RequestMethod.OPTIONS) {
+        return next({ ...context, status: 204 });
+      }
 
-    if (request.method === 'OPTIONS') {
-      return;
-    }
+      if (method !== RequestMethod.POST) {
+        return next({ ...context, status: 405 });
+      }
 
-    console.log('Received', body);
-    await pool.query(sql`
-      insert into forms (id, remote_address, headers, data)
-      values (${nanoid()}, ${request.socket.remoteAddress ?? null}, ${sql.jsonb(
-      request.rawHeaders
-    )}, ${sql.jsonb(JSON.parse(body))})
-    `);
-  },
-}).listen();
+      console.log('Received', body);
+      await pool.query(sql`
+        insert into forms (id, remote_address, headers, data)
+        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(body)})
+      `);
+
+      return next({ ...context, status: 204 });
+    }),
+});
+
+server.listen((port) => {
+  console.log('Server is listening port', port);
+});

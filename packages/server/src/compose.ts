@@ -1,31 +1,32 @@
 import type {
   BaseContext,
-  ExtractContextInput,
+  ExtractInputContext,
+  HttpContext,
   MiddlewareFunction,
   NextFunction,
 } from './middleware.js';
 
 export type ComposerProperties<
   MiddlewareFunctions extends unknown[],
-  ContextInput extends BaseContext,
-  ContextOutput extends BaseContext
+  InputContext extends BaseContext,
+  OutputContext extends BaseContext
 > = {
   functions: Readonly<MiddlewareFunctions>;
   and: <Context extends BaseContext>(
-    middleware: MiddlewareFunction<ContextOutput, Context>
+    middleware: MiddlewareFunction<OutputContext, Context>
   ) => Composer<
-    [...MiddlewareFunctions, MiddlewareFunction<ContextOutput, Context>],
-    ContextInput,
+    [...MiddlewareFunctions, MiddlewareFunction<OutputContext, Context>],
+    InputContext,
     Context
   >;
 };
 
 export type Composer<
   MiddlewareFunctions extends unknown[],
-  ContextInput extends BaseContext,
-  ContextOutput extends BaseContext
-> = MiddlewareFunction<ContextInput, ContextOutput> &
-  ComposerProperties<MiddlewareFunctions, ContextInput, ContextOutput>;
+  InputContext extends BaseContext,
+  OutputContext extends BaseContext
+> = MiddlewareFunction<InputContext, OutputContext> &
+  ComposerProperties<MiddlewareFunctions, InputContext, OutputContext>;
 
 export class ComposeError extends Error {
   constructor(public type: 'next_call_twice') {
@@ -35,7 +36,8 @@ export class ComposeError extends Error {
 
 const buildNext = (
   [first, ...rest]: readonly MiddlewareFunction[],
-  next: NextFunction
+  next: NextFunction,
+  http: HttpContext
 ): NextFunction => {
   if (!first) {
     return next;
@@ -45,14 +47,14 @@ const buildNext = (
   // eslint-disable-next-line @silverhand/fp/no-let
   let called = false;
 
-  return async (context: ExtractContextInput<typeof first>) => {
+  return async (context: ExtractInputContext<typeof first>) => {
     if (called) {
       throw new ComposeError('next_call_twice');
     }
     // eslint-disable-next-line @silverhand/fp/no-mutation
     called = true;
 
-    return first(context, buildNext(rest, next));
+    return first(context, buildNext(rest, next, http), http);
   };
 };
 
@@ -79,20 +81,27 @@ const createComposer = function <
     MiddlewareFunction<InputContext, OutputContext>,
     ComposerProperties<T, InputContext, OutputContext>
   >(
-    async function (context, next) {
+    async function (context, next, http) {
       /**
        * `buildNext()` doesn't care about the context type,
        * and it's also hard to derive the strict context with a generic array type.
        * Thus it's OK to use `as` I think.
        */
-      // eslint-disable-next-line no-restricted-syntax
-      return buildNext(_functions as Readonly<MiddlewareFunction[]>, next as NextFunction)(context);
+      /* eslint-disable no-restricted-syntax */
+      return buildNext(
+        _functions as Readonly<MiddlewareFunction[]>,
+        next as NextFunction,
+        http
+      )(context);
+      /* eslint-enable no-restricted-syntax */
     },
     {
       get functions() {
         return _functions;
       },
-      and<Context extends BaseContext>(middleware: MiddlewareFunction<OutputContext, Context>) {
+      and<Context extends BaseContext = OutputContext>(
+        middleware: MiddlewareFunction<OutputContext, Context>
+      ) {
         return createComposer<[...T, typeof middleware], InputContext, Context>(
           Object.freeze([..._functions, middleware] as const)
         );
@@ -103,6 +112,11 @@ const createComposer = function <
   return composer;
 };
 
+// Need this to make function overloads work
+// eslint-disable-next-line @typescript-eslint/ban-types
+type EmptyArray = [];
+
+// Note: Cannot use arrow function overload since https://github.com/microsoft/TypeScript/issues/33482
 /**
  * Create a chainable composer with the given middleware function.
  * Call `.and()` of the composer to chain another middleware function.
@@ -118,11 +132,28 @@ const createComposer = function <
  * @param middleware The first middleware function to compose.
  * @returns A composer.
  */
-const compose = <InputContext extends BaseContext, OutputContext extends BaseContext>(
+function compose<InputContext extends BaseContext, OutputContext extends BaseContext>(
   middleware: MiddlewareFunction<InputContext, OutputContext>
-) =>
-  createComposer<[MiddlewareFunction<InputContext, OutputContext>], InputContext, OutputContext>([
-    middleware,
-  ]);
+): Composer<[MiddlewareFunction<InputContext, OutputContext>], InputContext, OutputContext>;
+
+function compose<
+  InputContext extends BaseContext = BaseContext,
+  OutputContext extends BaseContext = InputContext
+>(): Composer<EmptyArray, InputContext, OutputContext>;
+
+function compose<
+  InputContext extends BaseContext = BaseContext,
+  OutputContext extends BaseContext = InputContext
+>(middleware?: MiddlewareFunction<InputContext, OutputContext>) {
+  if (middleware) {
+    return createComposer<
+      [MiddlewareFunction<InputContext, OutputContext>],
+      InputContext,
+      OutputContext
+    >([middleware]);
+  }
+
+  return createComposer<EmptyArray, InputContext, OutputContext>([]);
+}
 
 export default compose;

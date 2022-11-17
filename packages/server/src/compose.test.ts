@@ -1,9 +1,12 @@
 import assert from 'node:assert';
+import { IncomingMessage, ServerResponse } from 'node:http';
+import { Socket } from 'node:net';
 
 import { describe, it } from 'node:test';
 
 import compose, { ComposeError } from './compose.js';
-import type { BaseContext, MiddlewareFunction } from './middleware.js';
+import type { BaseContext, HttpContext, MiddlewareFunction } from './middleware.js';
+import { noop } from './utils.js';
 
 type Ctx1 = BaseContext & { c1: string };
 
@@ -33,35 +36,66 @@ const midTwiceNext: MiddlewareFunction<Ctx1, Ctx2> = async (context, next) => {
   await next({ ...context, c2: Number(context.c1) });
 };
 
+const midError: MiddlewareFunction<Ctx2, Ctx3> = async () => {
+  await mockResolve();
+  throw new Error('A special error');
+};
+
+const request = new IncomingMessage(new Socket());
+
+const httpContext: HttpContext = {
+  request,
+  response: new ServerResponse(request),
+};
+
 describe('compose()', () => {
+  it('should allow to create an empty composer', async () => {
+    await compose()({}, noop, httpContext);
+  });
+
   it('should compose two middleware functions and return a new middleware function', async () => {
-    const baseContext: Readonly<BaseContext> = Object.freeze({ status: 200, body: { foo: 'bar' } });
-    await compose(mid1).and(mid2)({ ...baseContext, c1: '256' }, async (context) => {
-      assert.deepEqual(context, { ...baseContext, c2: 256, c3: 512 });
-    });
+    const baseContext: Readonly<BaseContext> = Object.freeze({ status: 200, json: { foo: 'bar' } });
+    await compose(mid1).and(mid2)(
+      { ...baseContext, c1: '256' },
+      async (context) => {
+        assert.deepEqual(context, { ...baseContext, c2: 256, c3: 512 });
+      },
+      httpContext
+    );
   });
 
   it('should return a valid middleware function', async () => {
-    await compose(compose(mid1).and(mid2))({ c1: '128' }, async (context) => {
-      assert.deepEqual(context, { c2: 128, c3: 256 });
-    });
+    await compose(compose(mid1).and(mid2))(
+      { c1: '128' },
+      async (context) => {
+        assert.deepEqual(context, { c2: 128, c3: 256 });
+      },
+      httpContext
+    );
   });
 
   it('should be able to chain', async () => {
     const composed = compose(mid1).and(mid2).and(mid3);
 
-    await composed({ c1: '128' }, async (context) => {
-      await composed(context, async ({ c1 }) => {
+    await composed.and(compose(compose())).and(composed)(
+      { c1: '128' },
+      async ({ c1 }) => {
         assert.equal(c1, '512');
-      });
-    });
+      },
+      httpContext
+    );
+  });
+
+  it('should throw error originated by middleware', async () => {
+    await assert.rejects(
+      compose(mid1).and(midError).and(mid3)({ c1: '128' }, noop, httpContext),
+      new Error('A special error')
+    );
   });
 
   it('should disallow to call same next() twice', async () => {
     await assert.rejects(
-      compose(midTwiceNext).and(mid2)({ c1: '128' }, async () => {
-        // Let it go
-      }),
+      compose(midTwiceNext).and(mid2)({ c1: '128' }, noop, httpContext),
       new ComposeError('next_call_twice')
     );
   });
