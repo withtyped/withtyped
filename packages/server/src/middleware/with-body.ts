@@ -15,8 +15,16 @@ export type JsonObject = {
 
 export type WithBodyContext<InputContext extends BaseContext> = MergeRequestContext<
   InputContext,
-  { body: Json }
+  { body?: Json }
 >;
+
+const tryParse = (body: Buffer): Json | undefined => {
+  try {
+    // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return JSON.parse(body.toString());
+  } catch {}
+};
 
 export default function withBody<InputContext extends BaseContext>() {
   return async (
@@ -44,8 +52,6 @@ export default function withBody<InputContext extends BaseContext>() {
 
     const raw = await readBody();
 
-    // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return next({ ...context, request: { ...context.request, body: JSON.parse(raw.toString()) } });
+    return next({ ...context, request: { ...context.request, body: tryParse(raw) } });
   };
 }

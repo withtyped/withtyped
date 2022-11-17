@@ -31,7 +31,9 @@ const server = createServer({
       console.log('Received', body);
       await pool.query(sql`
         insert into forms (id, remote_address, headers, data)
-        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(body)})
+        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(
+        body ?? {}
+      )})
       `);
 
       return next({ ...context, status: 204 });
