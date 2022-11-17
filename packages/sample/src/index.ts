@@ -4,7 +4,6 @@ import withBody from '@withtyped/server/lib/middleware/with-body.js';
 import withCors from '@withtyped/server/lib/middleware/with-cors.js';
 import withRequest, { RequestMethod } from '@withtyped/server/lib/middleware/with-request.js';
 import { nanoid } from 'nanoid';
-import type { SerializableValue } from 'slonik';
 import { createPool, sql } from 'slonik';
 
 const { DB_URL, PORT } = process.env;
@@ -32,11 +31,7 @@ const server = createServer({
       console.log('Received', body);
       await pool.query(sql`
         insert into forms (id, remote_address, headers, data)
-        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(
-        // Testing purpose
-        // eslint-disable-next-line no-restricted-syntax
-        body as SerializableValue
-      )})
+        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(body)})
       `);
 
       return next({ ...context, status: 204 });
