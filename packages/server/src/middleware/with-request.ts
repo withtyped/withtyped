@@ -13,6 +13,15 @@ export enum RequestMethod {
   OPTIONS = 'OPTIONS',
 }
 
+export const requestMethods = Object.freeze(Object.values(RequestMethod));
+export const lowerRequestMethods = Object.freeze(
+  requestMethods.map(
+    // Cannot change the return type of `.toLowerCase()`
+    // eslint-disable-next-line no-restricted-syntax
+    (value) => value.toLowerCase() as Lowercase<RequestMethod>
+  )
+);
+
 export type MergeRequestContext<InputContext extends BaseContext, MergeType> = Omit<
   InputContext,
   'request'
@@ -34,8 +43,6 @@ export type WithRequestContext<InputContext extends BaseContext> = MergeRequestC
 >;
 
 export default function withRequest<InputContext extends BaseContext>() {
-  const methods = Object.freeze(Object.values(RequestMethod));
-
   return async (
     context: InputContext,
     next: NextFunction<WithRequestContext<InputContext>>,
@@ -52,7 +59,7 @@ export default function withRequest<InputContext extends BaseContext>() {
       ...context,
       request: {
         ...context.request,
-        method: methods.find((value) => value === method?.toUpperCase()),
+        method: requestMethods.find((value) => value === method?.toUpperCase()),
         rawMethod: method,
         headers,
         rawHeaders,

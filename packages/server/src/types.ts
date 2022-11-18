@@ -19,10 +19,12 @@ type B = Params<'/user/:id/password'>;
 
 type C = Params<'/'>;
 
+/* eslint-disable @typescript-eslint/ban-types */
 type Routes = {
-  get: Record<string, unknown>;
-  post: Record<string, unknown>;
+  get: {};
+  post: {};
 };
+/* eslint-enable @typescript-eslint/ban-types */
 
 type ApiGuard<Path extends string, Body = never, Response = never> = {
   params: Params<Path>;

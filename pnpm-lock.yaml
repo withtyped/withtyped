@@ -36,6 +36,7 @@ importers:
       eslint: ^8.25.0
       prettier: ^2.7.1
       typescript: ^4.8.4
+      zod: ^3.19.1
     devDependencies:
       '@silverhand/eslint-config': 1.3.0_jgy3n4355e6bfws3px3ickn7ti
       '@silverhand/ts-config': 1.2.1_typescript@4.8.4
@@ -43,6 +44,7 @@ importers:
       eslint: 8.25.0
       prettier: 2.7.1
       typescript: 4.8.4
+      zod: 3.19.1
 
 packages:
 
@@ -2716,4 +2718,3 @@ packages:
 
   /zod/3.19.1:
     resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
-    dev: false

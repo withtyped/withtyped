@@ -27,15 +27,31 @@ export default function createServer<T extends unknown[], OutputContext extends 
       {},
       async ({ status, json, headers }) => {
         // Send status along with headers
-        if (!response.headersSent) {
-          response.writeHead(status ?? 404, headers);
+        // eslint-disable-next-line @silverhand/fp/no-mutation
+        response.statusCode = status ?? 404;
+
+        if (headers) {
+          for (const [key, value] of Object.entries(headers)) {
+            if (value) {
+              response.setHeader(key, value);
+            }
+          }
         }
 
         // Send JSON body
         if (json) {
-          const write = promisify((chunk: unknown, callback: ErrorCallback) =>
-            response.write(chunk, callback)
-          );
+          const write = promisify((chunk: unknown, callback: ErrorCallback) => {
+            if (
+              typeof chunk === 'string' ||
+              chunk instanceof Buffer ||
+              chunk instanceof Uint8Array
+            ) {
+              return response.write(chunk, callback);
+            }
+            response.write(JSON.stringify(chunk), callback);
+          });
+
+          response.setHeader('Content-Type', 'application/json');
           await write(json);
         }
 
