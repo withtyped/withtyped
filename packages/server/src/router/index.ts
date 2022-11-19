@@ -1,7 +1,7 @@
 import url from 'node:url';
 
+import RequestError from '../errors/RequestError.js';
 import type { BaseContext, MiddlewareFunction } from '../middleware.js';
-import { color } from '../middleware/with-system-log.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
 import { buildOpenApiJson } from './openapi.js';
@@ -93,21 +93,29 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
         return next(context);
       }
 
-      console.log(color('dbg', 'dim'), 'matched handler', handler.path);
+      // Debug: console.log(color('dbg', 'dim'), 'matched handler', handler.path);
 
-      return handler.run(
-        context,
-        async (context) => {
-          const responseGuard = handler.guard?.response;
+      try {
+        await handler.run(
+          context,
+          async (context) => {
+            const responseGuard = handler.guard?.response;
 
-          if (responseGuard) {
-            responseGuard.parse(context.json);
-          }
+            if (responseGuard) {
+              responseGuard.parse(context.json);
+            }
 
-          return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
-        },
-        http
-      );
+            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+          },
+          http
+        );
+      } catch (error: unknown) {
+        if (error instanceof RequestError) {
+          return next({ ...context, status: error.status, json: { message: error.message } });
+        }
+
+        throw error;
+      }
     };
   }
 

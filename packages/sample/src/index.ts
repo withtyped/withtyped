@@ -1,9 +1,9 @@
 import createServer from '@withtyped/server';
-import compose from '@withtyped/server/lib/compose';
-import withBody from '@withtyped/server/lib/middleware/with-body';
-import withCors from '@withtyped/server/lib/middleware/with-cors';
-import withRequest from '@withtyped/server/lib/middleware/with-request';
-import { RequestMethod } from '@withtyped/server/lib/request';
+import compose from '@withtyped/server/lib/compose.js';
+import withBody from '@withtyped/server/lib/middleware/with-body.js';
+import withCors from '@withtyped/server/lib/middleware/with-cors.js';
+import withRequest from '@withtyped/server/lib/middleware/with-request.js';
+import { RequestMethod } from '@withtyped/server/lib/request.js';
 import { nanoid } from 'nanoid';
 import { createPool, sql } from 'slonik';
 

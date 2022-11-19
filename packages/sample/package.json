@@ -10,7 +10,8 @@
     "prepack": "pnpm build",
     "build": "rm -rf lib/ && tsc",
     "start": "node lib/index.js",
-    "dev": "pnpm build && pnpm start"
+    "dev": "pnpm build && pnpm start",
+    "test": "tsc && node --test"
   },
   "devDependencies": {
     "@silverhand/eslint-config": "^1.3.0",
@@ -25,6 +26,7 @@
   },
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@silverhand/essentials": "^1.3.0",
     "@withtyped/client": "workspace:^0.1.0",
     "@withtyped/server": "workspace:^0.1.0",

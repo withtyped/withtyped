@@ -19,6 +19,14 @@ const buildQueryString = (record?: Record<string, string | string[]>) =>
         .join('&')
     : '';
 
+const tryJson = async (response: Response) => {
+  try {
+    // It defines as any, and we already guarded in server :-)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return await response.json();
+  } catch {}
+};
+
 export default class Client<R extends Router, Routes extends BaseRoutes = RouterRoutes<R>>
   implements RouterClient<Routes>
 {
@@ -66,11 +74,14 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
         })
         .join('/');
 
-      console.log(this.baseUrl + requestPath + buildQueryString(query));
+      console.log(method.toUpperCase(), this.baseUrl + requestPath + buildQueryString(query));
 
       const response = await fetch(this.baseUrl + requestPath + buildQueryString(query), {
         method,
-        body: typeof body === 'string' ? body : JSON.stringify(body),
+        body:
+          typeof body === 'string' || typeof body === 'undefined' || body === null
+            ? body
+            : JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -79,7 +90,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
 
       // Trust backend since it has been guarded
       // eslint-disable-next-line no-restricted-syntax
-      return response.json() as ReturnType<ClientRequestHandler<Routes[Method]>>;
+      return tryJson(response) as ReturnType<ClientRequestHandler<Routes[Method]>>;
     };
 
     return handler;
