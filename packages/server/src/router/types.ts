@@ -2,7 +2,7 @@ import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
-type Parser<T> = {
+export type Parser<T> = {
   parse: (data: unknown) => T;
 };
 

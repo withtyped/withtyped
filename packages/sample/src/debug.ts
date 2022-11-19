@@ -3,6 +3,8 @@ import { createComposer } from '@withtyped/server/lib/preset.js';
 import Router from '@withtyped/server/lib/router/index.js';
 import { z } from 'zod';
 
+import { zodTypeToParameters, zodTypeToSwagger } from './openapi.js';
+
 export const router = new Router()
   .get(
     '/ok/okk',
@@ -139,10 +141,11 @@ export const router = new Router()
     async (context, next) => {
       return next(context);
     }
-  );
+  )
+  .withOpenApi(zodTypeToParameters, zodTypeToSwagger);
 
 const server = createServer({ composer: createComposer().and(router.routes()) });
 
 server.listen(() => {
-  console.log('Listening');
+  console.log('Listening', 9001);
 });

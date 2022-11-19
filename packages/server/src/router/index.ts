@@ -2,10 +2,13 @@ import url from 'node:url';
 
 import type { BaseContext, MiddlewareFunction } from '../middleware.js';
 import { color } from '../middleware/with-system-log.js';
+import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
+import { buildOpenApiJson } from './openapi.js';
 import type {
   BaseRoutes,
   GuardedContext,
+  Parser,
   PathGuard,
   RequestGuard,
   RouteHandler,
@@ -106,6 +109,17 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
         http
       );
     };
+  }
+
+  public withOpenApi(
+    parseQuery: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+    parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
+    info?: OpenAPIV3.InfoObject,
+    path = '/openapi.json'
+  ) {
+    return this.get(path, {}, async (context, next) => {
+      return next({ ...context, json: buildOpenApiJson(this.handlers, parseQuery, parse, info) });
+    });
   }
 
   private buildHandler<Method extends Lowercase<RequestMethod>>(
