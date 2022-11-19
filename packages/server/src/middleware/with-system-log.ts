@@ -21,7 +21,15 @@ export default function withSystemLog<InputContext extends BaseContext>(): Middl
   return async (context, next, { request, response }) => {
     console.log(color(' in', 'blue'), request.url);
     const startTime = Date.now();
-    await next(context);
+
+    // TODO: This try-catch block is for testing purpose. Consider moving to somewhere else.
+    try {
+      await next(context);
+    } catch {
+      // eslint-disable-next-line @silverhand/fp/no-mutation
+      response.statusCode = 500;
+    }
+
     console.log(
       color('out', 'magenta'),
       request.url,

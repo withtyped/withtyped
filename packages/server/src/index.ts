@@ -54,13 +54,13 @@ export default function createServer<T extends unknown[], OutputContext extends 
           response.setHeader('Content-Type', 'application/json');
           await write(json);
         }
-
-        // End
-        const end = promisify((callback: ErrorCallback) => response.end(callback));
-        await end();
       },
       { request, response }
     );
+
+    // End
+    const end = promisify((callback: ErrorCallback) => response.end(callback));
+    await end();
   });
 
   return {
