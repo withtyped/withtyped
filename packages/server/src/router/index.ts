@@ -41,6 +41,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> {
   > {
     return async (context, next, http) => {
       const { request } = http;
+
       // TODO: Do best match instead of first match
       const handler = this.handlers[request.method?.toLowerCase() ?? '']?.find((handler) =>
         matchRoute(handler, request)

@@ -1,5 +1,5 @@
 import createServer from '@withtyped/server';
-import compose from '@withtyped/server/lib/compose.js';
+import { createComposer } from '@withtyped/server/lib/preset.js';
 import Router from '@withtyped/server/lib/router/index.js';
 import { z } from 'zod';
 
@@ -58,14 +58,21 @@ export const router = new Router()
       return next(context);
     }
   )
-  .get(
+  .post(
     '/ok/:sad/asd',
     {
       query: z.object({ foo: z.string(), bar: z.number().optional() }),
-      response: z.object({ sad: z.string() }),
+      body: z.object({
+        key1: z.string(),
+        key2: z.object({ foo: z.number(), bar: z.boolean().optional() }),
+      }),
+      response: z.object({ sad: z.string(), foo: z.number() }),
     },
     async (context, next) => {
-      return next({ ...context, json: { sad: context.request.params.sad } });
+      return next({
+        ...context,
+        json: { sad: context.request.params.sad, foo: context.request.body.key2.foo },
+      });
     }
   )
   .get(
@@ -134,7 +141,7 @@ export const router = new Router()
     }
   );
 
-const server = createServer({ composer: compose(router.routes()) });
+const server = createServer({ composer: createComposer().and(router.routes()) });
 
 server.listen(() => {
   console.log('Listening');

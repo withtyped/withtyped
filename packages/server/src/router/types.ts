@@ -1,8 +1,10 @@
-import type { ZodType } from 'zod';
-
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
+
+type Parser<T> = {
+  parse: (data: unknown) => T;
+};
 
 /* eslint-disable @typescript-eslint/ban-types */
 export type BaseRoutes = {
@@ -24,9 +26,9 @@ export type Params<Path extends string> = {
 };
 
 export type RequestGuard<Query, Body, Response> = {
-  query?: ZodType<Query>;
-  body?: ZodType<Body>;
-  response?: ZodType<Response>;
+  query?: Parser<Query>;
+  body?: Parser<Body>;
+  response?: Parser<Response>;
 };
 
 export type PathGuard<Path extends string, Query, Body, Response> = RequestGuard<
@@ -34,7 +36,7 @@ export type PathGuard<Path extends string, Query, Body, Response> = RequestGuard
   Body,
   Response
 > & {
-  params: ZodType<Params<Path>>;
+  params: Parser<Params<Path>>;
 };
 
 // Mapped type `as` clauses https://github.com/microsoft/TypeScript/pull/40336
