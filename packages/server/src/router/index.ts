@@ -1,6 +1,7 @@
 import url from 'node:url';
 
 import type { BaseContext, MiddlewareFunction, NextFunction } from '../middleware.js';
+import { color } from '../middleware/with-system-log.js';
 import type { RequestMethod } from '../request.js';
 import { lowerRequestMethods } from '../request.js';
 import type {
@@ -51,7 +52,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> {
         return next(context);
       }
 
-      console.log('matched handler', handler);
+      console.log(color('dbg', 'dim'), 'matched handler', handler.path);
 
       return handler.run(
         context,
