@@ -1,7 +1,8 @@
 import type { ZodType } from 'zod';
 
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-import type { MergeRequestContext, RequestMethod } from '../middleware/with-request.js';
+import type { MergeRequestContext } from '../middleware/with-request.js';
+import type { RequestMethod } from '../request.js';
 
 /* eslint-disable @typescript-eslint/ban-types */
 export type BaseRoutes = {

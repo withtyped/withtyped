@@ -1,6 +1,10 @@
-import type { RequestMethod } from '../middleware/with-request.js';
-import type Router from './index.js';
-import type { BaseRoutes, GuardedPayload, GuardedResponse } from './types.js';
+import type { RequestMethod } from '@withtyped/server/lib/request.js';
+import type Router from '@withtyped/server/lib/router/index.js';
+import type {
+  BaseRoutes,
+  GuardedPayload,
+  GuardedResponse,
+} from '@withtyped/server/lib/router/index.js';
 
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
   infer Routes
@@ -14,3 +18,5 @@ export type RouterClient<Routes extends BaseRoutes> = {
     payload: GuardedPayload<Routes[key][T]>
   ) => Promise<GuardedResponse<Routes[key][T]>>;
 };
+
+export { type RequestMethod } from '@withtyped/server/lib/request.js';

@@ -1,5 +1,6 @@
+import Client from '@withtyped/client';
+
 import type { router } from './debug.js';
-import Client from './router/client.js';
 
 const client = new Client<typeof router>('http://localhost:9001');
 

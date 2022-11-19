@@ -1,8 +1,7 @@
+import createServer from '@withtyped/server';
+import compose from '@withtyped/server/lib/compose.js';
+import Router from '@withtyped/server/lib/router/index.js';
 import { z } from 'zod';
-
-import compose from './compose.js';
-import createServer from './index.js';
-import Router from './router/index.js';
 
 export const router = new Router()
   .get(

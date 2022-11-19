@@ -1,7 +1,11 @@
-import type { RequestMethod } from '../middleware/with-request.js';
-import type { RouterClient, RouterRoutes } from './client-types.js';
-import type Router from './index.js';
-import type { BaseRoutes, GuardedPayload, GuardedResponse } from './types.js';
+import type Router from '@withtyped/server/lib/router/index.js';
+import type {
+  BaseRoutes,
+  GuardedPayload,
+  GuardedResponse,
+} from '@withtyped/server/lib/router/index.js';
+
+import type { RouterClient, RouterRoutes, RequestMethod } from './types.js';
 
 export type ClientPayload = {
   params?: Record<string, string>;

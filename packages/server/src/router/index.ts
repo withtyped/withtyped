@@ -1,8 +1,8 @@
 import url from 'node:url';
 
 import type { BaseContext, MiddlewareFunction, NextFunction } from '../middleware.js';
-import type { RequestMethod } from '../middleware/with-request.js';
-import { lowerRequestMethods } from '../middleware/with-request.js';
+import type { RequestMethod } from '../request.js';
+import { lowerRequestMethods } from '../request.js';
 import type {
   BaseRoutes,
   GuardedContext,
@@ -11,6 +11,8 @@ import type {
   RouterHandlerMap,
 } from './types.js';
 import { guardInput, matchRoute } from './utils.js';
+
+export * from './types.js';
 
 type WithHandler<
   Routes extends BaseRoutes,
