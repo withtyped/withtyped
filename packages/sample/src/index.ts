@@ -2,7 +2,8 @@ import createServer from '@withtyped/server';
 import compose from '@withtyped/server/lib/compose.js';
 import withBody from '@withtyped/server/lib/middleware/with-body.js';
 import withCors from '@withtyped/server/lib/middleware/with-cors.js';
-import withRequest, { RequestMethod } from '@withtyped/server/lib/middleware/with-request.js';
+import withRequest from '@withtyped/server/lib/middleware/with-request.js';
+import { RequestMethod } from '@withtyped/server/lib/request.js';
 import { nanoid } from 'nanoid';
 import { createPool, sql } from 'slonik';
 

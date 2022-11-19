@@ -1,17 +1,8 @@
 import type { IncomingHttpHeaders } from 'node:http';
 
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-
-export enum RequestMethod {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  PATCH = 'PATCH',
-  DELETE = 'DELETE',
-  COPY = 'COPY',
-  HEAD = 'HEAD',
-  OPTIONS = 'OPTIONS',
-}
+import type { RequestMethod } from '../request.js';
+import { requestMethods } from '../request.js';
 
 export type MergeRequestContext<InputContext extends BaseContext, MergeType> = Omit<
   InputContext,
@@ -34,8 +25,6 @@ export type WithRequestContext<InputContext extends BaseContext> = MergeRequestC
 >;
 
 export default function withRequest<InputContext extends BaseContext>() {
-  const methods = Object.freeze(Object.values(RequestMethod));
-
   return async (
     context: InputContext,
     next: NextFunction<WithRequestContext<InputContext>>,
@@ -52,7 +41,7 @@ export default function withRequest<InputContext extends BaseContext>() {
       ...context,
       request: {
         ...context.request,
-        method: methods.find((value) => value === method?.toUpperCase()),
+        method: requestMethods.find((value) => value === method?.toUpperCase()),
         rawMethod: method,
         headers,
         rawHeaders,
