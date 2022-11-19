@@ -7,10 +7,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "prepack": "pnpm build",
+    "build": "rm -rf lib/ && tsc",
     "start": "node lib/index.js",
-    "dev": "pnpm build && pnpm start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "pnpm build && pnpm start"
   },
   "devDependencies": {
     "@silverhand/eslint-config": "^1.3.0",

@@ -1,6 +1,6 @@
 import createServer from '@withtyped/server';
-import { createComposer } from '@withtyped/server/lib/preset.js';
-import Router from '@withtyped/server/lib/router/index.js';
+import { createComposer } from '@withtyped/server/lib/preset';
+import Router from '@withtyped/server/lib/router';
 import { z } from 'zod';
 
 import { zodTypeToParameters, zodTypeToSwagger } from './openapi.js';
@@ -135,13 +135,9 @@ export const router = new Router()
       return next(context);
     }
   )
-  .get(
-    '/123/xc/qw',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
+  .patch('/123/xc/qw', {}, async (context, next) => {
+    return next(context);
+  })
   .withOpenApi(zodTypeToParameters, zodTypeToSwagger);
 
 const server = createServer({ composer: createComposer().and(router.routes()) });

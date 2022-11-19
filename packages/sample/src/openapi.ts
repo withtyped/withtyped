@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import type { ValuesOf } from '@silverhand/essentials';
 import { conditional } from '@silverhand/essentials';
-import type { OpenAPIV3 } from '@withtyped/server/lib/openapi/openapi-types.js';
+import type { OpenAPIV3 } from '@withtyped/server/lib/openapi/openapi-types';
 import type { ZodStringDef } from 'zod';
 import {
   ZodOptional,

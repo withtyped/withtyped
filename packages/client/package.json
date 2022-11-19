@@ -3,11 +3,19 @@
   "version": "0.1.0",
   "author": "Gao Sun",
   "license": "MIT",
-  "main": "lib/index.js",
-  "private": true,
   "type": "module",
+  "source": "./src/index.ts",
+  "exports": {
+    "import": "./lib/index.js"
+  },
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "build": "tsc",
+    "prepack": "pnpm build",
+    "build": "rm -rf lib/ && tsc",
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
     "test": "tsc && node --test"
   },
@@ -25,5 +33,8 @@
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "dependencies": {
     "@withtyped/server": "workspace:^0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
