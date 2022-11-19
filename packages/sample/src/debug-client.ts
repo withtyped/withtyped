@@ -15,4 +15,7 @@ const response = await client.post('/ok/:sad/asd', {
   params: { sad: 'happy' },
 });
 
+const openapi = await client.get('/openapi.json');
+
 console.log('response', response);
+console.log(openapi.info);

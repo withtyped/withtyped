@@ -1,11 +1,7 @@
 import type Router from '@withtyped/server/lib/router/index.js';
-import type {
-  BaseRoutes,
-  GuardedPayload,
-  GuardedResponse,
-} from '@withtyped/server/lib/router/index.js';
+import type { BaseRoutes, GuardedPayload } from '@withtyped/server/lib/router/index.js';
 
-import type { RouterClient, RouterRoutes, RequestMethod } from './types.js';
+import type { RouterClient, RouterRoutes, RequestMethod, ClientRequestHandler } from './types.js';
 
 export type ClientPayload = {
   params?: Record<string, string>;
@@ -40,9 +36,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
   private buildHandler<Method extends Lowercase<RequestMethod>>(method: Method) {
     type MethodRoutes = Routes[Method];
 
-    return async <T extends keyof MethodRoutes>(
+    const handler: ClientRequestHandler<MethodRoutes> = async <T extends keyof MethodRoutes>(
       path: T,
-      payload: GuardedPayload<MethodRoutes[T]>
+      payload?: GuardedPayload<MethodRoutes[T]>
     ) => {
       if (typeof path !== 'string') {
         throw new TypeError('Path is not string');
@@ -51,7 +47,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       // We treat payload general and use code to make it works as expected
       // Type inference will always fall into the empty object result
       // eslint-disable-next-line no-restricted-syntax
-      const { params, query, body } = payload as ClientPayload;
+      const { params, query, body } = (payload ?? {}) as ClientPayload;
       const requestPath = path
         .split('/')
         .map((value) => {
@@ -83,7 +79,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
 
       // Trust backend since it has been guarded
       // eslint-disable-next-line no-restricted-syntax
-      return response.json() as Promise<GuardedResponse<MethodRoutes[T]>>;
+      return response.json() as ReturnType<ClientRequestHandler<Routes[Method]>>;
     };
+
+    return handler;
   }
 }

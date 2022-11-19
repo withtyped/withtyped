@@ -114,12 +114,15 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   public withOpenApi(
     parseQuery: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
-    info?: OpenAPIV3.InfoObject,
-    path = '/openapi.json'
+    info?: OpenAPIV3.InfoObject
   ) {
-    return this.get(path, {}, async (context, next) => {
-      return next({ ...context, json: buildOpenApiJson(this.handlers, parseQuery, parse, info) });
-    });
+    return this.get<'/openapi.json', unknown, unknown, OpenAPIV3.Document>(
+      '/openapi.json',
+      {},
+      async (context, next) => {
+        return next({ ...context, json: buildOpenApiJson(this.handlers, parseQuery, parse, info) });
+      }
+    );
   }
 
   private buildHandler<Method extends Lowercase<RequestMethod>>(
