@@ -20,7 +20,6 @@ export type Parts<Path extends string> = Path extends `/${infer A}`
   ? IsParameter<A> | Parts<B>
   : IsParameter<Path>;
 
-// eslint-disable-next-line unicorn/prevent-abbreviations
 export type Params<Path extends string> = {
   [key in Parts<Path>]: string;
 };
@@ -69,23 +68,12 @@ export type GuardedContext<
   Body
 > = MergeRequestContext<InputContext, Guarded<Path, Query, Body>>;
 
-export type RestfulRouter<Routes extends BaseRoutes> = {
-  [method in Lowercase<RequestMethod>]: <Path extends string, Query, Body, Response>(
-    path: Path,
-    guard?: PathGuard<Path, Query, Body, Response>
-  ) => RestfulRouter<{
-    [key in keyof Routes]: key extends method
-      ? Routes[key] & { [key in Path]: PathGuard<Path, Query, Body, Response> }
-      : Routes[key];
-  }>;
-};
-
 export type RouteHandler = {
   path: string;
   guard?: RequestGuard<unknown, unknown, unknown>;
-  run: <InputContext extends BaseContext>(
+  run: <InputContext extends BaseContext, OutputContext extends BaseContext = InputContext>(
     context: InputContext,
-    next: NextFunction<InputContext>,
+    next: NextFunction<OutputContext>,
     http: HttpContext
   ) => Promise<void>;
 };

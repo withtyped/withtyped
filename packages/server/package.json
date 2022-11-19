@@ -20,7 +20,10 @@
     "typescript": "^4.8.4"
   },
   "eslintConfig": {
-    "extends": "@silverhand"
+    "extends": "@silverhand",
+    "rules": {
+      "unicorn/prevent-abbreviations": "off"
+    }
   },
   "prettier": "@silverhand/eslint-config/.prettierrc"
 }

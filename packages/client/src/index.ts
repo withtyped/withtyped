@@ -81,6 +81,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
         throw new Error(`Response status ${response.status}`);
       }
 
+      // Trust backend since it has been guarded
       // eslint-disable-next-line no-restricted-syntax
       return response.json() as Promise<GuardedResponse<MethodRoutes[T]>>;
     };

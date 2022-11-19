@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prevent-abbreviations */
 import type { IncomingMessage } from 'http';
 import type { UrlWithParsedQuery } from 'node:url';
 import url from 'node:url';
@@ -36,6 +35,8 @@ export const getParams = <Path extends string>(match: Path, { pathname }: UrlWit
     }
   }
 
+  // TODO: Add UTs
+  // Yes I'm sure what I'm doing
   // eslint-disable-next-line no-restricted-syntax
   return params as Params<Path>;
 };
@@ -46,10 +47,10 @@ export const guardInput = <Path extends string, Query, Body>(
   body: unknown,
   guard: RequestGuard<Query, Body, unknown>
 ): Guarded<Path, Query, Body> =>
+  // The compiler cannot infer the output
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, no-restricted-syntax
   ({
     params: getParams(path, url),
     query: guard.query?.parse(url.query),
     body: guard.body?.parse(body) ?? {},
   } as Guarded<Path, Query, Body>);
-/* eslint-enable unicorn/prevent-abbreviations */

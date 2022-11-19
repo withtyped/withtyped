@@ -1,9 +1,9 @@
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext } from './with-request.js';
 
-/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/consistent-indexed-object-style */
 // Manually define JSON types since `JSON.prase()` returns any
 // https://github.com/Microsoft/TypeScript/issues/15225
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/consistent-indexed-object-style */
 
 /** Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#return_value */
 export type Json = JsonObject | JsonArray | string | number | boolean | null;

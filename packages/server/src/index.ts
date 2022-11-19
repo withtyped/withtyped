@@ -14,6 +14,7 @@ export type CreateServer<
   composer?: Composer<T, InputContext, OutputContext>;
 };
 
+// Need `null` to make callback be compatible with `promisify()`
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ErrorCallback = (error?: Error | null) => void;
 
