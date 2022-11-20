@@ -1,7 +1,5 @@
 # withtyped
 
-Type-safe RESTful framework for fullstack. Zero dependency.
-
 > NOTE
 > This project is in the experimental stage and has a lot of work to do. Don't use it in prod.
 
@@ -148,4 +146,9 @@ But still have some pain points:
 - Existing services and components are mainly based on RESTful, hard to gradually migrate to a new framework
 - KoaJS is written in JavaScript and its ecosystem lacks of maintenance
 
-[^openapi]: Needs a simple transformer function that parses your type guard to OpenAPI schema. See sample project for details.
+[^openapi]: Needs a simple transformer function that parses your type guard to OpenAPI schema. See [sample project](./packages/sample/src) for details.
+
+## Future (not sure)
+
+- Make it for prod use
+- Infer CRUD APIs from a single type definition
