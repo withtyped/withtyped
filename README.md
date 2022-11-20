@@ -1,6 +1,6 @@
 # withtyped
 
-> NOTE
+> **Note**
 > This project is in the experimental stage and has a lot of work to do. Don't use it in prod.
 
 ![Banner](./banner.png)
@@ -24,6 +24,8 @@
 npm i @withtyped/server # In API server project
 npm i @withtyped/client # In client (frontend/backend) project, can be a different one from server
 ```
+
+Currently built for ESM only.
 
 ### Server
 
