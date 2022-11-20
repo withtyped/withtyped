@@ -1,145 +1,83 @@
+import { faker } from '@faker-js/faker';
 import createServer from '@withtyped/server';
+import RequestError from '@withtyped/server/lib/errors/RequestError.js';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 import Router from '@withtyped/server/lib/router/index.js';
 import { z } from 'zod';
 
+import type { Book } from './book.js';
+import { bookGuard, createBook } from './book.js';
 import { zodTypeToParameters, zodTypeToSwagger } from './openapi.js';
+
+// eslint-disable-next-line @silverhand/fp/no-let
+let books = Array.from({ length: 10 }).map(() => createBook());
 
 export const router = new Router()
   .get(
-    '/ok/okk',
+    '/books',
     {
-      query: z.object({ foo: z.string(), bar: z.number().optional() }),
-      response: z.object({ success: z.boolean() }),
+      response: z.object({ books: bookGuard.array() }),
     },
     async (context, next) => {
-      console.log(context.request);
-
-      return next({ ...context, json: { success: true } });
-    }
-  )
-  .get(
-    '/ok/1',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/3',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/4',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/5/1/1',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/7/2/2',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/9/32/asd',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
+      return next({ ...context, json: { books } });
     }
   )
   .post(
-    '/ok/:sad/asd',
-    {
-      query: z.object({ foo: z.string(), bar: z.number().optional() }),
-      body: z.object({
-        key1: z.string(),
-        key2: z.object({ foo: z.number(), bar: z.boolean().optional() }),
-      }),
-      response: z.object({ sad: z.string(), foo: z.number() }),
-    },
+    '/books',
+    { body: bookGuard.omit({ id: true }), response: bookGuard },
+    async (context, next) => {
+      const book: Book = { id: faker.datatype.uuid(), ...context.request.body };
+      // eslint-disable-next-line @silverhand/fp/no-mutating-methods
+      books.push(book);
+
+      return next({ ...context, json: book });
+    }
+  )
+  .patch(
+    '/books/:id',
+    { body: bookGuard.omit({ id: true }), response: bookGuard },
+    async (context, next) => {
+      const bookIndex = books.findIndex(({ id }) => id === context.request.params.id);
+
+      if (bookIndex < 0) {
+        throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+      }
+
+      // eslint-disable-next-line @silverhand/fp/no-mutation, @typescript-eslint/no-non-null-assertion
+      books[bookIndex] = { ...books[bookIndex]!, ...context.request.body };
+
+      return next({ ...context, json: books[bookIndex] });
+    }
+  )
+  .get('/books/:id', { response: bookGuard }, async (context, next) => {
+    const book = books.find(({ id }) => id === context.request.params.id);
+
+    if (!book) {
+      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+    }
+
+    return next({ ...context, json: book });
+  })
+  .delete('/books/:id', {}, async (context, next) => {
+    const newBooks = books.filter(({ id }) => id !== context.request.params.id);
+
+    if (newBooks.length === books.length) {
+      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+    }
+
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    books = newBooks;
+
+    return next(context);
+  })
+  .get(
+    '/search',
+    { query: z.object({ name: z.string() }), response: z.object({ books: bookGuard.array() }) },
     async (context, next) => {
       return next({
         ...context,
-        json: { sad: context.request.params.sad, foo: context.request.body.key2.foo },
+        json: { books: books.filter(({ name }) => name.includes(context.request.query.name)) },
       });
-    }
-  )
-  .get(
-    '/ok/asd/asd',
-    {
-      query: z.object({ foo: z.string(), bar: z.number().optional() }),
-    },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/qq/1',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/11/2',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/ok/qq/1/2/3',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/asd/qwe',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/csad/asd',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/erwc/qwz',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/qwet/qwe/czx/qwe',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
-    }
-  )
-  .get(
-    '/123/xc/qw',
-    { query: z.object({ foo: z.string(), bar: z.number().optional() }) },
-    async (context, next) => {
-      return next(context);
     }
   )
   .withOpenApi(zodTypeToParameters, zodTypeToSwagger);

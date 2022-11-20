@@ -2,6 +2,7 @@ import type { BaseContext, MiddlewareFunction } from '../middleware.js';
 
 const colors = Object.freeze({
   reset: '\u001B[0m',
+  bright: '\u001B[1m',
   dim: '\u001B[2m',
   black: '\u001B[30m',
   red: '\u001B[31m',
@@ -19,7 +20,7 @@ export default function withSystemLog<InputContext extends BaseContext>(): Middl
   InputContext
 > {
   return async (context, next, { request, response }) => {
-    console.log(color(' in', 'blue'), request.url);
+    console.log(color(' in', 'blue'), color(request.method ?? 'N/A', 'bright'), request.url);
     const startTime = Date.now();
 
     // TODO: This try-catch block is for testing purpose. Consider moving to somewhere else.
@@ -32,6 +33,7 @@ export default function withSystemLog<InputContext extends BaseContext>(): Middl
 
     console.log(
       color('out', 'magenta'),
+      color(request.method ?? 'N/A', 'bright'),
       request.url,
       response.statusCode,
       `${Date.now() - startTime}ms`
