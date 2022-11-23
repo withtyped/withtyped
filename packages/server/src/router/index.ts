@@ -1,7 +1,8 @@
 import url from 'node:url';
 
 import RequestError from '../errors/RequestError.js';
-import type { BaseContext, MiddlewareFunction } from '../middleware.js';
+import type { MiddlewareFunction } from '../middleware.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
 import { buildOpenApiJson } from './openapi.js';
@@ -40,8 +41,8 @@ export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<Re
   path: Path,
   guard: RequestGuard<Query, Body, Response>,
   handler: MiddlewareFunction<
-    GuardedContext<BaseContext, Path, Query, Body>,
-    GuardedContext<BaseContext, Path, Query, Body> & { json?: Response }
+    GuardedContext<RequestContext, Path, Query, Body>,
+    GuardedContext<RequestContext, Path, Query, Body> & { json?: Response }
   >
 ) => RouterWithHandler<Routes, Method, Path, Query, Body, Response>;
 
@@ -77,7 +78,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     this.options = this.buildHandler('options');
   }
 
-  public routes<InputContext extends BaseContext>(): MiddlewareFunction<
+  public routes<InputContext extends RequestContext>(): MiddlewareFunction<
     InputContext,
     InputContext
   > {
@@ -153,7 +154,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
                 ...guardInput(
                   path,
                   url.parse(http.request.url ?? '', true),
-                  context.request?.body,
+                  context.request.body,
                   guard
                 ),
               },

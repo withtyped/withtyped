@@ -1,5 +1,5 @@
-import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-import type { MergeRequestContext } from '../middleware/with-request.js';
+import type { HttpContext, NextFunction } from '../middleware.js';
+import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
 export type Parser<T> = {
@@ -62,7 +62,7 @@ export type Guarded<Path extends string, Query, Body> = {
 };
 
 export type GuardedContext<
-  InputContext extends BaseContext,
+  InputContext extends RequestContext,
   Path extends string,
   Query,
   Body
@@ -71,7 +71,7 @@ export type GuardedContext<
 export type RouteHandler = {
   path: string;
   guard?: RequestGuard<unknown, unknown, unknown>;
-  run: <InputContext extends BaseContext, OutputContext extends BaseContext = InputContext>(
+  run: <InputContext extends RequestContext, OutputContext extends RequestContext = InputContext>(
     context: InputContext,
     next: NextFunction<OutputContext>,
     http: HttpContext

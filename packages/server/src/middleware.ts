@@ -1,9 +1,9 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 
-export type BaseContext<Status extends number = number, ResponseBody = unknown> = {
-  request?: { body?: unknown };
-  status?: Status;
-  json?: ResponseBody;
+export type BaseContext = {
+  request?: Record<string, unknown>;
+  status?: number;
+  json?: unknown;
   headers?: OutgoingHttpHeaders;
 };
 

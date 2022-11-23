@@ -16,9 +16,9 @@ const server = createServer({
     .and(withRequest())
     .and(withBody())
     .and(withCors())
-    .and(async (context, next) => {
+    .and(async (context, next, { request: { socket, rawHeaders } }) => {
       const {
-        request: { body, method, remoteAddress, rawHeaders },
+        request: { body, method },
       } = context;
 
       if (method === RequestMethod.OPTIONS) {
@@ -32,7 +32,7 @@ const server = createServer({
       console.log('Received', body);
       await pool.query(sql`
         insert into forms (id, remote_address, headers, data)
-        values (${nanoid()}, ${remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(
+        values (${nanoid()}, ${socket.remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(
         body ?? {}
       )})
       `);

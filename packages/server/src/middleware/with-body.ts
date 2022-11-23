@@ -1,5 +1,5 @@
-import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-import type { MergeRequestContext } from './with-request.js';
+import type { HttpContext, NextFunction } from '../middleware.js';
+import type { MergeRequestContext, RequestContext } from './with-request.js';
 
 // Manually define JSON types since `JSON.prase()` returns any
 // https://github.com/Microsoft/TypeScript/issues/15225
@@ -13,7 +13,7 @@ export type JsonObject = {
 };
 /* eslint-enable @typescript-eslint/ban-types, @typescript-eslint/consistent-indexed-object-style */
 
-export type WithBodyContext<InputContext extends BaseContext> = MergeRequestContext<
+export type WithBodyContext<InputContext extends RequestContext> = MergeRequestContext<
   InputContext,
   { body?: Json }
 >;
@@ -26,7 +26,7 @@ const tryParse = (body: Buffer): Json | undefined => {
   } catch {}
 };
 
-export default function withBody<InputContext extends BaseContext>() {
+export default function withBody<InputContext extends RequestContext>() {
   return async (
     context: InputContext,
     next: NextFunction<WithBodyContext<InputContext>>,
