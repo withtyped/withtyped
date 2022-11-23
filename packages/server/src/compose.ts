@@ -103,7 +103,7 @@ const createComposer = function <
         middleware: MiddlewareFunction<OutputContext, Context>
       ) {
         return createComposer<[...T, typeof middleware], InputContext, Context>(
-          Object.freeze([..._functions, middleware] as const)
+          Object.freeze([..._functions, middleware])
         );
       },
     }

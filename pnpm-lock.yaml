@@ -3,7 +3,10 @@ lockfileVersion: 5.4
 importers:
 
   .:
-    specifiers: {}
+    specifiers:
+      typescript: ^4.9.3
+    devDependencies:
+      typescript: 4.9.3
 
   packages/client:
     specifiers:

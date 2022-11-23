@@ -8,7 +8,7 @@ export const colors = Object.freeze({
   blue: '\u001B[34m',
   magenta: '\u001B[35m',
   cyan: '\u001B[36m',
-} as const);
+});
 
 export const color = (string: string, color: keyof typeof colors) =>
   colors[color] + string + colors.reset;
