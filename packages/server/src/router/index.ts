@@ -24,28 +24,28 @@ export type RouterWithHandler<
   Routes extends BaseRoutes,
   Method extends Lowercase<RequestMethod>,
   Path extends string,
-  Query,
+  Search,
   Body,
   Response
 > = Router<{
   [key in keyof Routes]: key extends Method
-    ? Routes[key] & { [key in Path]: PathGuard<Path, Query, Body, Response> }
+    ? Routes[key] & { [key in Path]: PathGuard<Path, Search, Body, Response> }
     : Routes[key];
 }>;
 
 export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<RequestMethod>> = <
   Path extends string,
-  Query,
+  Search,
   Body,
   Response
 >(
   path: Path,
-  guard: RequestGuard<Query, Body, Response>,
+  guard: RequestGuard<Search, Body, Response>,
   handler: MiddlewareFunction<
-    GuardedContext<RequestContext, Path, Query, Body>,
-    GuardedContext<RequestContext, Path, Query, Body> & { json?: Response }
+    GuardedContext<RequestContext, Path, Search, Body>,
+    GuardedContext<RequestContext, Path, Search, Body> & { json?: Response }
   >
-) => RouterWithHandler<Routes, Method, Path, Query, Body, Response>;
+) => RouterWithHandler<Routes, Method, Path, Search, Body, Response>;
 
 type BaseRouter<Routes extends BaseRoutes> = {
   [key in Lowercase<RequestMethod>]: MethodHandler<Routes, key>;
@@ -122,7 +122,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   }
 
   public withOpenApi(
-    parseQuery: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+    parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
     info?: OpenAPIV3.InfoObject
   ) {
@@ -130,7 +130,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       '/openapi.json',
       {},
       async (context, next) => {
-        return next({ ...context, json: buildOpenApiJson(this.handlers, parseQuery, parse, info) });
+        return next({ ...context, json: buildOpenApiJson(this.handlers, parseSearch, parse, info) });
       }
     );
   }

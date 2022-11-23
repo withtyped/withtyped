@@ -22,7 +22,7 @@ const parseParameters = (path: string): OpenAPIV3.ParameterObject[] =>
 
 export const buildOpenApiJson = (
   handlerMap: RouterHandlerMap,
-  parseQuery: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+  parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
   parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
   info = defaultInfo
 ): OpenAPIV3.Document => {
@@ -35,7 +35,7 @@ export const buildOpenApiJson = (
   for (const [method, handlers] of Object.entries(handlerMap)) {
     for (const { path, guard } of handlers) {
       const operationObject: OpenAPIV3.OperationObject = {
-        parameters: [...parseParameters(path), ...parseQuery(guard?.query)],
+        parameters: [...parseParameters(path), ...parseSearch(guard?.search)],
         requestBody: guard?.body && {
           required: true,
           content: { [contentJson]: { schema: parse(guard.body) } },

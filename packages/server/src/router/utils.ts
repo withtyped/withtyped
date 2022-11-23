@@ -70,16 +70,16 @@ export const searchParamsToObject = (
   return object;
 };
 
-export const guardInput = <Path extends string, Query, Body>(
+export const guardInput = <Path extends string, Search, Body>(
   path: Path,
   url: URL,
   body: unknown,
-  guard: RequestGuard<Query, Body, unknown>
-): Guarded<Path, Query, Body> =>
+  guard: RequestGuard<Search, Body, unknown>
+): Guarded<Path, Search, Body> =>
   // The compiler cannot infer the output
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, no-restricted-syntax
   ({
     params: parsePathParams(path, url),
-    query: guard.query?.parse(searchParamsToObject(url.searchParams)),
+    search: guard.search?.parse(searchParamsToObject(url.searchParams)),
     body: guard.body?.parse(body) ?? {},
-  } as Guarded<Path, Query, Body>);
+  } as Guarded<Path, Search, Body>);

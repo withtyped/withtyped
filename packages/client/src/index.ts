@@ -5,11 +5,11 @@ import type { RouterClient, RouterRoutes, RequestMethod, ClientRequestHandler } 
 
 export type ClientPayload = {
   params?: Record<string, string>;
-  query?: Record<string, string | string[]>;
+  search?: Record<string, string | string[]>;
   body?: unknown;
 };
 
-const buildQueryString = (record?: Record<string, string | string[]>) =>
+const buildSearchString = (record?: Record<string, string | string[]>) =>
   record
     ? '?' +
       Object.entries(record)
@@ -55,7 +55,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       // We treat payload general and use code to make it works as expected
       // Type inference will always fall into the empty object result
       // eslint-disable-next-line no-restricted-syntax
-      const { params, query, body } = (payload ?? {}) as ClientPayload;
+      const { params, search, body } = (payload ?? {}) as ClientPayload;
       const requestPath = path
         .split('/')
         .map((value) => {
@@ -74,9 +74,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
         })
         .join('/');
 
-      console.log(method.toUpperCase(), this.baseUrl + requestPath + buildQueryString(query));
+      console.log(method.toUpperCase(), this.baseUrl + requestPath + buildSearchString(search));
 
-      const response = await fetch(this.baseUrl + requestPath + buildQueryString(query), {
+      const response = await fetch(this.baseUrl + requestPath + buildSearchString(search), {
         method,
         body:
           typeof body === 'string' || typeof body === 'undefined' || body === null
