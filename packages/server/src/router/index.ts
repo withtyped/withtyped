@@ -1,3 +1,4 @@
+import { normalize } from 'node:path';
 import url from 'node:url';
 
 import RequestError from '../errors/RequestError.js';
@@ -83,11 +84,11 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     InputContext
   > {
     return async (context, next, http) => {
-      const { request } = http;
+      const { request, json, status } = context;
 
       // TODO: Consider best match instead of first match
       const handler = this.handlers[request.method?.toLowerCase() ?? '']?.find((handler) =>
-        matchRoute(handler, request)
+        matchRoute(handler, request.url)
       );
 
       if (!handler) {
@@ -103,10 +104,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
             const responseGuard = handler.guard?.response;
 
             if (responseGuard) {
-              responseGuard.parse(context.json);
+              responseGuard.parse(json);
             }
 
-            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+            return next({ ...context, status: status ?? (json ? 200 : 204) });
           },
           http
         );
@@ -143,7 +144,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     return (path, guard, handler) => {
       // eslint-disable-next-line @silverhand/fp/no-mutating-methods
       handlers.push({
-        path,
+        path: normalize(path),
         guard,
         run: async (context, next, http) => {
           return handler(

@@ -1,16 +1,16 @@
-import type { IncomingMessage } from 'http';
 import type { UrlWithParsedQuery } from 'node:url';
-import url from 'node:url';
 
+import { tryThat } from '../utils.js';
 import type { Guarded, Params, RequestGuard, RouteHandler } from './types.js';
 
-export const matchRoute = (handler: RouteHandler, request: IncomingMessage): boolean => {
-  if (!request.url) {
-    return false;
-  }
-
-  // `url.parse()` is deprecated. Change to `URL` class later.
-  const urlParts = (url.parse(request.url).pathname ?? '').split('/');
+/**
+ * Test if the pathname of the given URL matches the handler.
+ * The function assumes the handler path has been normalized.
+ *
+ * @returns `true` if the pathname matches the handler.
+ */
+export const matchRoute = (handler: RouteHandler, url: URL): boolean => {
+  const urlParts = url.pathname.split('/');
   const matchParts = handler.path.split('/');
 
   if (urlParts.length !== matchParts.length) {
@@ -18,7 +18,9 @@ export const matchRoute = (handler: RouteHandler, request: IncomingMessage): boo
   }
 
   return matchParts.every((part, index) =>
-    part.startsWith(':') ? true : part === urlParts[index]
+    // Tested length above
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    part.startsWith(':') ? true : part === tryThat(() => decodeURI(urlParts[index]!))
   );
 };
 
