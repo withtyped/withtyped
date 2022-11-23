@@ -1,5 +1,3 @@
-import type { UrlWithParsedQuery } from 'node:url';
-
 import { tryThat } from '../utils.js';
 import type { Guarded, Params, RequestGuard, RouteHandler } from './types.js';
 
@@ -25,9 +23,12 @@ export const matchRoute = (handler: RouteHandler, url: URL): boolean => {
 };
 
 // Consider build params during matching routes to improve efficiency
-export const getParams = <Path extends string>(match: Path, { pathname }: UrlWithParsedQuery) => {
-  const params: Record<string, string | string[]> = {};
-  const urlParts = (pathname ?? '').split('/');
+export const parsePathParams = <Path extends string>(
+  match: Path,
+  { pathname }: URL
+): Params<Path> => {
+  const params: Record<string, string> = {};
+  const urlParts = pathname.split('/');
   const matchParts = match.split('/');
 
   for (const [index, value] of matchParts.entries()) {
@@ -43,16 +44,42 @@ export const getParams = <Path extends string>(match: Path, { pathname }: UrlWit
   return params as Params<Path>;
 };
 
+export const searchParamsToObject = (
+  urlSearchParams: URLSearchParams
+): Record<string, string | string[]> => {
+  const object: Record<string, string | string[]> = {};
+
+  // Use the mutating approach to get better performance
+  /* eslint-disable @silverhand/fp/no-mutation, @silverhand/fp/no-mutating-methods */
+  for (const [key, value] of urlSearchParams.entries()) {
+    const result = object[key];
+
+    if (Array.isArray(result)) {
+      result.push(value);
+      continue;
+    }
+
+    if (typeof result === 'string') {
+      object[key] = [result, value];
+    }
+
+    object[key] = value;
+  }
+  /* eslint-enable @silverhand/fp/no-mutation, @silverhand/fp/no-mutating-methods */
+
+  return object;
+};
+
 export const guardInput = <Path extends string, Query, Body>(
   path: Path,
-  url: UrlWithParsedQuery,
+  url: URL,
   body: unknown,
   guard: RequestGuard<Query, Body, unknown>
 ): Guarded<Path, Query, Body> =>
   // The compiler cannot infer the output
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, no-restricted-syntax
   ({
-    params: getParams(path, url),
-    query: guard.query?.parse(url.query),
+    params: parsePathParams(path, url),
+    query: guard.query?.parse(searchParamsToObject(url.searchParams)),
     body: guard.body?.parse(body) ?? {},
   } as Guarded<Path, Query, Body>);

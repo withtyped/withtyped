@@ -1,11 +1,11 @@
 import { normalize } from 'node:path';
-import url from 'node:url';
 
 import RequestError from '../errors/RequestError.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
+import { log } from '../utils.js';
 import { buildOpenApiJson } from './openapi.js';
 import type {
   BaseRoutes,
@@ -95,7 +95,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
         return next(context);
       }
 
-      // Debug: console.log(color('dbg', 'dim'), 'matched handler', handler.path);
+      log.debug('matched handler', handler.path);
 
       try {
         await handler.run(
@@ -152,12 +152,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
               ...context,
               request: {
                 ...context.request,
-                ...guardInput(
-                  path,
-                  url.parse(http.request.url ?? '', true),
-                  context.request.body,
-                  guard
-                ),
+                ...guardInput(path, context.request.url, context.request.body, guard),
               },
             },
             // eslint-disable-next-line no-restricted-syntax
