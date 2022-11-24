@@ -1,9 +1,11 @@
-import url from 'node:url';
+import { normalize } from 'node:path';
 
 import RequestError from '../errors/RequestError.js';
-import type { BaseContext, MiddlewareFunction } from '../middleware.js';
+import type { MiddlewareFunction } from '../middleware.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
+import { log } from '../utils.js';
 import { buildOpenApiJson } from './openapi.js';
 import type {
   BaseRoutes,
@@ -22,28 +24,28 @@ export type RouterWithHandler<
   Routes extends BaseRoutes,
   Method extends Lowercase<RequestMethod>,
   Path extends string,
-  Query,
+  Search,
   Body,
   Response
 > = Router<{
   [key in keyof Routes]: key extends Method
-    ? Routes[key] & { [key in Path]: PathGuard<Path, Query, Body, Response> }
+    ? Routes[key] & { [key in Path]: PathGuard<Path, Search, Body, Response> }
     : Routes[key];
 }>;
 
 export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<RequestMethod>> = <
   Path extends string,
-  Query,
+  Search,
   Body,
   Response
 >(
   path: Path,
-  guard: RequestGuard<Query, Body, Response>,
+  guard: RequestGuard<Search, Body, Response>,
   handler: MiddlewareFunction<
-    GuardedContext<BaseContext, Path, Query, Body>,
-    GuardedContext<BaseContext, Path, Query, Body> & { json?: Response }
+    GuardedContext<RequestContext, Path, Search, Body>,
+    GuardedContext<RequestContext, Path, Search, Body> & { json?: Response }
   >
-) => RouterWithHandler<Routes, Method, Path, Query, Body, Response>;
+) => RouterWithHandler<Routes, Method, Path, Search, Body, Response>;
 
 type BaseRouter<Routes extends BaseRoutes> = {
   [key in Lowercase<RequestMethod>]: MethodHandler<Routes, key>;
@@ -77,23 +79,23 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     this.options = this.buildHandler('options');
   }
 
-  public routes<InputContext extends BaseContext>(): MiddlewareFunction<
+  public routes<InputContext extends RequestContext>(): MiddlewareFunction<
     InputContext,
     InputContext
   > {
     return async (context, next, http) => {
-      const { request } = http;
+      const { request, json, status } = context;
 
       // TODO: Consider best match instead of first match
       const handler = this.handlers[request.method?.toLowerCase() ?? '']?.find((handler) =>
-        matchRoute(handler, request)
+        matchRoute(handler, request.url)
       );
 
       if (!handler) {
         return next(context);
       }
 
-      // Debug: console.log(color('dbg', 'dim'), 'matched handler', handler.path);
+      log.debug('matched handler', handler.path);
 
       try {
         await handler.run(
@@ -102,10 +104,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
             const responseGuard = handler.guard?.response;
 
             if (responseGuard) {
-              responseGuard.parse(context.json);
+              responseGuard.parse(json);
             }
 
-            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+            return next({ ...context, status: status ?? (json ? 200 : 204) });
           },
           http
         );
@@ -120,7 +122,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   }
 
   public withOpenApi(
-    parseQuery: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+    parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
     info?: OpenAPIV3.InfoObject
   ) {
@@ -128,7 +130,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       '/openapi.json',
       {},
       async (context, next) => {
-        return next({ ...context, json: buildOpenApiJson(this.handlers, parseQuery, parse, info) });
+        return next({
+          ...context,
+          json: buildOpenApiJson(this.handlers, parseSearch, parse, info),
+        });
       }
     );
   }
@@ -142,7 +147,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     return (path, guard, handler) => {
       // eslint-disable-next-line @silverhand/fp/no-mutating-methods
       handlers.push({
-        path,
+        path: normalize(path),
         guard,
         run: async (context, next, http) => {
           return handler(
@@ -150,12 +155,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
               ...context,
               request: {
                 ...context.request,
-                ...guardInput(
-                  path,
-                  url.parse(http.request.url ?? '', true),
-                  context.request?.body,
-                  guard
-                ),
+                ...guardInput(path, context.request.url, context.request.body, guard),
               },
             },
             // eslint-disable-next-line no-restricted-syntax

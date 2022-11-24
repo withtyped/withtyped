@@ -181,7 +181,7 @@ export const zodTypeToSwagger = (config: unknown): OpenAPIV3.SchemaObject => {
 // Parameter serialization: https://swagger.io/docs/specification/serialization
 export const zodTypeToParameters = (
   zodParameters: unknown,
-  inWhere: 'path' | 'query' = 'query'
+  inWhere: 'path' | 'search' = 'search'
 ): OpenAPIV3.ParameterObject[] => {
   if (!zodParameters) {
     return [];

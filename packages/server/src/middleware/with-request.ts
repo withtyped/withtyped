@@ -1,53 +1,38 @@
-import type { IncomingHttpHeaders } from 'node:http';
+import type { IncomingHttpHeaders } from 'http';
+import { TLSSocket } from 'tls';
 
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
 import type { RequestMethod } from '../request.js';
 import { requestMethods } from '../request.js';
 
-export type MergeRequestContext<InputContext extends BaseContext, MergeType> = Omit<
+export type WithRequestContext<InputContext> = InputContext & {
+  request: { method?: RequestMethod; headers: IncomingHttpHeaders; url: URL; body?: unknown };
+};
+
+export type RequestContext = WithRequestContext<BaseContext>;
+
+export type MergeRequestContext<InputContext extends RequestContext, MergeType> = Omit<
   InputContext,
   'request'
 > & { request: InputContext['request'] & MergeType };
-
-export type RequestContext = {
-  method?: RequestMethod;
-  rawMethod?: string;
-  headers: IncomingHttpHeaders;
-  rawHeaders: string[];
-  remoteAddress?: string;
-  remotePort?: number;
-  remoteFamily?: string;
-};
-
-export type WithRequestContext<InputContext extends BaseContext> = MergeRequestContext<
-  InputContext,
-  RequestContext
->;
 
 export default function withRequest<InputContext extends BaseContext>() {
   return async (
     context: InputContext,
     next: NextFunction<WithRequestContext<InputContext>>,
-    { request }: HttpContext
+    { request: { method, headers, url, socket } }: HttpContext
   ) => {
-    const {
-      method,
-      headers,
-      rawHeaders,
-      socket: { remoteAddress, remoteFamily, remotePort },
-    } = request;
+    const protocol = socket instanceof TLSSocket ? 'https' : 'http';
+    // Empty host will fail when constructing URL
+    // which is expected since host is mandatory in HTTP/1.1
+    const host = headers.host ?? '';
 
     return next({
       ...context,
       request: {
-        ...context.request,
         method: requestMethods.find((value) => value === method?.toUpperCase()),
-        rawMethod: method,
         headers,
-        rawHeaders,
-        remoteAddress,
-        remotePort,
-        remoteFamily,
+        url: new URL(url ?? '', `${protocol}//${host}`),
       },
     });
   };

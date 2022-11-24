@@ -72,11 +72,11 @@ export const router = new Router()
   })
   .get(
     '/search',
-    { query: z.object({ name: z.string() }), response: z.object({ books: bookGuard.array() }) },
+    { search: z.object({ name: z.string() }), response: z.object({ books: bookGuard.array() }) },
     async (context, next) => {
       return next({
         ...context,
-        json: { books: books.filter(({ name }) => name.includes(context.request.query.name)) },
+        json: { books: books.filter(({ name }) => name.includes(context.request.search.name)) },
       });
     }
   )

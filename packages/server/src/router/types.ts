@@ -1,5 +1,5 @@
-import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-import type { MergeRequestContext } from '../middleware/with-request.js';
+import type { HttpContext, NextFunction } from '../middleware.js';
+import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
 export type Parser<T> = {
@@ -24,14 +24,14 @@ export type Params<Path extends string> = {
   [key in Parts<Path>]: string;
 };
 
-export type RequestGuard<Query, Body, Response> = {
-  query?: Parser<Query>;
+export type RequestGuard<Search, Body, Response> = {
+  search?: Parser<Search>;
   body?: Parser<Body>;
   response?: Parser<Response>;
 };
 
-export type PathGuard<Path extends string, Query, Body, Response> = RequestGuard<
-  Query,
+export type PathGuard<Path extends string, Search, Body, Response> = RequestGuard<
+  Search,
   Body,
   Response
 > & {
@@ -43,10 +43,10 @@ export type RemoveUsedKeys<T> = {
   [key in keyof T as keyof T[key] extends never ? never : key]: T[key];
 };
 
-export type GuardedPayload<T> = T extends PathGuard<infer Path, infer Query, infer Body, unknown>
+export type GuardedPayload<T> = T extends PathGuard<infer Path, infer Search, infer Body, unknown>
   ? RemoveUsedKeys<{
       params: Params<Path>;
-      query: Query;
+      search: Search;
       body: Body;
     }>
   : never;
@@ -55,23 +55,23 @@ export type GuardedResponse<T> = T extends PathGuard<string, unknown, unknown, i
   ? Response
   : never;
 
-export type Guarded<Path extends string, Query, Body> = {
+export type Guarded<Path extends string, Search, Body> = {
   params: Params<Path>;
-  query: Query;
+  search: Search;
   body: Body;
 };
 
 export type GuardedContext<
-  InputContext extends BaseContext,
+  InputContext extends RequestContext,
   Path extends string,
-  Query,
+  Search,
   Body
-> = MergeRequestContext<InputContext, Guarded<Path, Query, Body>>;
+> = MergeRequestContext<InputContext, Guarded<Path, Search, Body>>;
 
 export type RouteHandler = {
   path: string;
   guard?: RequestGuard<unknown, unknown, unknown>;
-  run: <InputContext extends BaseContext, OutputContext extends BaseContext = InputContext>(
+  run: <InputContext extends RequestContext, OutputContext extends RequestContext = InputContext>(
     context: InputContext,
     next: NextFunction<OutputContext>,
     http: HttpContext

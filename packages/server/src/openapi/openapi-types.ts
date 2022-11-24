@@ -1,4 +1,7 @@
-/* We only need V3 types to generate a valid OpenAPI JSON, copied from `openapi-types@12.0.2` */
+/**
+ * We only need V3 types to generate a valid OpenAPI JSON,
+ * content is copied from `openapi-types@12.0.2` with all ESLint rules disabled.
+ */
 
 /*
 The MIT License (MIT)

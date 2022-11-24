@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import Client from '@withtyped/client';
-import { describe, it } from 'node:test';
 
 import { createBook } from './book.js';
 import type { router } from './debug.js';
@@ -50,7 +50,7 @@ describe('books', () => {
     const book = books[0]!;
 
     const { books: result } = await client.get('/search', {
-      query: { name: book.name.slice(0, 3) },
+      search: { name: book.name.slice(0, 3) },
     });
     assert.ok(result.some(({ id }) => id === book.id));
   });

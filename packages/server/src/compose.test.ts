@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { Socket } from 'node:net';
-
 import { describe, it } from 'node:test';
 
 import compose, { ComposeError } from './compose.js';
