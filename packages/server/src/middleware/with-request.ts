@@ -32,7 +32,7 @@ export default function withRequest<InputContext extends BaseContext>() {
       request: {
         method: requestMethods.find((value) => value === method?.toUpperCase()),
         headers,
-        url: new URL(url ?? '', `${protocol}//${host}`),
+        url: new URL(url ?? '', `${protocol}://${host}`),
       },
     });
   };
