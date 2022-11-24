@@ -10,6 +10,7 @@ import { buildOpenApiJson } from './openapi.js';
 import type {
   BaseRoutes,
   GuardedContext,
+  MergeRoutes,
   Parser,
   PathGuard,
   RequestGuard,
@@ -28,9 +29,9 @@ export type RouterWithHandler<
   Body,
   Response
 > = Router<{
-  [key in keyof Routes]: key extends Method
-    ? Routes[key] & { [key in Path]: PathGuard<Path, Search, Body, Response> }
-    : Routes[key];
+  [method in keyof Routes]: method extends Method
+    ? Routes[method] & { [path in Path]: PathGuard<Path, Search, Body, Response> }
+    : Routes[method];
 }>;
 
 export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<RequestMethod>> = <
@@ -61,7 +62,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   head: MethodHandler<Routes, 'head'>;
   options: MethodHandler<Routes, 'options'>;
 
-  private readonly handlers: RouterHandlerMap;
+  protected readonly handlers: RouterHandlerMap;
 
   constructor() {
     // Use the dumb way to init since:
@@ -136,6 +137,23 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
         });
       }
     );
+  }
+
+  public merge<AnotherRoutes extends BaseRoutes>(another: Router<AnotherRoutes>) {
+    for (const [method, handlers] of Object.entries(another.handlers)) {
+      this.handlers[method] = (this.handlers[method] ?? []).concat(handlers);
+    }
+
+    // Intended
+    // eslint-disable-next-line no-restricted-syntax
+    return this as Router<MergeRoutes<Routes, AnotherRoutes>>;
+  }
+
+  public handlerFor<Method extends Lowercase<RequestMethod>>(
+    method: Method,
+    path: keyof Routes[Method]
+  ) {
+    return this.handlers[method]?.find(({ path: handlerPath }) => handlerPath === path);
   }
 
   private buildHandler<Method extends Lowercase<RequestMethod>>(

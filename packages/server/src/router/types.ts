@@ -2,6 +2,10 @@ import type { HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
+export type MergeRoutes<A, B> = {
+  [key in keyof (A | B)]: key extends keyof B ? A[key] & B[key] : A[key];
+};
+
 export type Parser<T> = {
   parse: (data: unknown) => T;
 };
