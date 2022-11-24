@@ -67,6 +67,7 @@ importers:
       prettier: ^2.7.1
       tap-arc: ^0.3.5
       typescript: ^4.9.3
+      zod: ^3.19.1
     devDependencies:
       '@silverhand/eslint-config': 1.3.0_lodna2kqutudccklmsddzyjx3a
       '@silverhand/ts-config': 1.2.1_typescript@4.9.3
@@ -75,6 +76,7 @@ importers:
       prettier: 2.7.1
       tap-arc: 0.3.5
       typescript: 4.9.3
+      zod: 3.19.1
 
 packages:
 
@@ -2834,4 +2836,3 @@ packages:
 
   /zod/3.19.1:
     resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
-    dev: false

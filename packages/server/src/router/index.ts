@@ -130,7 +130,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       '/openapi.json',
       {},
       async (context, next) => {
-        return next({ ...context, json: buildOpenApiJson(this.handlers, parseSearch, parse, info) });
+        return next({
+          ...context,
+          json: buildOpenApiJson(this.handlers, parseSearch, parse, info),
+        });
       }
     );
   }

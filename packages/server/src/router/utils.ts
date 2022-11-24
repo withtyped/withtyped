@@ -23,6 +23,16 @@ export const matchRoute = (handler: RouteHandler, url: URL): boolean => {
 };
 
 // Consider build params during matching routes to improve efficiency
+/**
+ * Parse `match`'s path segments start with `:` with the value of the same index in the `url`'s path segments into an object.
+ * This function assumes `match` has been normalized.
+ *
+ * E.g.
+ * ```ts
+ * parsePathParams('/foo/:bar/:baz', new URL('/foo/123/abc', base)) // { bar: '123', baz: 'abc' }
+ * parsePathParams('/foo/:bar/:baz', new URL('/foo/123', base)) // { bar: '123', baz: '' }
+ * ```
+ */
 export const parsePathParams = <Path extends string>(
   match: Path,
   { pathname }: URL
@@ -38,12 +48,20 @@ export const parsePathParams = <Path extends string>(
     }
   }
 
-  // TODO: Add UTs
   // Yes I'm sure what I'm doing
   // eslint-disable-next-line no-restricted-syntax
   return params as Params<Path>;
 };
 
+/**
+ * Parse URLSearchParams to an key-value object. If a key appears multiple times, the value will be an array.
+ *
+ * E.g.
+ * ```ts
+ * searchParamsToObject(new URLSearchParams('?foo=1&bar=2')) // { foo: '1', bar: '2' }
+ * searchParamsToObject(new URLSearchParams('?foo=1&bar=2&foo=%5Ea')) // { foo: ['1', '^a'], bar: '2' }
+ * ```
+ */
 export const searchParamsToObject = (
   urlSearchParams: URLSearchParams
 ): Record<string, string | string[]> => {
@@ -61,6 +79,7 @@ export const searchParamsToObject = (
 
     if (typeof result === 'string') {
       object[key] = [result, value];
+      continue;
     }
 
     object[key] = value;
@@ -81,5 +100,5 @@ export const guardInput = <Path extends string, Search, Body>(
   ({
     params: parsePathParams(path, url),
     search: guard.search?.parse(searchParamsToObject(url.searchParams)),
-    body: guard.body?.parse(body) ?? {},
+    body: guard.body?.parse(body),
   } as Guarded<Path, Search, Body>);
