@@ -1,8 +1,6 @@
 import { faker } from '@faker-js/faker';
-import createServer from '@withtyped/server';
-import RequestError from '@withtyped/server/lib/errors/RequestError.js';
+import createServer, { RequestError, Router } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
-import Router from '@withtyped/server/lib/router/index.js';
 import { z } from 'zod';
 
 import type { Book } from './book.js';

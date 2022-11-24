@@ -77,3 +77,12 @@ export default function createServer<T extends unknown[], OutputContext extends 
     },
   };
 }
+
+export { default as RequestError } from './errors/RequestError.js';
+export * from './middleware/index.js';
+export * from './openapi/openapi-types.js';
+export { default as Router } from './router/index.js';
+export * from './router/index.js';
+export { default as compose } from './compose.js';
+export * from './middleware.js';
+export * from './request.js';

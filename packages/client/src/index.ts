@@ -1,5 +1,4 @@
-import type Router from '@withtyped/server/lib/router/index.js';
-import type { BaseRoutes, GuardedPayload } from '@withtyped/server/lib/router/index.js';
+import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
 
 import type { RouterClient, RouterRoutes, RequestMethod, ClientRequestHandler } from './types.js';
 
