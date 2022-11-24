@@ -57,23 +57,23 @@ describe('matchRoute()', () => {
 
 describe('parsePathParams()', () => {
   it('should return an empty object when no path param available', () => {
-    assert.deepEqual(parsePathParams('/foo/bar/baz', new URL('/foo/bar/baz', base)), {});
-    assert.deepEqual(parsePathParams('/', new URL('/foo/bar/baz', base)), {});
+    assert.deepStrictEqual(parsePathParams('/foo/bar/baz', new URL('/foo/bar/baz', base)), {});
+    assert.deepStrictEqual(parsePathParams('/', new URL('/foo/bar/baz', base)), {});
   });
 
   it('should return proper decoded params', () => {
-    assert.deepEqual(parsePathParams('/foo/:bar/:baz', new URL('/foo/bar/baz', base)), {
+    assert.deepStrictEqual(parsePathParams('/foo/:bar/:baz', new URL('/foo/bar/baz', base)), {
       bar: 'bar',
       baz: 'baz',
     });
-    assert.deepEqual(parsePathParams('/foo/:bar/:baz', new URL('/foo/bar?baz=123', base)), {
+    assert.deepStrictEqual(parsePathParams('/foo/:bar/:baz', new URL('/foo/bar?baz=123', base)), {
       bar: 'bar',
       baz: '',
     });
-    assert.deepEqual(parsePathParams('/foo/:bar', new URL('/foo/bar/baz/buh', base)), {
+    assert.deepStrictEqual(parsePathParams('/foo/:bar', new URL('/foo/bar/baz/buh', base)), {
       bar: 'bar',
     });
-    assert.deepEqual(parsePathParams('/foo/:bar', new URL('/foo/%20DDD', base)), {
+    assert.deepStrictEqual(parsePathParams('/foo/:bar', new URL('/foo/%20DDD', base)), {
       bar: '%20DDD',
     });
   });
@@ -81,22 +81,22 @@ describe('parsePathParams()', () => {
 
 describe('searchParamsToObject()', () => {
   it('should return a proper object', () => {
-    assert.deepEqual(searchParamsToObject(new URL('/foo?', base).searchParams), {});
-    assert.deepEqual(
+    assert.deepStrictEqual(searchParamsToObject(new URL('/foo?', base).searchParams), {});
+    assert.deepStrictEqual(
       searchParamsToObject(new URL('/foo?foo=123&baz=456&foo=123', base).searchParams),
       {
         foo: ['123', '123'],
         baz: '456',
       }
     );
-    assert.deepEqual(
+    assert.deepStrictEqual(
       searchParamsToObject(new URLSearchParams('?foo=123&baz=456&foo=a%25b%5E%25%26c&foo=%254')),
       {
         foo: ['123', 'a%b^%&c', '%4'],
         baz: '456',
       }
     );
-    assert.deepEqual(
+    assert.deepStrictEqual(
       searchParamsToObject(new URLSearchParams('foo=123&baz=456&foo=a%25b%5E%25&c&&&&c&foo=%254')),
       {
         foo: ['123', 'a%b^%', '%4'],
@@ -104,7 +104,7 @@ describe('searchParamsToObject()', () => {
         c: ['', ''],
       }
     );
-    assert.deepEqual(searchParamsToObject(new URLSearchParams('?foo=1&bar=2&foo=%5Ea')), {
+    assert.deepStrictEqual(searchParamsToObject(new URLSearchParams('?foo=1&bar=2&foo=%5Ea')), {
       foo: ['1', '^a'],
       bar: '2',
     });
@@ -113,7 +113,7 @@ describe('searchParamsToObject()', () => {
 
 describe('guardInput()', () => {
   it('should return a proper guarded object', () => {
-    assert.deepEqual(guardInput('/', new URL('/', base), {}, {}), {
+    assert.deepStrictEqual(guardInput('/', new URL('/', base), {}, {}), {
       params: {},
       search: undefined,
       body: undefined,
@@ -128,7 +128,7 @@ describe('guardInput()', () => {
       },
     };
 
-    assert.deepEqual(
+    assert.deepStrictEqual(
       guardInput('/:foo', url, body, {
         search: z.object({
           'foo[]': z.string(),
@@ -148,7 +148,7 @@ describe('guardInput()', () => {
         body: undefined,
       }
     );
-    assert.deepEqual(
+    assert.deepStrictEqual(
       guardInput('/:foo/:bar', url, body, {
         search: z.object({
           foo: z.string().array(),
@@ -163,7 +163,7 @@ describe('guardInput()', () => {
         },
         search: {
           foo: ['a%b^%&c', '%4'],
-          baz: 456,
+          baz: '456',
         },
         body: {
           what: {

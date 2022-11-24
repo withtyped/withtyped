@@ -19,6 +19,8 @@ jobs:
 
       - name: Setup Node and pnpm
         uses: silverhand-io/actions-node-pnpm-run-steps@v2
+        with:
+          node-version: 18
 
       - name: Build
         run: pnpm -r build
@@ -28,3 +30,11 @@ jobs:
 
       - name: Test
         run: pnpm -r test
+
+      - name: Setup debug server
+        working-directory: packages/sample
+        run: node lib/debug.js &
+
+      - name: Integration test
+        working-directory: packages/sample
+        run: node --test

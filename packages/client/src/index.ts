@@ -1,5 +1,4 @@
-import type Router from '@withtyped/server/lib/router/index.js';
-import type { BaseRoutes, GuardedPayload } from '@withtyped/server/lib/router/index.js';
+import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
 
 import type { RouterClient, RouterRoutes, RequestMethod, ClientRequestHandler } from './types.js';
 
@@ -78,6 +77,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
 
       const response = await fetch(this.baseUrl + requestPath + buildSearchString(search), {
         method,
+        headers: {
+          host: new URL(this.baseUrl).host,
+        },
         body:
           typeof body === 'string' || typeof body === 'undefined' || body === null
             ? body

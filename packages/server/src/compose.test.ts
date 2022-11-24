@@ -1,10 +1,9 @@
 import assert from 'node:assert';
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { Socket } from 'node:net';
 import { describe, it } from 'node:test';
 
 import compose, { ComposeError } from './compose.js';
-import type { BaseContext, HttpContext, MiddlewareFunction } from './middleware.js';
+import type { BaseContext, MiddlewareFunction } from './middleware.js';
+import { createHttpContext } from './test-utils/http.js';
 import { noop } from './utils.js';
 
 type Ctx1 = BaseContext & { c1: string };
@@ -40,12 +39,7 @@ const midError: MiddlewareFunction<Ctx2, Ctx3> = async () => {
   throw new Error('A special error');
 };
 
-const request = new IncomingMessage(new Socket());
-
-const httpContext: HttpContext = {
-  request,
-  response: new ServerResponse(request),
-};
+const httpContext = createHttpContext();
 
 describe('compose()', () => {
   it('should allow to create an empty composer', async () => {
@@ -57,7 +51,7 @@ describe('compose()', () => {
     await compose(mid1).and(mid2)(
       { ...baseContext, c1: '256' },
       async (context) => {
-        assert.deepEqual(context, { ...baseContext, c2: 256, c3: 512 });
+        assert.deepStrictEqual(context, { ...baseContext, c2: 256, c3: 512 });
       },
       httpContext
     );
@@ -67,7 +61,7 @@ describe('compose()', () => {
     await compose(compose(mid1).and(mid2))(
       { c1: '128' },
       async (context) => {
-        assert.deepEqual(context, { c2: 128, c3: 256 });
+        assert.deepStrictEqual(context, { c2: 128, c3: 256 });
       },
       httpContext
     );
@@ -79,7 +73,7 @@ describe('compose()', () => {
     await composed.and(compose(compose())).and(composed)(
       { c1: '128' },
       async ({ c1 }) => {
-        assert.equal(c1, '512');
+        assert.strictEqual(c1, '512');
       },
       httpContext
     );

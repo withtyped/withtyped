@@ -1,9 +1,5 @@
-import createServer from '@withtyped/server';
-import compose from '@withtyped/server/lib/compose.js';
-import withBody from '@withtyped/server/lib/middleware/with-body.js';
-import withCors from '@withtyped/server/lib/middleware/with-cors.js';
-import withRequest from '@withtyped/server/lib/middleware/with-request.js';
-import { RequestMethod } from '@withtyped/server/lib/request.js';
+import createServer, { RequestMethod, withCors } from '@withtyped/server';
+import { createComposer } from '@withtyped/server/lib/preset.js';
 import { nanoid } from 'nanoid';
 import { createPool, sql } from 'slonik';
 
@@ -12,9 +8,7 @@ const pool = await createPool(DB_URL ?? 'postgresql://localhost/sample');
 
 const server = createServer({
   port: PORT ? Number(PORT) : undefined,
-  composer: compose()
-    .and(withRequest())
-    .and(withBody())
+  composer: createComposer()
     .and(withCors())
     .and(async (context, next, { request: { socket, rawHeaders } }) => {
       const {
