@@ -10,7 +10,7 @@ import { zodTypeToParameters, zodTypeToSwagger } from './openapi.js';
 // eslint-disable-next-line @silverhand/fp/no-let
 let books = Array.from({ length: 10 }).map(() => createBook());
 
-export const router = new Router()
+const getRouter = new Router()
   .get(
     '/books',
     {
@@ -20,6 +20,18 @@ export const router = new Router()
       return next({ ...context, json: { books } });
     }
   )
+  .get('/books/:id', { response: bookGuard }, async (context, next) => {
+    const book = books.find(({ id }) => id === context.request.params.id);
+
+    if (!book) {
+      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+    }
+
+    return next({ ...context, json: book });
+  });
+
+export const router = new Router()
+  .merge(getRouter)
   .post(
     '/books',
     { body: bookGuard.omit({ id: true }), response: bookGuard },
@@ -47,15 +59,6 @@ export const router = new Router()
       return next({ ...context, json: books[bookIndex] });
     }
   )
-  .get('/books/:id', { response: bookGuard }, async (context, next) => {
-    const book = books.find(({ id }) => id === context.request.params.id);
-
-    if (!book) {
-      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
-    }
-
-    return next({ ...context, json: book });
-  })
   .delete('/books/:id', {}, async (context, next) => {
     const newBooks = books.filter(({ id }) => id !== context.request.params.id);
 

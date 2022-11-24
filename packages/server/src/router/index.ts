@@ -14,7 +14,6 @@ import type {
   Parser,
   PathGuard,
   RequestGuard,
-  RouteHandler,
   RouterHandlerMap,
 } from './types.js';
 import { guardInput, matchRoute } from './utils.js';
@@ -53,32 +52,17 @@ type BaseRouter<Routes extends BaseRoutes> = {
 };
 
 export default class Router<Routes extends BaseRoutes = BaseRoutes> implements BaseRouter<Routes> {
-  get: MethodHandler<Routes, 'get'>;
-  post: MethodHandler<Routes, 'post'>;
-  put: MethodHandler<Routes, 'put'>;
-  patch: MethodHandler<Routes, 'patch'>;
-  delete: MethodHandler<Routes, 'delete'>;
-  copy: MethodHandler<Routes, 'copy'>;
-  head: MethodHandler<Routes, 'head'>;
-  options: MethodHandler<Routes, 'options'>;
+  // Use the dumb way to init since it's easier to make the compiler happy
+  get = this.buildHandler('get');
+  post = this.buildHandler('post');
+  put = this.buildHandler('put');
+  patch = this.buildHandler('patch');
+  delete = this.buildHandler('delete');
+  copy = this.buildHandler('copy');
+  head = this.buildHandler('head');
+  options = this.buildHandler('options');
 
-  protected readonly handlers: RouterHandlerMap;
-
-  constructor() {
-    // Use the dumb way to init since:
-    // 1. Easier to make the compiler happy
-    // 2. `this.handlers` needs to be initialized before handler methods
-
-    this.handlers = {};
-    this.get = this.buildHandler('get');
-    this.post = this.buildHandler('post');
-    this.put = this.buildHandler('put');
-    this.patch = this.buildHandler('patch');
-    this.delete = this.buildHandler('delete');
-    this.copy = this.buildHandler('copy');
-    this.head = this.buildHandler('head');
-    this.options = this.buildHandler('options');
-  }
+  protected readonly handlers: RouterHandlerMap = {};
 
   public routes<InputContext extends RequestContext>(): MiddlewareFunction<
     InputContext,
@@ -143,7 +127,9 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     );
   }
 
-  public merge<AnotherRoutes extends BaseRoutes>(another: Router<AnotherRoutes>) {
+  public merge<AnotherRoutes extends BaseRoutes>(
+    another: Router<AnotherRoutes>
+  ): Router<MergeRoutes<Routes, AnotherRoutes>> {
     for (const [method, handlers] of Object.entries(another.handlers)) {
       this.handlers[method] = (this.handlers[method] ?? []).concat(handlers);
     }
@@ -163,10 +149,9 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   private buildHandler<Method extends Lowercase<RequestMethod>>(
     method: Method
   ): MethodHandler<Routes, Method> {
-    const handlers: RouteHandler[] = [];
-    this.handlers[method] = handlers;
-
     return (path, guard, handler) => {
+      const handlers = this.handlers[method] ?? [];
+
       // eslint-disable-next-line @silverhand/fp/no-mutating-methods
       handlers.push({
         path: normalize(path),
@@ -186,6 +171,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
           );
         },
       });
+      this.handlers[method] = handlers;
 
       // eslint-disable-next-line no-restricted-syntax
       return this as ReturnType<MethodHandler<Routes, Method>>;

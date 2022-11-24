@@ -21,6 +21,7 @@ describe('Router', () => {
       .get('/books/:id', { response: bookGuard }, async (context, next) => {
         return next({ ...context, json: createBook() });
       })
+      .merge(router1)
       .post(
         '/books',
         { body: bookGuard.omit({ id: true }), response: bookGuard },
@@ -29,10 +30,15 @@ describe('Router', () => {
         }
       );
 
-    const router = router1.merge(router2);
+    const router3 = router1.merge(router2);
 
-    assert.ok(router.handlerFor('get', '/books'));
-    assert.ok(router.handlerFor('get', '/books/:id'));
-    assert.ok(router.handlerFor('post', '/books'));
+    assert.ok(router2.handlerFor('get', '/books'));
+    assert.ok(router2.handlerFor('get', '/books/:id'));
+    assert.ok(router2.handlerFor('post', '/books'));
+
+    assert.strictEqual(router1, router3);
+    assert.ok(router3.handlerFor('get', '/books'));
+    assert.ok(router3.handlerFor('get', '/books/:id'));
+    assert.ok(router3.handlerFor('post', '/books'));
   });
 });
