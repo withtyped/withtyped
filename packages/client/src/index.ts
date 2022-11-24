@@ -77,6 +77,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
 
       const response = await fetch(this.baseUrl + requestPath + buildSearchString(search), {
         method,
+        headers: {
+          host: new URL(this.baseUrl).host,
+        },
         body:
           typeof body === 'string' || typeof body === 'undefined' || body === null
             ? body

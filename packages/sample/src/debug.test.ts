@@ -17,23 +17,23 @@ describe('books', () => {
 
   it('should return exact 10 books', async () => {
     const { books } = await client.get('/books');
-    assert.equal(books.length, 10);
+    assert.strictEqual(books.length, 10);
   });
 
   it('should allow to create and delete a new book with random id', async () => {
     const body = createBook();
     const book = await client.post('/books', { body });
-    assert.notEqual(body.id, book.id);
+    assert.notStrictEqual(body.id, book.id);
 
     const { books: newBooks } = await client.get('/books');
-    assert.equal(newBooks.length, 11);
+    assert.strictEqual(newBooks.length, 11);
 
     const queryBook = await client.get('/books/:id', { params: { id: book.id } });
-    assert.equal(queryBook.id, book.id);
+    assert.strictEqual(queryBook.id, book.id);
 
     await client.delete('/books/:id', { params: { id: book.id } });
     const { books } = await client.get('/books');
-    assert.equal(books.length, 10);
+    assert.strictEqual(books.length, 10);
     assert.ok(books.every(({ id }) => id !== book.id));
   });
 

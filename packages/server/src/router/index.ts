@@ -84,8 +84,8 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     InputContext,
     InputContext
   > {
-    return async (context, next, http) => {
-      const { request, json, status } = context;
+    return async (originalContext, next, http) => {
+      const { request } = originalContext;
 
       // TODO: Consider best match instead of first match
       const handler = this.handlers[request.method?.toLowerCase() ?? '']?.find((handler) =>
@@ -93,28 +93,32 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       );
 
       if (!handler) {
-        return next(context);
+        return next(originalContext);
       }
 
       log.debug('matched handler', handler.path);
 
       try {
         await handler.run(
-          context,
+          originalContext,
           async (context) => {
             const responseGuard = handler.guard?.response;
 
             if (responseGuard) {
-              responseGuard.parse(json);
+              responseGuard.parse(context.json);
             }
 
-            return next({ ...context, status: status ?? (json ? 200 : 204) });
+            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
           },
           http
         );
       } catch (error: unknown) {
         if (error instanceof RequestError) {
-          return next({ ...context, status: error.status, json: { message: error.message } });
+          return next({
+            ...originalContext,
+            status: error.status,
+            json: { message: error.message },
+          });
         }
 
         throw error;
