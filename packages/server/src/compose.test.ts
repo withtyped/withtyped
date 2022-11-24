@@ -1,10 +1,10 @@
 import assert from 'node:assert';
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { Socket } from 'node:net';
+
 import { describe, it } from 'node:test';
 
 import compose, { ComposeError } from './compose.js';
-import type { BaseContext, HttpContext, MiddlewareFunction } from './middleware.js';
+import type { BaseContext, MiddlewareFunction } from './middleware.js';
+import { createHttpContext } from './test-utils/http.js';
 import { noop } from './utils.js';
 
 type Ctx1 = BaseContext & { c1: string };
@@ -40,12 +40,7 @@ const midError: MiddlewareFunction<Ctx2, Ctx3> = async () => {
   throw new Error('A special error');
 };
 
-const request = new IncomingMessage(new Socket());
-
-const httpContext: HttpContext = {
-  request,
-  response: new ServerResponse(request),
-};
+const httpContext = createHttpContext();
 
 describe('compose()', () => {
   it('should allow to create an empty composer', async () => {
