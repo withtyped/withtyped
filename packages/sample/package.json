@@ -11,7 +11,8 @@
     "build": "rm -rf lib/ && tsc",
     "start": "node lib/index.js",
     "dev": "pnpm build && pnpm start",
-    "test": "tsc && node --test"
+    "lint": "eslint src/",
+    "test:integration": "pnpm build && node --test"
   },
   "devDependencies": {
     "@silverhand/eslint-config": "^1.3.0",

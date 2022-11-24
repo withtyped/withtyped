@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import Client from '@withtyped/client';
-import { describe, it } from 'node:test';
 
 import { createBook } from './book.js';
 import type { router } from './debug.js';

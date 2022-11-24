@@ -16,6 +16,7 @@ importers:
       '@withtyped/server': workspace:^0.1.0
       eslint: ^8.28.0
       prettier: ^2.7.1
+      tap-arc: ^0.3.5
       typescript: ^4.9.3
     dependencies:
       '@withtyped/server': link:../server
@@ -25,6 +26,7 @@ importers:
       '@types/node': 18.11.9
       eslint: 8.28.0
       prettier: 2.7.1
+      tap-arc: 0.3.5
       typescript: 4.9.3
 
   packages/sample:
