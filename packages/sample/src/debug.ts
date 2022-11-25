@@ -31,7 +31,7 @@ const getRouter = new Router()
   });
 
 export const router = new Router()
-  .merge(getRouter)
+  .pack(getRouter)
   .post(
     '/books',
     { body: bookGuard.omit({ id: true }), response: bookGuard },

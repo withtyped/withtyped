@@ -5,7 +5,6 @@ import type { RequestMethod } from '../request.js';
 export type MergeRoutes<A, B> = {
   [key in keyof (A | B)]: key extends keyof B ? A[key] & B[key] : A[key];
 };
-
 export type Parser<T> = {
   parse: (data: unknown) => T;
 };
@@ -15,6 +14,14 @@ export type BaseRoutes = {
   [key in Lowercase<RequestMethod>]: {};
 };
 /* eslint-enable @typescript-eslint/ban-types */
+
+export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
+  [method in keyof BaseRoutes]: {
+    [key in keyof Routes[method] as key extends string
+      ? `${Prefix}${key}`
+      : never]: Routes[method][key];
+  };
+};
 
 export type IsParameter<Part> = Part extends `:${infer Name}` ? Name : never;
 

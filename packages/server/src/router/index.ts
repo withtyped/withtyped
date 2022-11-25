@@ -15,6 +15,7 @@ import type {
   PathGuard,
   RequestGuard,
   RouterHandlerMap,
+  RoutesWithPrefix,
 } from './types.js';
 import { guardInput, matchRoute } from './utils.js';
 
@@ -22,36 +23,41 @@ export * from './types.js';
 
 export type RouterWithHandler<
   Routes extends BaseRoutes,
+  Prefix extends string,
   Method extends Lowercase<RequestMethod>,
   Path extends string,
   Search,
   Body,
   Response
-> = Router<{
-  [method in keyof Routes]: method extends Method
-    ? Routes[method] & { [path in Path]: PathGuard<Path, Search, Body, Response> }
-    : Routes[method];
-}>;
+> = Router<
+  {
+    [method in keyof Routes]: method extends Method
+      ? Routes[method] & { [path in `${Prefix}${Path}`]: PathGuard<Path, Search, Body, Response> }
+      : Routes[method];
+  },
+  Prefix
+>;
 
-export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<RequestMethod>> = <
-  Path extends string,
-  Search,
-  Body,
-  Response
->(
+export type MethodHandler<
+  Routes extends BaseRoutes,
+  Prefix extends string,
+  Method extends Lowercase<RequestMethod>
+> = <Path extends string, Search, Body, Response>(
   path: Path,
   guard: RequestGuard<Search, Body, Response>,
   handler: MiddlewareFunction<
-    GuardedContext<RequestContext, Path, Search, Body>,
-    GuardedContext<RequestContext, Path, Search, Body> & { json?: Response }
+    GuardedContext<RequestContext, `${Prefix}${Path}`, Search, Body>,
+    GuardedContext<RequestContext, `${Prefix}${Path}`, Search, Body> & { json?: Response }
   >
-) => RouterWithHandler<Routes, Method, Path, Search, Body, Response>;
+) => RouterWithHandler<Routes, Prefix, Method, Path, Search, Body, Response>;
 
-type BaseRouter<Routes extends BaseRoutes> = {
-  [key in Lowercase<RequestMethod>]: MethodHandler<Routes, key>;
+type BaseRouter<Routes extends BaseRoutes, Prefix extends string> = {
+  [key in Lowercase<RequestMethod>]: MethodHandler<Routes, Prefix, key>;
 };
 
-export default class Router<Routes extends BaseRoutes = BaseRoutes> implements BaseRouter<Routes> {
+export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix extends string = ''>
+  implements BaseRouter<Routes, Prefix>
+{
   // Use the dumb way to init since it's easier to make the compiler happy
   get = this.buildHandler('get');
   post = this.buildHandler('post');
@@ -62,7 +68,13 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
   head = this.buildHandler('head');
   options = this.buildHandler('options');
 
+  public readonly prefix: Prefix;
   protected readonly handlers: RouterHandlerMap = {};
+
+  constructor(prefix?: Prefix) {
+    // eslint-disable-next-line no-restricted-syntax
+    this.prefix = (prefix ?? '') as Prefix;
+  }
 
   public routes<InputContext extends RequestContext>(): MiddlewareFunction<
     InputContext,
@@ -127,19 +139,25 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
     );
   }
 
-  public merge<AnotherRoutes extends BaseRoutes>(
-    another: Router<AnotherRoutes>
-  ): Router<MergeRoutes<Routes, AnotherRoutes>> {
+  public pack<AnotherRoutes extends BaseRoutes>(
+    another: Router<AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+  ): Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>> {
+    const { prefix } = this;
+
     for (const [method, handlers] of Object.entries(another.handlers)) {
-      this.handlers[method] = (this.handlers[method] ?? []).concat(handlers);
+      this.handlers[method] = (this.handlers[method] ?? []).concat(
+        prefix
+          ? handlers.map(({ path, ...rest }) => ({ ...rest, path: normalize(prefix + path) }))
+          : handlers
+      );
     }
 
     // Intended
     // eslint-disable-next-line no-restricted-syntax
-    return this as Router<MergeRoutes<Routes, AnotherRoutes>>;
+    return this as Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>>;
   }
 
-  public handlerFor<Method extends Lowercase<RequestMethod>>(
+  public findHandler<Method extends Lowercase<RequestMethod>>(
     method: Method,
     path: keyof Routes[Method]
   ) {
@@ -148,7 +166,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
 
   private buildHandler<Method extends Lowercase<RequestMethod>>(
     method: Method
-  ): MethodHandler<Routes, Method> {
+  ): MethodHandler<Routes, Prefix, Method> {
     return (path, guard, handler) => {
       const handlers = this.handlers[method] ?? [];
 
@@ -162,7 +180,12 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
               ...context,
               request: {
                 ...context.request,
-                ...guardInput(path, context.request.url, context.request.body, guard),
+                ...guardInput(
+                  `${this.prefix}${path}` as const,
+                  context.request.url,
+                  context.request.body,
+                  guard
+                ),
               },
             },
             // eslint-disable-next-line no-restricted-syntax
@@ -174,7 +197,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       this.handlers[method] = handlers;
 
       // eslint-disable-next-line no-restricted-syntax
-      return this as ReturnType<MethodHandler<Routes, Method>>;
+      return this as ReturnType<MethodHandler<Routes, Prefix, Method>>;
     };
   }
 }

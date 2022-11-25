@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-import { describe, it } from 'node:test';
 
+import { describe, it } from 'node:test';
 import sinon from 'sinon';
 import { z } from 'zod';
 
@@ -18,7 +18,7 @@ describe('Router', () => {
       .get('///books', { response: z.object({ books: bookGuard.array() }) }, mid1)
       .delete('/books/////:id', { response: bookGuard }, mid2);
     const router2 = new Router()
-      .merge(router1)
+      .pack(router1)
       .post('/books', { body: bookGuard.omit({ id: true }), response: bookGuard }, mid3);
     const [context1, context2, context3, context4] = [
       createRequestContext(RequestMethod.GET, '/books'),
@@ -128,7 +128,7 @@ describe('Router', () => {
     );
   });
 
-  it('should merge the given router to the original router when calling `.merge()`', () => {
+  it('should pack the given router to the original router when calling `.pack()`', () => {
     const router1 = new Router().get(
       '/books',
       {
@@ -142,7 +142,7 @@ describe('Router', () => {
       .get('/books/:id', { response: bookGuard }, async (context, next) => {
         return next({ ...context, json: createBook() });
       })
-      .merge(router1)
+      .pack(router1)
       .post(
         '/books',
         { body: bookGuard.omit({ id: true }), response: bookGuard },
@@ -151,15 +151,15 @@ describe('Router', () => {
         }
       );
 
-    const router3 = router1.merge(router2);
+    const router3 = router1.pack(router2);
 
-    assert.ok(router2.handlerFor('get', '/books'));
-    assert.ok(router2.handlerFor('get', '/books/:id'));
-    assert.ok(router2.handlerFor('post', '/books'));
+    assert.ok(router2.findHandler('get', '/books'));
+    assert.ok(router2.findHandler('get', '/books/:id'));
+    assert.ok(router2.findHandler('post', '/books'));
 
     assert.strictEqual(router1, router3);
-    assert.ok(router3.handlerFor('get', '/books'));
-    assert.ok(router3.handlerFor('get', '/books/:id'));
-    assert.ok(router3.handlerFor('post', '/books'));
+    assert.ok(router3.findHandler('get', '/books'));
+    assert.ok(router3.findHandler('get', '/books/:id'));
+    assert.ok(router3.findHandler('post', '/books'));
   });
 });
