@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
 import { RequestMethod } from '../request.js';
-import { createHttpContext } from '../test-utils/http.js';
+import { createHttpContext } from '../test-utils/request.js';
 import { assertContext } from '../test-utils/middleware.js';
 import { noop } from '../utils.js';
 import withRequest from './with-request.js';

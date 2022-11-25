@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 
 import compose, { ComposeError } from './compose.js';
 import type { BaseContext, MiddlewareFunction } from './middleware.js';
-import { createHttpContext } from './test-utils/http.js';
+import { createHttpContext } from './test-utils/request.js';
 import { noop } from './utils.js';
 
 type Ctx1 = BaseContext & { c1: string };
