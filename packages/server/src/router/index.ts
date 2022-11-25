@@ -1,5 +1,3 @@
-import { normalize } from 'node:path';
-
 import RequestError from '../errors/RequestError.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
@@ -11,13 +9,14 @@ import type {
   BaseRoutes,
   GuardedContext,
   MergeRoutes,
+  NormalizePathname,
   Parser,
   PathGuard,
   RequestGuard,
   RouterHandlerMap,
   RoutesWithPrefix,
 } from './types.js';
-import { guardInput, matchRoute } from './utils.js';
+import { guardInput, matchRoute, normalizePathname } from './utils.js';
 
 export * from './types.js';
 
@@ -32,7 +31,9 @@ export type RouterWithHandler<
 > = Router<
   {
     [method in keyof Routes]: method extends Method
-      ? Routes[method] & { [path in `${Prefix}${Path}`]: PathGuard<Path, Search, Body, Response> }
+      ? Routes[method] & {
+          [path in NormalizePathname<`${Prefix}${Path}`>]: PathGuard<Path, Search, Body, Response>;
+        }
       : Routes[method];
   },
   Prefix
@@ -46,8 +47,10 @@ export type MethodHandler<
   path: Path,
   guard: RequestGuard<Search, Body, Response>,
   handler: MiddlewareFunction<
-    GuardedContext<RequestContext, `${Prefix}${Path}`, Search, Body>,
-    GuardedContext<RequestContext, `${Prefix}${Path}`, Search, Body> & { json?: Response }
+    GuardedContext<RequestContext, NormalizePathname<`${Prefix}${Path}`>, Search, Body>,
+    GuardedContext<RequestContext, NormalizePathname<`${Prefix}${Path}`>, Search, Body> & {
+      json?: Response;
+    }
   >
 ) => RouterWithHandler<Routes, Prefix, Method, Path, Search, Body, Response>;
 
@@ -147,7 +150,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
     for (const [method, handlers] of Object.entries(another.handlers)) {
       this.handlers[method] = (this.handlers[method] ?? []).concat(
         prefix
-          ? handlers.map(({ path, ...rest }) => ({ ...rest, path: normalize(prefix + path) }))
+          ? handlers.map(({ path, ...rest }) => ({
+              ...rest,
+              path: normalizePathname(prefix + path),
+            }))
           : handlers
       );
     }
@@ -172,7 +178,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
       // eslint-disable-next-line @silverhand/fp/no-mutating-methods
       handlers.push({
-        path: normalize(path),
+        path: normalizePathname(path),
         guard,
         run: async (context, next, http) => {
           return handler(
@@ -181,7 +187,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
               request: {
                 ...context.request,
                 ...guardInput(
-                  `${this.prefix}${path}` as const,
+                  normalizePathname(`${this.prefix}${path}`),
                   context.request.url,
                   context.request.body,
                   guard

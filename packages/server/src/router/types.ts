@@ -15,10 +15,25 @@ export type BaseRoutes = {
 };
 /* eslint-enable @typescript-eslint/ban-types */
 
+// <Start> Normalize pathname
+
+type NormalizePath<Path extends string> = Path extends `/${infer A}`
+  ? NormalizePath<A>
+  : Path extends `${infer A}/${infer B}`
+  ? `${A}/${NormalizePath<B>}`
+  : Path;
+
+type TrimEndSlash<Path extends string> = Path extends `${infer A}/` ? A : Path;
+
+// Should we test type `NormalizePathname` and function `normalizePathname()` equality?
+export type NormalizePathname<Path extends string> = `/${TrimEndSlash<NormalizePath<Path>>}`;
+
+// <End>
+
 export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
   [method in keyof BaseRoutes]: {
     [key in keyof Routes[method] as key extends string
-      ? `${Prefix}${key}`
+      ? NormalizePathname<`${Prefix}${key}`>
       : never]: Routes[method][key];
   };
 };

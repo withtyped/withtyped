@@ -129,8 +129,8 @@ describe('Router', () => {
   });
 
   it('should pack the given router to the original router when calling `.pack()`', () => {
-    const router1 = new Router().get(
-      '/books',
+    const router1 = new Router('books').get(
+      '////books///',
       {
         response: z.object({ books: bookGuard.array() }),
       },
@@ -139,12 +139,12 @@ describe('Router', () => {
       }
     );
     const router2 = new Router()
-      .get('/books/:id', { response: bookGuard }, async (context, next) => {
+      .get('///////books////:id////', { response: bookGuard }, async (context, next) => {
         return next({ ...context, json: createBook() });
       })
       .pack(router1)
       .post(
-        '/books',
+        'books',
         { body: bookGuard.omit({ id: true }), response: bookGuard },
         async (context, next) => {
           return next({ ...context, json: createBook() });
@@ -153,13 +153,13 @@ describe('Router', () => {
 
     const router3 = router1.pack(router2);
 
-    assert.ok(router2.findHandler('get', '/books'));
+    assert.ok(router2.findHandler('get', '/books/books'));
     assert.ok(router2.findHandler('get', '/books/:id'));
     assert.ok(router2.findHandler('post', '/books'));
 
     assert.strictEqual(router1, router3);
-    assert.ok(router3.findHandler('get', '/books'));
-    assert.ok(router3.findHandler('get', '/books/:id'));
-    assert.ok(router3.findHandler('post', '/books'));
+    assert.ok(router3.findHandler('get', '/books/books'));
+    assert.ok(router3.findHandler('get', '/books/books/:id'));
+    assert.ok(router3.findHandler('post', '/books/books'));
   });
 });
