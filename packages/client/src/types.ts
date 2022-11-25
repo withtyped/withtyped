@@ -41,18 +41,15 @@ export type ClientConfig = {
   headers?:
     | Record<string, string>
     | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
-  keepAlive: boolean;
 };
 
 export type ClientConfigInit = {
-  /** Base URL to prepend for every request. Only host and pathname will be applied. */
+  /** Base URL to prepend for every request. Only origin and pathname will be applied. */
   baseUrl: string | URL;
   /** Additional headers to append for every request, also accepts a function that returns headers. */
   headers?:
     | Record<string, string>
     | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
-  /** If `Connection: keep-alive` header is appended for every request. Default to `true`. */
-  keepAlive?: boolean;
 };
 
 export { type RequestMethod } from '@withtyped/server/lib/request.js';

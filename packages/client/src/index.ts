@@ -9,7 +9,7 @@ import type {
   ClientConfig,
   ClientConfigInit,
 } from './types.js';
-import { buildSearchString, tryJson } from './utils.js';
+import { buildSearchString, log, normalizePathname, tryJson } from './utils.js';
 
 export default class Client<R extends Router, Routes extends BaseRoutes = RouterRoutes<R>>
   implements RouterClient<Routes>
@@ -34,12 +34,18 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       const { baseUrl, ...rest } = value;
       this.config = Object.freeze({ baseUrl: new URL(baseUrl), keepAlive: true, ...rest });
     }
+
+    log.debug(this.config);
   }
 
   private buildUrl(pathname: string, search?: Record<string, string | string[]>): URL {
     const { baseUrl } = this.config;
+    const url = new URL(normalizePathname(baseUrl.pathname + pathname), baseUrl.origin);
+    // Reassign to search to avoid unexpected `?`
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    url.search = buildSearchString(search);
 
-    return new URL(baseUrl.pathname + pathname + '?' + buildSearchString(search), baseUrl);
+    return url;
   }
 
   private buildPathname(path: string, parameters?: Record<string, string>): string {
@@ -63,13 +69,12 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
   }
 
   private buildHeaders(url: URL, method: Lowercase<RequestMethod>): Record<string, string> {
-    const { keepAlive, headers } = this.config;
+    const { headers } = this.config;
 
     return {
       'content-type': 'application/json; charset=utf-8',
       host: url.host,
       accept: 'application/json',
-      ...(keepAlive && { connection: 'keep-alive' }),
       ...(typeof headers === 'function' ? headers(url, method) : headers),
     };
   }
@@ -92,10 +97,10 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       const pathname = this.buildPathname(path, params);
 
       const url = this.buildUrl(pathname, search);
-      console.log(method.toUpperCase(), url.href);
+      log.debug(method.toUpperCase(), url.href);
 
       const response = await fetch(url, {
-        method,
+        method: method.toUpperCase(),
         headers: this.buildHeaders(url, method),
         body:
           typeof body === 'string' || typeof body === 'undefined' || body === null
