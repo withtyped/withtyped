@@ -17,7 +17,7 @@ export type BaseRoutes = {
 export type Normalized<T> = T extends `${string}//${string}`
   ? never
   : T extends `/${string}`
-  ? T
+  ? TrimEndSlash<T>
   : never;
 
 export type NormalizedPrefix<T> = T extends `${string}:${string}`
@@ -35,7 +35,8 @@ type TrimEndSlash<Path extends string> = Path extends '/'
 export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
   [method in keyof BaseRoutes]: {
     [key in keyof Routes[method] as key extends string
-      ? TrimEndSlash<`${Prefix}${key}`> // Both `Prefix` and `key` are normalized
+      ? // Both `Prefix` and `key` are normalized, but `key` may be a single `/` for the root route (need to trim)
+        TrimEndSlash<`${Prefix}${key}`>
       : never]: Routes[method][key];
   };
 };
