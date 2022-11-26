@@ -26,13 +26,18 @@ export const writeContextToResponse = async (
   // Send JSON body
   if (json) {
     const write = promisify((chunk: unknown, callback: ErrorCallback) => {
-      if (typeof chunk === 'string' || chunk instanceof Buffer || chunk instanceof Uint8Array) {
+      if (chunk instanceof Buffer || chunk instanceof Uint8Array) {
         return response.write(chunk, callback);
       }
-      response.write(JSON.stringify(chunk), callback);
+
+      if (typeof chunk === 'string') {
+        return response.write(chunk, 'utf8', callback);
+      }
+
+      response.write(JSON.stringify(chunk), 'utf8', callback);
     });
 
-    response.setHeader('Content-Type', 'application/json');
+    response.setHeader('content-type', 'application/json');
     await write(json);
   }
 };

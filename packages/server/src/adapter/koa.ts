@@ -2,6 +2,7 @@ import type { Middleware } from 'koa';
 
 import compose from '../compose.js';
 import type { MiddlewareFunction } from '../middleware.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import withRequest from '../middleware/with-request.js';
 import { writeContextToResponse } from '../response.js';
 
@@ -12,7 +13,9 @@ import { writeContextToResponse } from '../response.js';
  * @param middleware The withtyped middleware function to transform.
  * @returns A KoaJS middleware function that chains `withRequest()` and `middleware` under the hood.
  */
-export default function koaAdapter(middleware: MiddlewareFunction): Middleware {
+export default function koaAdapter<OutputContext extends RequestContext>(
+  middleware: MiddlewareFunction<RequestContext, OutputContext>
+): Middleware {
   return async ({ req: request, res: response }, next) => {
     await compose(withRequest()).and(middleware)(
       {},
