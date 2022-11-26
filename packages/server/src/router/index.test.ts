@@ -165,4 +165,15 @@ describe('Router', () => {
     // @ts-expect-error for testing
     assert.ok(!router1.findHandler('get', '/books/books/:id'));
   });
+
+  it('should throw when init router with non-normalized prefix', () => {
+    // @ts-expect-error for testing
+    assert.throws(() => new Router('//'), TypeError);
+    // @ts-expect-error for testing
+    assert.throws(() => new Router('/'), TypeError);
+    // @ts-expect-error for testing
+    assert.throws(() => new Router('/foo/:asd'), TypeError);
+    // @ts-expect-error for testing
+    assert.throws(() => new Router('/foo/bar/'), TypeError);
+  });
 });

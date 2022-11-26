@@ -92,7 +92,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
   // eslint-disable-next-line @typescript-eslint/unified-signatures
   constructor(prefix: NormalizedPrefix<Prefix>);
   constructor(prefix?: NormalizedPrefix<Prefix>) {
-    // TODO: guard prefix
+    if (prefix && (prefix.endsWith('/') || prefix.includes('//') || prefix.includes(':'))) {
+      throw new TypeError('Router prefix must be normalized with no parameter (colon)');
+    }
+
     this.prefix = prefix ?? '';
   }
 
