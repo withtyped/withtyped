@@ -1,6 +1,8 @@
 import { tryThat } from '../utils.js';
 import type { RouteLike } from './route/index.js';
-import { normalizePathname } from './route/utils.js';
+
+export const normalizePathname = (pathname: string) =>
+  '/' + pathname.split('/').filter(Boolean).join('/');
 
 /**
  * Test if the pathname of the given URL matches the handler.

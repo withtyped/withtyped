@@ -1,4 +1,4 @@
-import type { Guarded, NormalizePathname, Params, RequestGuard } from '../types.js';
+import type { Guarded, Params, RequestGuard } from '../types.js';
 
 // Consider build params during matching routes to improve efficiency
 /**
@@ -80,8 +80,3 @@ export const guardInput = <Path extends string, Search, Body>(
     search: guard.search?.parse(searchParamsToObject(url.searchParams)),
     body: guard.body?.parse(body),
   } as Guarded<Path, Search, Body>);
-
-export const normalizePathname = <T extends string>(pathname: T): NormalizePathname<T> =>
-  // By design. Should we test type `NormalizePathname` and function `normalizePathname()` equality?
-  // eslint-disable-next-line no-restricted-syntax
-  ('/' + pathname.split('/').filter(Boolean).join('/')) as NormalizePathname<T>;
