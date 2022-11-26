@@ -1,4 +1,3 @@
-import type { HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
@@ -17,13 +16,29 @@ export type BaseRoutes = {
 
 // <Start> Normalize pathname
 
+export type Normalized<T> = T extends `${string}//${string}`
+  ? never
+  : T extends `/${string}`
+  ? T
+  : never;
+
+export type NormalizedPrefix<T> = T extends `${string}:${string}`
+  ? never
+  : T extends `${string}/`
+  ? never
+  : Normalized<T>;
+
 type NormalizePath<Path extends string> = Path extends `/${infer A}`
   ? NormalizePath<A>
   : Path extends `${infer A}/${infer B}`
   ? `${A}/${NormalizePath<B>}`
   : Path;
 
-type TrimEndSlash<Path extends string> = Path extends `${infer A}/` ? A : Path;
+type TrimEndSlash<Path extends string> = Path extends '/'
+  ? Path
+  : Path extends `${infer A}/`
+  ? A
+  : Path;
 
 // Should we test type `NormalizePathname` and function `normalizePathname()` equality?
 export type NormalizePathname<Path extends string> = `/${TrimEndSlash<NormalizePath<Path>>}`;
@@ -33,7 +48,7 @@ export type NormalizePathname<Path extends string> = `/${TrimEndSlash<NormalizeP
 export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
   [method in keyof BaseRoutes]: {
     [key in keyof Routes[method] as key extends string
-      ? NormalizePathname<`${Prefix}${key}`>
+      ? TrimEndSlash<`${Prefix}${key}`> // Both `Prefix` and `key` are normalized
       : never]: Routes[method][key];
   };
 };
@@ -93,17 +108,5 @@ export type GuardedContext<
   Search,
   Body
 > = MergeRequestContext<InputContext, Guarded<Path, Search, Body>>;
-
-export type RouteHandler = {
-  path: string;
-  guard?: RequestGuard<unknown, unknown, unknown>;
-  run: <InputContext extends RequestContext, OutputContext extends RequestContext = InputContext>(
-    context: InputContext,
-    next: NextFunction<OutputContext>,
-    http: HttpContext
-  ) => Promise<void>;
-};
-
-export type RouterHandlerMap = Record<string, RouteHandler[]>;
 
 export type StringLiteral<T> = T extends string ? (string extends T ? never : T) : never;

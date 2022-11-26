@@ -15,8 +15,8 @@ describe('Router', () => {
   it('should provide a middleware function to call the provided middleware function with request context', async () => {
     const [mid1, mid2, mid3] = [sinon.fake(), sinon.fake(), sinon.fake()];
     const router1 = new Router()
-      .get('///books', { response: z.object({ books: bookGuard.array() }) }, mid1)
-      .delete('/books/////:id', { response: bookGuard }, mid2);
+      .get('/books', { response: z.object({ books: bookGuard.array() }) }, mid1)
+      .delete('/books/:id', { response: bookGuard }, mid2);
     const router2 = new Router()
       .pack(router1)
       .post('/books', { body: bookGuard.omit({ id: true }), response: bookGuard }, mid3);
@@ -129,8 +129,8 @@ describe('Router', () => {
   });
 
   it('should pack the given router to the original router when calling `.pack()`', () => {
-    const router1 = new Router('books').get(
-      '////books///',
+    const router1 = new Router('/books').get(
+      '/books',
       {
         response: z.object({ books: bookGuard.array() }),
       },
@@ -138,13 +138,13 @@ describe('Router', () => {
         return next({ ...context, json: { books: [] } });
       }
     );
-    const router2 = new Router()
-      .get('///////books////:id////', { response: bookGuard }, async (context, next) => {
+    const router2 = new Router('/books')
+      .get('/books/:id', { response: bookGuard }, async (context, next) => {
         return next({ ...context, json: createBook() });
       })
       .pack(router1)
       .post(
-        'books',
+        '/books',
         { body: bookGuard.omit({ id: true }), response: bookGuard },
         async (context, next) => {
           return next({ ...context, json: createBook() });
@@ -153,13 +153,16 @@ describe('Router', () => {
 
     const router3 = router1.pack(router2);
 
-    assert.ok(router2.findHandler('get', '/books/books'));
-    assert.ok(router2.findHandler('get', '/books/:id'));
-    assert.ok(router2.findHandler('post', '/books'));
+    assert.ok(router2.findHandler('get', '/books/books/books'));
+    assert.ok(router2.findHandler('get', '/books/books/:id'));
+    assert.ok(router2.findHandler('post', '/books/books'));
 
     assert.strictEqual(router1, router3);
-    assert.ok(router3.findHandler('get', '/books/books'));
-    assert.ok(router3.findHandler('get', '/books/books/:id'));
-    assert.ok(router3.findHandler('post', '/books/books'));
+    assert.ok(router1.findHandler('get', '/books/books'));
+    assert.ok(router1.findHandler('post', '/books/books/books'));
+    assert.ok(router1.findHandler('get', '/books/books/books/:id'));
+    assert.ok(router1.findHandler('get', '/books/books/books/books'));
+    // @ts-expect-error for testing
+    assert.ok(!router1.findHandler('get', '/books/books/:id'));
   });
 });
