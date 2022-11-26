@@ -7,6 +7,19 @@ import type { BaseContext } from './middleware.js';
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ErrorCallback = (error?: Error | null) => void;
 
+export const getWriteResponse = (response: ServerResponse) =>
+  promisify((chunk: unknown, callback: ErrorCallback) => {
+    if (chunk instanceof Buffer || chunk instanceof Uint8Array) {
+      return response.write(chunk, callback);
+    }
+
+    if (typeof chunk === 'string') {
+      return response.write(chunk, 'utf8', callback);
+    }
+
+    response.write(JSON.stringify(chunk), 'utf8', callback);
+  });
+
 export const writeContextToResponse = async (
   response: ServerResponse,
   { status, headers, json }: BaseContext
@@ -25,19 +38,7 @@ export const writeContextToResponse = async (
 
   // Send JSON body
   if (json) {
-    const write = promisify((chunk: unknown, callback: ErrorCallback) => {
-      if (chunk instanceof Buffer || chunk instanceof Uint8Array) {
-        return response.write(chunk, callback);
-      }
-
-      if (typeof chunk === 'string') {
-        return response.write(chunk, 'utf8', callback);
-      }
-
-      response.write(JSON.stringify(chunk), 'utf8', callback);
-    });
-
     response.setHeader('content-type', 'application/json');
-    await write(json);
+    await getWriteResponse(response)(json);
   }
 };

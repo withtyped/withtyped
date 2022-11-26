@@ -4,7 +4,8 @@ import { promisify } from 'node:util';
 import type { Composer } from './compose.js';
 import compose from './compose.js';
 import type { BaseContext } from './middleware.js';
-import { writeContextToResponse } from './response.js';
+import { getWriteResponse, writeContextToResponse } from './response.js';
+import { color, log } from './utils.js';
 
 export type CreateServer<
   T extends unknown[],
@@ -21,14 +22,41 @@ export default function createServer<T extends unknown[], OutputContext extends 
 }: CreateServer<T, BaseContext, OutputContext>) {
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
-    await composed({}, async (context) => writeContextToResponse(response, context), {
-      request,
-      response,
-    });
+    // Start log
+    console.log(color(' in', 'blue'), color(request.method ?? 'N/A', 'bright'), request.url);
+    const startTime = Date.now();
+
+    // Run the middleware chain
+    try {
+      await composed({}, async (context) => writeContextToResponse(response, context), {
+        request,
+        response,
+      });
+    } catch (error: unknown) {
+      // Global error handling
+      log.debug(error);
+
+      if (!response.headersSent) {
+        // eslint-disable-next-line @silverhand/fp/no-mutation
+        response.statusCode = 500;
+        response.setHeader('content-type', 'application/json');
+      }
+
+      await getWriteResponse(response)({ message: 'Internal server error.' });
+    }
 
     // End
     const end = promisify((callback: ErrorCallback) => response.end(callback));
     await end();
+
+    // End log
+    console.log(
+      color('out', 'magenta'),
+      color(request.method ?? 'N/A', 'bright'),
+      request.url,
+      response.statusCode,
+      `${Date.now() - startTime}ms`
+    );
   });
 
   return {

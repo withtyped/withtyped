@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import type { ParameterizedContext } from 'koa';
-import { describe, it } from 'node:test';
 import sinon from 'sinon';
 
 import { RequestMethod } from '../request.js';
