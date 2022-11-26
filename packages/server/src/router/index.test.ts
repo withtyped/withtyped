@@ -153,17 +153,17 @@ describe('Router', () => {
 
     const router3 = router1.pack(router2);
 
-    assert.ok(router2.findHandler('get', '/books/books/books'));
-    assert.ok(router2.findHandler('get', '/books/books/:id'));
-    assert.ok(router2.findHandler('post', '/books/books'));
+    assert.ok(router2.findRoute('get', '/books/books/books'));
+    assert.ok(router2.findRoute('get', '/books/books/:id'));
+    assert.ok(router2.findRoute('post', '/books/books'));
 
     assert.strictEqual(router1, router3);
-    assert.ok(router1.findHandler('get', '/books/books'));
-    assert.ok(router1.findHandler('post', '/books/books/books'));
-    assert.ok(router1.findHandler('get', '/books/books/books/:id'));
-    assert.ok(router1.findHandler('get', '/books/books/books/books'));
+    assert.ok(router1.findRoute('get', '/books/books'));
+    assert.ok(router1.findRoute('post', '/books/books/books'));
+    assert.ok(router1.findRoute('get', '/books/books/books/:id'));
+    assert.ok(router1.findRoute('get', '/books/books/books/books'));
     // @ts-expect-error for testing
-    assert.ok(!router1.findHandler('get', '/books/books/:id'));
+    assert.ok(!router1.findRoute('get', '/books/books/:id'));
   });
 
   it('should throw when init router with non-normalized prefix', () => {

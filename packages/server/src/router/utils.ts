@@ -5,15 +5,13 @@ export const normalizePathname = (pathname: string) =>
   '/' + pathname.split('/').filter(Boolean).join('/');
 
 /**
- * Test if the pathname of the given URL matches the handler.
+ * Test if the pathname of the given URL matches the route.
  *
- * @returns `true` if the pathname matches the handler.
+ * @returns `true` if the pathname matches the route.
  */
 export const matchRoute = (route: RouteLike, url: URL): boolean => {
   const urlParts = normalizePathname(url.pathname).split('/').filter(Boolean);
-  const matchParts = normalizePathname(route.prefix + route.path)
-    .split('/')
-    .filter(Boolean);
+  const matchParts = normalizePathname(route.fullPath).split('/').filter(Boolean);
 
   if (urlParts.length !== matchParts.length) {
     return false;

@@ -11,6 +11,7 @@ export abstract class RouteLike<
 > {
   abstract prefix: string;
   abstract path: Path;
+  abstract readonly fullPath: string;
   abstract runnable: MiddlewareFunction<RequestContext, OutputContext>;
   abstract guard: RequestGuard<Search, Body, unknown>;
   abstract clone(newPrefix?: string): RouteLike<Path, Search, Body, OutputContext>;
@@ -32,6 +33,10 @@ export default class Route<
     >
   ) {
     super();
+  }
+
+  public get fullPath() {
+    return this.prefix + this.path;
   }
 
   public get runnable(): <InputContext extends RequestContext>(

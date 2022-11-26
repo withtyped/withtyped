@@ -173,7 +173,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
     return this as Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix>;
   }
 
-  public findHandler<Method extends Lowercase<RequestMethod>>(
+  public findRoute<Method extends Lowercase<RequestMethod>>(
     method: Method,
     path: keyof Routes[Method]
   ) {
