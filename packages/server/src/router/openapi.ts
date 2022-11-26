@@ -1,5 +1,6 @@
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
-import type { Parser, RouterHandlerMap } from './types.js';
+import type { MethodRoutesMap } from './index.js';
+import type { Parser } from './types.js';
 
 const contentJson = 'application/json';
 const defaultInfo: OpenAPIV3.InfoObject = { title: 'API reference', version: '0.1.0' };
@@ -21,7 +22,7 @@ const parseParameters = (path: string): OpenAPIV3.ParameterObject[] =>
     }));
 
 export const buildOpenApiJson = (
-  handlerMap: RouterHandlerMap,
+  routesMap: MethodRoutesMap,
   parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
   parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
   info = defaultInfo
@@ -32,15 +33,15 @@ export const buildOpenApiJson = (
 
   const pathMap = new Map<string, MethodMap>();
 
-  for (const [method, handlers] of Object.entries(handlerMap)) {
-    for (const { path, guard } of handlers) {
+  for (const [method, routes] of Object.entries(routesMap)) {
+    for (const { fullPath, path, guard } of routes) {
       const operationObject: OpenAPIV3.OperationObject = {
-        parameters: [...parseParameters(path), ...parseSearch(guard?.search)],
-        requestBody: guard?.body && {
+        parameters: [...parseParameters(path), ...parseSearch(guard.search)],
+        requestBody: guard.body && {
           required: true,
           content: { [contentJson]: { schema: parse(guard.body) } },
         },
-        responses: guard?.response
+        responses: guard.response
           ? {
               '200': {
                 description: 'OK',
@@ -50,8 +51,8 @@ export const buildOpenApiJson = (
           : defaultResponses,
       };
 
-      pathMap.set(path, {
-        ...pathMap.get(path),
+      pathMap.set(fullPath, {
+        ...pathMap.get(fullPath),
         [method]: operationObject,
       });
     }

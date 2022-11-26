@@ -19,3 +19,9 @@ export const createBook = (): Book => ({
   ],
   price: faker.datatype.number(100),
 });
+
+export const createBookWithoutId = (): Omit<Book, 'id'> => {
+  const { id, ...book } = createBook();
+
+  return book;
+};

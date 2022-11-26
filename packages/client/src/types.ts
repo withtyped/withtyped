@@ -6,6 +6,12 @@ import type {
   GuardedResponse,
 } from '@withtyped/server';
 
+export type ClientPayload = {
+  params?: Record<string, string>;
+  search?: Record<string, string | string[]>;
+  body?: unknown;
+};
+
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
   infer Routes
 >
@@ -28,6 +34,22 @@ export type ClientRequestHandler<MethodRoutes> = {
 
 export type RouterClient<Routes extends BaseRoutes> = {
   [key in Lowercase<RequestMethod>]: ClientRequestHandler<Routes[key]>;
+};
+
+export type ClientConfig = {
+  baseUrl: URL;
+  headers?:
+    | Record<string, string>
+    | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
+};
+
+export type ClientConfigInit = {
+  /** Base URL to prepend for every request. Only origin and pathname will be applied. */
+  baseUrl: string | URL;
+  /** Additional headers to append for every request, also accepts a function that returns headers. */
+  headers?:
+    | Record<string, string>
+    | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
 };
 
 export { type RequestMethod } from '@withtyped/server/lib/request.js';

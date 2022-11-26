@@ -1,5 +1,3 @@
-import { normalize } from 'node:path';
-
 import RequestError from '../errors/RequestError.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
@@ -7,102 +5,120 @@ import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
 import { log } from '../utils.js';
 import { buildOpenApiJson } from './openapi.js';
+import type { RouteLike } from './route/index.js';
+import Route from './route/index.js';
 import type {
   BaseRoutes,
   GuardedContext,
   MergeRoutes,
+  Normalized,
+  NormalizedPrefix,
   Parser,
   PathGuard,
   RequestGuard,
-  RouteHandler,
-  RouterHandlerMap,
+  RoutesWithPrefix,
 } from './types.js';
-import { guardInput, matchRoute } from './utils.js';
+import { matchRoute } from './utils.js';
 
 export * from './types.js';
 
-export type RouterWithHandler<
+export type MethodRoutesMap = Record<string, RouteLike[]>;
+
+export type RouterWithRoute<
   Routes extends BaseRoutes,
+  Prefix extends string,
   Method extends Lowercase<RequestMethod>,
   Path extends string,
   Search,
   Body,
   Response
-> = Router<{
-  [method in keyof Routes]: method extends Method
-    ? Routes[method] & { [path in Path]: PathGuard<Path, Search, Body, Response> }
-    : Routes[method];
-}>;
+> = Router<
+  {
+    [method in keyof Routes]: method extends Method
+      ? Routes[method] & {
+          [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<Path, Search, Body, Response>;
+        }
+      : Routes[method];
+  },
+  Prefix
+>;
 
-export type MethodHandler<Routes extends BaseRoutes, Method extends Lowercase<RequestMethod>> = <
-  Path extends string,
-  Search,
-  Body,
-  Response
->(
-  path: Path,
+export type BuildRoute<
+  Routes extends BaseRoutes,
+  Prefix extends string,
+  Method extends Lowercase<RequestMethod>
+> = <Path extends string, Search, Body, Response>(
+  path: Normalized<Path>,
   guard: RequestGuard<Search, Body, Response>,
-  handler: MiddlewareFunction<
-    GuardedContext<RequestContext, Path, Search, Body>,
-    GuardedContext<RequestContext, Path, Search, Body> & { json?: Response }
+  run: MiddlewareFunction<
+    GuardedContext<RequestContext, Normalized<Path>, Search, Body>,
+    GuardedContext<RequestContext, Normalized<Path>, Search, Body> & {
+      json?: Response;
+    }
   >
-) => RouterWithHandler<Routes, Method, Path, Search, Body, Response>;
+) => RouterWithRoute<Routes, Prefix, Method, Normalized<Path>, Search, Body, Response>;
 
-type BaseRouter<Routes extends BaseRoutes> = {
-  [key in Lowercase<RequestMethod>]: MethodHandler<Routes, key>;
+type BaseRouter<Routes extends BaseRoutes, Prefix extends string> = {
+  [key in Lowercase<RequestMethod>]: BuildRoute<Routes, Prefix, key>;
 };
 
-export default class Router<Routes extends BaseRoutes = BaseRoutes> implements BaseRouter<Routes> {
-  get: MethodHandler<Routes, 'get'>;
-  post: MethodHandler<Routes, 'post'>;
-  put: MethodHandler<Routes, 'put'>;
-  patch: MethodHandler<Routes, 'patch'>;
-  delete: MethodHandler<Routes, 'delete'>;
-  copy: MethodHandler<Routes, 'copy'>;
-  head: MethodHandler<Routes, 'head'>;
-  options: MethodHandler<Routes, 'options'>;
+export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix extends string = ''>
+  implements BaseRouter<Routes, Prefix>
+{
+  // Use the dumb way to init since it's easier to make the compiler happy
+  get = this.buildRoute('get');
+  post = this.buildRoute('post');
+  put = this.buildRoute('put');
+  patch = this.buildRoute('patch');
+  delete = this.buildRoute('delete');
+  copy = this.buildRoute('copy');
+  head = this.buildRoute('head');
+  options = this.buildRoute('options');
 
-  protected readonly handlers: RouterHandlerMap;
+  public readonly prefix: string;
+  protected readonly routesMap: MethodRoutesMap = {};
 
-  constructor() {
-    // Use the dumb way to init since:
-    // 1. Easier to make the compiler happy
-    // 2. `this.handlers` needs to be initialized before handler methods
+  /**
+   * Create a router instance.
+   */
+  constructor();
+  /**
+   * Create a router instance with a normalized prefix:
+   * - Start with `/`, but not end with `/`
+   * - Have NO continuous `/`, e.g. `/foo//bar`
+   * - Have NO path parameter, e.g. `/:foo`
+   */
+  // By design. To provider a better hint.
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  constructor(prefix: NormalizedPrefix<Prefix>);
+  constructor(prefix?: NormalizedPrefix<Prefix>) {
+    if (prefix && (prefix.endsWith('/') || prefix.includes('//') || prefix.includes(':'))) {
+      throw new TypeError('Router prefix must be normalized with no parameter (colon)');
+    }
 
-    this.handlers = {};
-    this.get = this.buildHandler('get');
-    this.post = this.buildHandler('post');
-    this.put = this.buildHandler('put');
-    this.patch = this.buildHandler('patch');
-    this.delete = this.buildHandler('delete');
-    this.copy = this.buildHandler('copy');
-    this.head = this.buildHandler('head');
-    this.options = this.buildHandler('options');
+    this.prefix = prefix ?? '';
   }
 
-  public routes<InputContext extends RequestContext>(): MiddlewareFunction<
-    InputContext,
-    InputContext
-  > {
+  public routes(): MiddlewareFunction<RequestContext> {
     return async (originalContext, next, http) => {
       const { request } = originalContext;
 
       // TODO: Consider best match instead of first match
-      const handler = this.handlers[request.method?.toLowerCase() ?? '']?.find((handler) =>
-        matchRoute(handler, request.url)
+      const route = this.routesMap[request.method?.toLowerCase() ?? '']?.find((route) =>
+        matchRoute(route, request.url)
       );
 
-      if (!handler) {
+      if (!route) {
         return next(originalContext);
       }
 
-      log.debug('matched handler', handler.path);
+      log.debug('matched route', this.prefix, route.path);
 
       try {
-        await handler.run(
+        await route.runnable(
           originalContext,
           async (context) => {
-            const responseGuard = handler.guard?.response;
+            const responseGuard = route.guard.response;
 
             if (responseGuard) {
               responseGuard.parse(context.json);
@@ -137,58 +153,44 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes> implements B
       async (context, next) => {
         return next({
           ...context,
-          json: buildOpenApiJson(this.handlers, parseSearch, parse, info),
+          json: buildOpenApiJson(this.routesMap, parseSearch, parse, info),
         });
       }
     );
   }
 
-  public merge<AnotherRoutes extends BaseRoutes>(another: Router<AnotherRoutes>) {
-    for (const [method, handlers] of Object.entries(another.handlers)) {
-      this.handlers[method] = (this.handlers[method] ?? []).concat(handlers);
+  public pack<AnotherRoutes extends BaseRoutes>(
+    another: Router<AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+  ): Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix> {
+    for (const [method, routes] of Object.entries(another.routesMap)) {
+      this.routesMap[method] = (this.routesMap[method] ?? []).concat(
+        routes.map((instance) => instance.clone(this.prefix + instance.prefix))
+      );
     }
 
     // Intended
     // eslint-disable-next-line no-restricted-syntax
-    return this as Router<MergeRoutes<Routes, AnotherRoutes>>;
+    return this as Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix>;
   }
 
-  public handlerFor<Method extends Lowercase<RequestMethod>>(
+  public findRoute<Method extends Lowercase<RequestMethod>>(
     method: Method,
     path: keyof Routes[Method]
   ) {
-    return this.handlers[method]?.find(({ path: handlerPath }) => handlerPath === path);
+    const url = new URL(String(path), 'https://fake-url');
+
+    return this.routesMap[method]?.find((route) => matchRoute(route, url));
   }
 
-  private buildHandler<Method extends Lowercase<RequestMethod>>(
+  private buildRoute<Method extends Lowercase<RequestMethod>>(
     method: Method
-  ): MethodHandler<Routes, Method> {
-    const handlers: RouteHandler[] = [];
-    this.handlers[method] = handlers;
+  ): BuildRoute<Routes, Prefix, Method> {
+    return (path, guard, run) => {
+      this.routesMap[method] = (this.routesMap[method] ?? []).concat(
+        new Route(this.prefix, path, guard, run)
+      );
 
-    return (path, guard, handler) => {
-      // eslint-disable-next-line @silverhand/fp/no-mutating-methods
-      handlers.push({
-        path: normalize(path),
-        guard,
-        run: async (context, next, http) => {
-          return handler(
-            {
-              ...context,
-              request: {
-                ...context.request,
-                ...guardInput(path, context.request.url, context.request.body, guard),
-              },
-            },
-            // eslint-disable-next-line no-restricted-syntax
-            next as Parameters<typeof handler>[1],
-            http
-          );
-        },
-      });
-
-      // eslint-disable-next-line no-restricted-syntax
-      return this as ReturnType<MethodHandler<Routes, Method>>;
+      return this;
     };
   }
 }

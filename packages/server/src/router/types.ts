@@ -1,11 +1,9 @@
-import type { HttpContext, NextFunction } from '../middleware.js';
 import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
 
 export type MergeRoutes<A, B> = {
   [key in keyof (A | B)]: key extends keyof B ? A[key] & B[key] : A[key];
 };
-
 export type Parser<T> = {
   parse: (data: unknown) => T;
 };
@@ -15,6 +13,33 @@ export type BaseRoutes = {
   [key in Lowercase<RequestMethod>]: {};
 };
 /* eslint-enable @typescript-eslint/ban-types */
+
+export type Normalized<T> = T extends `${string}//${string}`
+  ? never
+  : T extends `/${string}`
+  ? TrimEndSlash<T>
+  : never;
+
+export type NormalizedPrefix<T> = T extends `${string}:${string}`
+  ? never
+  : T extends `${string}/`
+  ? never
+  : Normalized<T>;
+
+type TrimEndSlash<Path extends string> = Path extends '/'
+  ? Path
+  : Path extends `${infer A}/`
+  ? A
+  : Path;
+
+export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
+  [method in keyof BaseRoutes]: {
+    [key in keyof Routes[method] as key extends string
+      ? // Both `Prefix` and `key` are normalized, but `key` may be a single `/` for the root route (need to trim)
+        TrimEndSlash<`${Prefix}${key}`>
+      : never]: Routes[method][key];
+  };
+};
 
 export type IsParameter<Part> = Part extends `:${infer Name}` ? Name : never;
 
@@ -71,17 +96,5 @@ export type GuardedContext<
   Search,
   Body
 > = MergeRequestContext<InputContext, Guarded<Path, Search, Body>>;
-
-export type RouteHandler = {
-  path: string;
-  guard?: RequestGuard<unknown, unknown, unknown>;
-  run: <InputContext extends RequestContext, OutputContext extends RequestContext = InputContext>(
-    context: InputContext,
-    next: NextFunction<OutputContext>,
-    http: HttpContext
-  ) => Promise<void>;
-};
-
-export type RouterHandlerMap = Record<string, RouteHandler[]>;
 
 export type StringLiteral<T> = T extends string ? (string extends T ? never : T) : never;
