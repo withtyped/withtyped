@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-
 import { describe, it } from 'node:test';
+
 import sinon from 'sinon';
 import { z } from 'zod';
 

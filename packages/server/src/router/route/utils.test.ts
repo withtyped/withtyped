@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-
 import { describe, it } from 'node:test';
+
 import { z } from 'zod';
 
 import { guardInput, parsePathParams, searchParamsToObject } from './utils.js';
