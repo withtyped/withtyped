@@ -3,6 +3,7 @@ import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { RequestMethod } from '../request.js';
+import type { Parser } from '../types.js';
 import { log } from '../utils.js';
 import { buildOpenApiJson } from './openapi.js';
 import type { RouteLike } from './route/index.js';
@@ -13,7 +14,6 @@ import type {
   MergeRoutes,
   Normalized,
   NormalizedPrefix,
-  Parser,
   PathGuard,
   RequestGuard,
   RoutesWithPrefix,

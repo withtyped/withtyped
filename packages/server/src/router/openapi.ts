@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
+import type { Parser } from '../types.js';
 import type { MethodRoutesMap } from './index.js';
-import type { Parser } from './types.js';
 
 const contentJson = 'application/json';
 const defaultInfo: OpenAPIV3.InfoObject = { title: 'API reference', version: '0.1.0' };

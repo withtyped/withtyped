@@ -1,11 +1,15 @@
 import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
 import type { RequestMethod } from '../request.js';
+import type { Parser } from '../types.js';
 
 export type MergeRoutes<A, B> = {
-  [key in keyof (A | B)]: key extends keyof B ? A[key] & B[key] : A[key];
-};
-export type Parser<T> = {
-  parse: (data: unknown) => T;
+  [key in keyof (A & B)]: key extends keyof (A | B)
+    ? A[key] & B[key]
+    : key extends keyof B
+    ? B[key]
+    : key extends keyof A
+    ? A[key]
+    : never;
 };
 
 /* eslint-disable @typescript-eslint/ban-types */
