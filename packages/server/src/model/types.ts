@@ -1,7 +1,16 @@
-import type { Json } from '../types.js';
+import type { JsonArray, JsonObject } from '../types.js';
 
 export type PrimitiveType = 'string' | 'number' | 'boolean' | 'json';
 
+export type PrimitiveTypeMap = {
+  string: string;
+  number: number;
+  boolean: boolean;
+  json: JsonObject | JsonArray;
+};
+// Should work in TS 4.9, wait for VSCode support: satisfies Record<PrimitiveType, unknown>
+
+// This section should match `findType()` in `utils.ts`
 export type NumberType =
   | `${string}int${string}`
   | `${string}serial`
@@ -10,7 +19,9 @@ export type NumberType =
   | 'real'
   | `timestamp${string}`;
 
-export type StringType = `varchar(${string})` | 'text';
+export type StringType = `varchar${string}` | 'text';
+
+export type BooleanType = `bool${string}`;
 
 export type JsonType = 'json' | 'jsonb';
 
@@ -19,7 +30,7 @@ export type DataType<T extends string> = T extends NumberType
   : T extends StringType
   ? string
   : T extends JsonType
-  ? Json
+  ? JsonObject | JsonArray
   : never;
 
 // TODO: Need clear docs for the transpilation

@@ -1,7 +1,8 @@
+import assert from 'node:assert';
+
 import { describe, it } from 'node:test';
 import { z } from 'zod';
 
-import type { Infer } from './index.js';
 import Model from './index.js';
 
 describe('Model class', () => {
@@ -11,7 +12,7 @@ describe('Model class', () => {
       CREATE table forms ( 
         id VARCHAR(32) not null,
         remote_address varchar(128),
-        headers jsonb,
+        headers jsonb not null,
         data jsonb,
         num bigint array,
         test decimal not null array default([]),
@@ -19,7 +20,24 @@ describe('Model class', () => {
       );
     `
     ).extend('data', z.object({ foo: z.string(), bar: z.number() }));
+    const baseData = {
+      id: 'foo',
+      headers: {},
+      data: {},
+      test: [456, 789],
+      created_at: 123,
+    };
 
-    type Form = Infer<typeof forms>;
+    assert.deepStrictEqual(forms.parse(baseData), {
+      id: 'foo',
+      remoteAddress: null,
+      headers: {},
+      data: {},
+      num: null,
+      test: [456, 789],
+      createdAt: 123,
+    });
+    assert.throws(() => forms.parse({ ...baseData, remote_address: 123 }), TypeError);
+    assert.throws(() => forms.parse({ ...baseData, headers: undefined }), TypeError);
   });
 });
