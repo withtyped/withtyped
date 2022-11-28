@@ -92,7 +92,11 @@ export type RawParserConfig = {
   hasDefault: boolean;
 };
 
+export type TableName<Raw extends string> =
+  Lowercase<Raw> extends `${string}create table ${infer Name}(${string}` ? Normalize<Name> : never;
 export type Entity<Raw extends string> = RawModel<SplitRawColumns<Normalize<CreateTableBody<Raw>>>>;
 export type CreateEntity<Raw extends string> = RawCreateModel<
   SplitRawColumns<Normalize<CreateTableBody<Raw>>>
 >;
+
+export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;

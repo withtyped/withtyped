@@ -1,3 +1,5 @@
+import type { Parser } from './types.js';
+
 export const colors = Object.freeze({
   reset: '\u001B[0m',
   bright: '\u001B[1m',
@@ -34,3 +36,5 @@ export const log: Log = {
     }
   },
 };
+
+export const createParser = <T>(parse: (data: unknown) => T): Parser<T> => ({ parse });

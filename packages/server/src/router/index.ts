@@ -34,7 +34,7 @@ export type RouterWithRoute<
   Response
 > = Router<
   {
-    [method in keyof Routes]: method extends Method
+    [method in Lowercase<RequestMethod>]: method extends Method
       ? Routes[method] & {
           [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<Path, Search, Body, Response>;
         }
@@ -61,6 +61,12 @@ export type BuildRoute<
 type BaseRouter<Routes extends BaseRoutes, Prefix extends string> = {
   [key in Lowercase<RequestMethod>]: BuildRoute<Routes, Prefix, key>;
 };
+
+export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
+  infer Routes
+>
+  ? Routes
+  : never;
 
 export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix extends string = ''>
   implements BaseRouter<Routes, Prefix>
@@ -190,7 +196,8 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
         new Route(this.prefix, path, guard, run)
       );
 
-      return this;
+      // eslint-disable-next-line no-restricted-syntax
+      return this as ReturnType<ReturnType<typeof this.buildRoute<Method>>>;
     };
   }
 }

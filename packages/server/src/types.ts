@@ -18,3 +18,5 @@ export type Merge<A, B> = {
 export type Parser<T> = {
   parse: (data: unknown) => T;
 };
+
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;

@@ -20,6 +20,7 @@ describe('Model class', () => {
       );
     `
     ).extend('data', z.object({ foo: z.string(), bar: z.number() }));
+
     const baseData = {
       id: 'foo',
       headers: {},
