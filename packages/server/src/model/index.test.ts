@@ -9,11 +9,12 @@ describe('Model class', () => {
     const forms = Model.create(
       /* Sql */ `
       CREATE table forms ( 
-        num bigint,
         id VARCHAR(32) not null,
         remote_address varchar(128),
         headers jsonb,
         data jsonb,
+        num bigint array,
+        test decimal not null array default([]),
         created_at timestamptz not null default(now())
       );
     `
