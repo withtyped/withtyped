@@ -89,6 +89,7 @@ export type RawParserConfig = {
   type: PrimitiveType;
   isArray: boolean;
   isNullable: boolean;
+  hasDefault: boolean;
 };
 
 export type Entity<Raw extends string> = RawModel<SplitRawColumns<Normalize<CreateTableBody<Raw>>>>;

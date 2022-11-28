@@ -23,7 +23,7 @@ describe('Model class', () => {
     const baseData = {
       id: 'foo',
       headers: {},
-      data: {},
+      data: { foo: 'foo', bar: 1 },
       test: [456, 789],
       created_at: 123,
     };
@@ -32,7 +32,7 @@ describe('Model class', () => {
       id: 'foo',
       remoteAddress: null,
       headers: {},
-      data: {},
+      data: { foo: 'foo', bar: 1 },
       num: null,
       test: [456, 789],
       createdAt: 123,

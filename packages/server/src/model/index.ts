@@ -14,12 +14,10 @@ export default class Model<
 
   protected tableName?: string;
   protected rawConfigs: Record<string, RawParserConfig>;
-  protected rawCreateConfigs: Record<string, RawParserConfig>;
 
   constructor(public readonly raw: string, public readonly extendedConfigs: ExtendGuard) {
     this.tableName = parseTableName(raw);
     this.rawConfigs = parseRawConfigs(raw);
-    this.rawCreateConfigs = parseRawConfigs(raw, true);
     console.log(this.tableName);
     console.log(this.rawConfigs);
   }
@@ -49,13 +47,25 @@ export default class Model<
 
     const result: Record<string, unknown> = {};
 
+    /* eslint-disable @silverhand/fp/no-mutation */
+    for (const [key, config] of Object.entries(this.extendedConfigs)) {
+      const camelCaseKey = camelCase(key);
+      const value = data[key] ?? data[camelCaseKey];
+
+      result[camelCaseKey] = config.parse(value);
+    }
+
     for (const [key, config] of Object.entries(this.rawConfigs)) {
       const camelCaseKey = camelCase(key);
+
+      if (key in this.extendedConfigs || camelCaseKey in this.extendedConfigs) {
+        continue;
+      }
+
       const value = data[key] ?? data[camelCaseKey];
 
       if (value === null || value === undefined) {
         if (config.isNullable) {
-          // eslint-disable-next-line @silverhand/fp/no-mutation
           result[camelCaseKey] = null;
           continue;
         } else {
@@ -80,9 +90,9 @@ export default class Model<
         );
       }
 
-      // eslint-disable-next-line @silverhand/fp/no-mutation
       result[camelCaseKey] = data[key];
     }
+    /* eslint-enable @silverhand/fp/no-mutation */
 
     // eslint-disable-next-line no-restricted-syntax
     return result as ModelType;

@@ -38,10 +38,7 @@ export const parseTableName = (raw: string): string | undefined => {
   return match?.[1] ?? undefined;
 };
 
-export const parseRawConfigs = (
-  raw: string,
-  forCreate = false
-): Record<string, RawParserConfig> => {
+export const parseRawConfigs = (raw: string): Record<string, RawParserConfig> => {
   const matchBody = /create table [^ ]+ \((.*)\);/.exec(normalizeString(raw));
   const body = matchBody?.[1];
 
@@ -67,7 +64,8 @@ export const parseRawConfigs = (
         {
           type,
           isArray: props.includes('array'),
-          isNullable: !props.includes('not null') || (forCreate && props.includes('default')),
+          isNullable: !props.includes('not null'),
+          hasDefault: props.includes('default'),
         },
       ];
     })
