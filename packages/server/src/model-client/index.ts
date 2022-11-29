@@ -3,7 +3,7 @@ import type Model from '../model/index.js';
 export default abstract class ModelClient<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string,
-  CreateType = {},
+  CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType
   /* eslint-enable @typescript-eslint/ban-types */
 > {

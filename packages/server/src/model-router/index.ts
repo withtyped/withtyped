@@ -10,7 +10,7 @@ import { createParser } from '../utils.js';
 export default class ModelRouter<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string,
-  CreateType = {},
+  CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
   Routes extends BaseRoutes = BaseRoutes
 
@@ -19,7 +19,7 @@ export default class ModelRouter<
   constructor(
     public readonly model: Model<Table, CreateType, ModelType>,
     public readonly prefix: Table,
-    protected readonly queryRunner: ModelClient<Table, CreateType, ModelType>
+    protected readonly client: ModelClient<Table, CreateType, ModelType>
   ) {
     super();
   }
@@ -31,7 +31,7 @@ export default class ModelRouter<
         body: createParser((data) => this.model.parse(data, 'create')),
       },
       async (context, next) => {
-        return next({ ...context, json: await this.queryRunner.create(context.request.body) });
+        return next({ ...context, json: await this.client.create(context.request.body) });
       }
     );
 
@@ -44,12 +44,12 @@ export default class ModelRouter<
       '/',
       {},
       async (context, next) => {
-        return next({ ...context, json: await this.queryRunner.readAll() });
+        return next({ ...context, json: await this.client.readAll() });
       }
     ).get<'/:id', unknown, unknown, ModelType>('/:id', {}, async (context, next) => {
       const { id } = context.request.params;
 
-      return next({ ...context, json: await this.queryRunner.read(id) });
+      return next({ ...context, json: await this.client.read(id) });
     });
 
     // eslint-disable-next-line no-restricted-syntax
@@ -66,7 +66,7 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.queryRunner.update(id, body) });
+        return next({ ...context, json: await this.client.update(id, body) });
       }
     ).put<'/:id', unknown, CreateType, ModelType>(
       '/:id',
@@ -77,7 +77,7 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.queryRunner.update(id, body) });
+        return next({ ...context, json: await this.client.update(id, body) });
       }
     );
 
@@ -92,7 +92,7 @@ export default class ModelRouter<
       async (context, next) => {
         const { id } = context.request.params;
 
-        if (!(await this.queryRunner.delete(id))) {
+        if (!(await this.client.delete(id))) {
           throw new RequestError(`Resource with ID ${id} does not exist.`, 404);
         }
 

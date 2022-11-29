@@ -1,10 +1,10 @@
 import type { CamelCase, PrimitiveType, PrimitiveTypeMap, RawParserConfig } from './types.js';
 
-const normalizeString = (raw: string) =>
+export const normalizeString = (raw: string) =>
   raw.toLowerCase().replaceAll('\n', ' ').trim().replaceAll(/ {2,}/g, ' ');
 
 // eslint-disable-next-line complexity
-const findType = (raw?: string): PrimitiveType | undefined => {
+export const findType = (raw?: string): PrimitiveType | undefined => {
   if (!raw) {
     return;
   }

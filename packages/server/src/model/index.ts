@@ -5,7 +5,7 @@ import { camelCase, isObject, parseRawConfigs, parseTableName, testType } from '
 export default class Model<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string = '',
-  CreateType = {},
+  CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
   ExtendGuard extends Record<string, Parser<unknown>> = {}
   /* eslint-enable @typescript-eslint/ban-types */
@@ -13,8 +13,8 @@ export default class Model<
   static create = <Raw extends string>(raw: Raw) =>
     new Model<TableName<Raw>, CreateEntity<Raw>, Entity<Raw>>(raw, Object.freeze({}));
 
-  public tableName: Table;
-  protected rawConfigs: Record<string, RawParserConfig>;
+  public readonly tableName: Table;
+  public readonly rawConfigs: Record<string, RawParserConfig>;
 
   constructor(public readonly raw: string, public readonly extendedConfigs: ExtendGuard) {
     const tableName = parseTableName(raw);
@@ -28,6 +28,10 @@ export default class Model<
     this.rawConfigs = parseRawConfigs(raw);
     console.log(this.tableName);
     console.log(this.rawConfigs);
+  }
+
+  get keys() {
+    return Object.keys(this.rawConfigs);
   }
 
   extend<Key extends keyof ModelType, Type>(key: Key, parser: Parser<Type>) {
