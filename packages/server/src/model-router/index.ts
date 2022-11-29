@@ -1,5 +1,5 @@
 import RequestError from '../errors/RequestError.js';
-import type ModelQueryRunner from '../model-query-runner/index.js';
+import type ModelClient from '../model-client/index.js';
 import type Model from '../model/index.js';
 import type { BaseRoutes, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
@@ -19,8 +19,7 @@ export default class ModelRouter<
   constructor(
     public readonly model: Model<Table, CreateType, ModelType>,
     public readonly prefix: Table,
-    public readonly idKey: keyof ModelType,
-    protected readonly queryRunner: ModelQueryRunner<Table, CreateType, ModelType>
+    protected readonly queryRunner: ModelClient<Table, CreateType, ModelType>
   ) {
     super();
   }
@@ -50,7 +49,7 @@ export default class ModelRouter<
     ).get<'/:id', unknown, unknown, ModelType>('/:id', {}, async (context, next) => {
       const { id } = context.request.params;
 
-      return next({ ...context, json: await this.queryRunner.read(this.idKey, id) });
+      return next({ ...context, json: await this.queryRunner.read(id) });
     });
 
     // eslint-disable-next-line no-restricted-syntax
@@ -67,7 +66,7 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.queryRunner.update(this.idKey, id, body) });
+        return next({ ...context, json: await this.queryRunner.update(id, body) });
       }
     ).put<'/:id', unknown, CreateType, ModelType>(
       '/:id',
@@ -78,7 +77,7 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.queryRunner.update(this.idKey, id, body) });
+        return next({ ...context, json: await this.queryRunner.update(id, body) });
       }
     );
 
@@ -93,7 +92,7 @@ export default class ModelRouter<
       async (context, next) => {
         const { id } = context.request.params;
 
-        if (!(await this.queryRunner.delete(this.idKey, id))) {
+        if (!(await this.queryRunner.delete(id))) {
           throw new RequestError(`Resource with ID ${id} does not exist.`, 404);
         }
 

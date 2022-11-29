@@ -1,6 +1,6 @@
 import type Model from '../model/index.js';
 
-export default abstract class ModelQueryRunner<
+export default abstract class ModelClient<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string,
   CreateType = {},
@@ -13,13 +13,9 @@ export default abstract class ModelQueryRunner<
 
   abstract readAll(): Promise<{ rows: ModelType[]; rowCount: number }>;
 
-  abstract read<Key extends keyof ModelType>(byKey: Key, value: string): Promise<ModelType>;
+  abstract read(id: string): Promise<ModelType>;
 
-  abstract update<Key extends keyof ModelType>(
-    byKey: Key,
-    value: string,
-    data: Partial<CreateType>
-  ): Promise<ModelType>;
+  abstract update(id: string, data: Partial<CreateType>): Promise<ModelType>;
 
-  abstract delete<Key extends keyof ModelType>(byKey: Key, value: string): Promise<boolean>;
+  abstract delete(id: string): Promise<boolean>;
 }
