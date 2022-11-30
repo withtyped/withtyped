@@ -35,8 +35,8 @@ export default class Route<
     super();
   }
 
-  public get fullPath() {
-    return this.prefix + this.path;
+  public get fullPath(): `${string}${Path}` {
+    return `${this.prefix}${this.path}`;
   }
 
   public get runnable(): <InputContext extends RequestContext>(
@@ -50,7 +50,13 @@ export default class Route<
           ...context,
           request: {
             ...context.request,
-            ...guardInput(this.path, context.request.url, context.request.body, this.guard),
+            ...guardInput(
+              this.prefix,
+              this.path,
+              context.request.url,
+              context.request.body,
+              this.guard
+            ),
           },
         },
         next,
@@ -59,7 +65,7 @@ export default class Route<
     };
   }
 
-  public clone(newPrefix?: string) {
-    return new Route(newPrefix ?? this.prefix, this.path, this.guard, this.run);
+  public clone(newPrefix = this.prefix) {
+    return new Route(newPrefix, this.path, this.guard, this.run);
   }
 }

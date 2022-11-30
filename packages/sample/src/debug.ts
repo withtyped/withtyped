@@ -45,7 +45,7 @@ export const router = new Router()
   )
   .patch(
     '/books/:id',
-    { body: bookGuard.omit({ id: true }), response: bookGuard },
+    { body: bookGuard.omit({ id: true }).partial(), response: bookGuard },
     async (context, next) => {
       const bookIndex = books.findIndex(({ id }) => id === context.request.params.id);
 

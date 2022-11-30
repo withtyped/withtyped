@@ -2,14 +2,14 @@ import QueryClient from '@withtyped/server/lib/query/client.js';
 import type { QueryResult } from '@withtyped/server/lib/query/index.js';
 import type PostgreSql from '@withtyped/server/lib/query/sql/postgres.js';
 import type { PoolConfig } from 'pg';
-import { Pool } from 'pg';
+import pg from 'pg';
 
 export default class PostgresQueryClient extends QueryClient<PostgreSql> {
-  public pool: Pool;
+  public pool: pg.Pool;
 
   constructor(config?: PoolConfig) {
     super();
-    this.pool = new Pool(config);
+    this.pool = new pg.Pool(config);
   }
 
   async connect() {

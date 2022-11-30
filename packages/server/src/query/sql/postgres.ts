@@ -1,58 +1,66 @@
-import type { Json } from '../../types.js';
-import Sql, { createIdentifierSqlFunction, createSqlTag, IdentifierSql } from './abstract.js';
+import type { Json, JsonArray, JsonObject } from '../../types.js';
+import { log } from '../../utils.js';
+import Sql, { createIdentifierSqlFunction, createSqlTag } from './abstract.js';
 
-export class IdentifierPostgreSql extends IdentifierSql {
-  get composed() {
-    return { raw: this.strings.map((value) => `"${value}"`).join('.'), args: [] };
+export class IdentifierPostgreSql extends Sql {
+  public compose(rawArray: string[], _: unknown[], indexInit = 0) {
+    // eslint-disable-next-line @silverhand/fp/no-mutating-methods
+    rawArray.push(this.strings.map((value) => `"${value}"`).join('.'));
+
+    return { lastIndex: indexInit };
+  }
+
+  get composed(): { raw: string; args: unknown[] } {
+    throw new Error('Method not implemented.');
   }
 }
 
 export const identifier = createIdentifierSqlFunction(IdentifierPostgreSql);
 export const id = identifier;
 
-const isSqlArray = (array: unknown): array is Array<PostgreSql | IdentifierSql> =>
-  Array.isArray(array) &&
-  array.every((value) => value instanceof PostgreSql || value instanceof IdentifierSql);
-
-type InputArg = Json | PostgreSql | IdentifierSql | Array<PostgreSql | IdentifierSql>;
+export type PostgresJson = Json | Date;
+export type InputArg =
+  | PostgresJson
+  | Sql
+  | Array<Sql | Exclude<PostgresJson, JsonArray | JsonObject>>;
 
 /** Sql tag class for `pg` (i.e. node-pg) */
-export default class PostgreSql extends Sql<Json, InputArg> {
-  protected compose(rawArray: string[], args: Json[], indexInit = 0) {
+export default class PostgreSql extends Sql<PostgresJson, InputArg> {
+  public compose(rawArray: string[], args: PostgresJson[], indexInit = 0) {
     /* eslint-disable @silverhand/fp/no-mutating-methods, @silverhand/fp/no-let, @silverhand/fp/no-mutation */
     let globalIndex = indexInit;
 
-    const combineSql = (sql: PostgreSql | IdentifierSql) => {
-      if (sql instanceof IdentifierSql) {
-        rawArray.push(sql.composed.raw);
-
-        return;
-      }
-
+    const combineSql = (sql: Sql) => {
       const { lastIndex } = sql.compose(rawArray, args, globalIndex);
 
       globalIndex = lastIndex;
     };
 
     const handle = (arg?: InputArg) => {
+      console.log('handle', arg);
+
       if (arg === undefined) {
         return;
       }
 
-      if (arg instanceof PostgreSql || arg instanceof IdentifierSql) {
+      if (arg instanceof Sql) {
+        console.log('handle is sql!');
         combineSql(arg);
-      } else if (isSqlArray(arg)) {
+      } else if (Array.isArray(arg)) {
+        console.log('handle is array!');
+
         const [first, ...rest] = arg;
 
         if (first) {
-          combineSql(first);
+          handle(first);
         }
 
         for (const sql of rest) {
           rawArray.push(', ');
-          combineSql(sql);
+          handle(sql);
         }
       } else {
+        console.log('handle is others!');
         globalIndex += 1;
         rawArray.push(`$${globalIndex}`);
         args.push(arg);
@@ -61,7 +69,6 @@ export default class PostgreSql extends Sql<Json, InputArg> {
 
     for (const [index, value] of this.strings.entries()) {
       rawArray.push(value);
-
       handle(this.args[index]);
     }
     /* eslint-enable @silverhand/fp/no-mutating-methods, @silverhand/fp/no-let, @silverhand/fp/no-mutation */
@@ -71,12 +78,45 @@ export default class PostgreSql extends Sql<Json, InputArg> {
 
   get composed() {
     const rawArray: string[] = [];
-    const args: Json[] = [];
+    const args: PostgresJson[] = [];
 
     this.compose(rawArray, args);
+    const result = { raw: rawArray.join(''), args };
+    log.debug('composed query', result);
 
-    return { raw: rawArray.join(''), args };
+    return result;
+  }
+}
+
+export class JsonPostgreSql extends Sql<string, PostgresJson> {
+  public compose(rawArray: string[], args: PostgresJson[], indexInit = 0) {
+    const value = this.args[0];
+
+    if (!value) {
+      return { lastIndex: indexInit };
+    }
+
+    /* eslint-disable @silverhand/fp/no-mutating-methods */
+    rawArray.push(`$${indexInit + 1}::json`);
+    args.push(JSON.stringify(value));
+    /* eslint-enable @silverhand/fp/no-mutating-methods */
+
+    return { lastIndex: indexInit + 1 };
+  }
+
+  get composed(): { raw: string; args: string[] } {
+    throw new Error('Method not implemented.');
   }
 }
 
 export const sql = createSqlTag(PostgreSql);
+
+export const json = (data: PostgresJson) =>
+  new JsonPostgreSql(Object.assign([], { raw: [] }), [data]);
+
+export const jsonIfNeeded = (
+  data: PostgresJson | PostgreSql
+): PostgreSql | Exclude<PostgresJson, JsonArray | JsonObject> =>
+  Array.isArray(data) || (typeof data === 'object' && data !== null && !(data instanceof Sql))
+    ? json(data)
+    : data;

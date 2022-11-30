@@ -1,10 +1,11 @@
 import type { JsonArray, JsonObject } from '../types.js';
 
-export type PrimitiveType = 'string' | 'number' | 'boolean' | 'json';
+export type PrimitiveType = 'string' | 'number' | 'boolean' | 'json' | 'date';
 
 export type PrimitiveTypeMap = {
   string: string;
   number: number;
+  date: Date;
   boolean: boolean;
   json: JsonObject | JsonArray;
 };
@@ -16,8 +17,9 @@ export type NumberType =
   | `${string}serial`
   | 'decimal'
   | 'numeric'
-  | 'real'
-  | `timestamp${string}`;
+  | 'real';
+
+export type DateType = `timestamp${string}`;
 
 export type StringType = `varchar${string}` | 'text';
 
@@ -27,6 +29,8 @@ export type JsonType = 'json' | 'jsonb';
 
 export type DataType<T extends string> = T extends NumberType
   ? number
+  : T extends DateType
+  ? Date
   : T extends StringType
   ? string
   : T extends JsonType

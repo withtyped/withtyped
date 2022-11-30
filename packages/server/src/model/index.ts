@@ -1,6 +1,12 @@
 import type { Parser } from '../types.js';
 import type { CreateEntity, Entity, RawParserConfig, TableName } from './types.js';
-import { camelCase, isObject, parseRawConfigs, parseTableName, testType } from './utils.js';
+import {
+  camelCase,
+  isObject,
+  parsePrimitiveType,
+  parseRawConfigs,
+  parseTableName,
+} from './utils.js';
 
 export default class Model<
   /* eslint-disable @typescript-eslint/ban-types */
@@ -26,8 +32,6 @@ export default class Model<
     // eslint-disable-next-line no-restricted-syntax
     this.tableName = tableName as Table;
     this.rawConfigs = parseRawConfigs(raw);
-    console.log(this.tableName);
-    console.log(this.rawConfigs);
   }
 
   get keys() {
@@ -63,7 +67,14 @@ export default class Model<
     /* eslint-disable @silverhand/fp/no-mutation */
     for (const [key, config] of Object.entries(this.extendedConfigs)) {
       const camelCaseKey = camelCase(key);
-      const value = data[key] ?? data[camelCaseKey];
+      const value = data[key] === undefined ? data[camelCaseKey] : data[key];
+
+      if (
+        value === undefined &&
+        ((forType === 'create' && Boolean(this.rawConfigs[key]?.hasDefault)) || forType === 'patch')
+      ) {
+        continue;
+      }
 
       result[camelCaseKey] = config.parse(value);
     }
@@ -75,7 +86,7 @@ export default class Model<
         continue;
       }
 
-      const value = data[key] ?? data[camelCaseKey];
+      const value = data[key] === undefined ? data[camelCaseKey] : data[key];
 
       if (value === null) {
         if (config.isNullable) {
@@ -99,23 +110,32 @@ export default class Model<
       }
 
       if (config.isArray) {
-        if (
-          !Array.isArray(value) &&
-          // Should work in TS 4.9, wait for VSCode support
-          // eslint-disable-next-line no-restricted-syntax
-          !(value as unknown[]).every((element) => testType(element, config.type))
-        ) {
+        const parsed =
+          Array.isArray(value) && value.map((element) => parsePrimitiveType(element, config.type));
+
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        if (!parsed || parsed.includes(undefined)) {
           throw new TypeError(
             `Unexpected type for key \`${key}\`, expected an array of ${config.type}`
           );
         }
-      } else if (!testType(value, config.type)) {
-        throw new TypeError(
-          `Unexpected type for key \`${key}\`, expected ${config.type} but received ${typeof value}`
-        );
-      }
 
-      result[camelCaseKey] = data[key];
+        result[camelCaseKey] = parsed;
+        continue;
+      } else {
+        const parsed = parsePrimitiveType(value, config.type);
+
+        if (parsed === undefined) {
+          throw new TypeError(
+            `Unexpected type for key \`${key}\`, expected ${
+              config.type
+            } but received ${typeof value}`
+          );
+        }
+
+        result[camelCaseKey] = parsed;
+        continue;
+      }
     }
     /* eslint-enable @silverhand/fp/no-mutation */
 

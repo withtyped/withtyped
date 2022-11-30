@@ -1,7 +1,6 @@
 import RequestError from '../errors/RequestError.js';
 import type ModelClient from '../model-client/index.js';
-import type Model from '../model/index.js';
-import type { BaseRoutes, RouterRoutes } from '../router/index.js';
+import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
 import { createParser } from '../utils.js';
 
@@ -13,15 +12,17 @@ export default class ModelRouter<
   CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
   Routes extends BaseRoutes = BaseRoutes
-
   /* eslint-enable @typescript-eslint/ban-types */
-> extends Router<Routes> {
+> extends Router<Routes, `/${Table}`> {
   constructor(
-    public readonly model: Model<Table, CreateType, ModelType>,
-    public readonly prefix: Table,
-    protected readonly client: ModelClient<Table, CreateType, ModelType>
+    protected readonly client: ModelClient<Table, CreateType, ModelType>,
+    public readonly prefix: NormalizedPrefix<`/${Table}`>
   ) {
-    super();
+    super(prefix);
+  }
+
+  get model() {
+    return this.client.model;
   }
 
   withCreate() {

@@ -1,23 +1,24 @@
 export default abstract class Sql<OutputArg = unknown, InputArg = OutputArg> {
   constructor(public readonly strings: TemplateStringsArray, public readonly args: InputArg[]) {}
 
+  public abstract compose(
+    rawArray: string[],
+    args: OutputArg[],
+    indexInit?: number
+  ): { lastIndex: number };
   abstract get composed(): { raw: string; args: OutputArg[] };
 }
 
-export abstract class IdentifierSql extends Sql<never, never> {
-  constructor(strings: string[]) {
-    super(Object.assign([...strings], { raw: strings }), []);
-  }
-}
-
 export const createIdentifierSqlFunction =
-  <SqlClass extends IdentifierSql>(Factory: new (strings: string[]) => SqlClass) =>
+  <SqlClass extends Sql>(
+    Factory: new (strings: TemplateStringsArray, args: unknown[]) => SqlClass
+  ) =>
   (...strings: string[]) =>
-    new Factory(strings);
+    new Factory(Object.assign([...strings], { raw: strings }), []);
 
 export const createSqlTag =
   <ArgType, SqlClass extends Sql<unknown, ArgType>>(
     Factory: new (strings: TemplateStringsArray, args: ArgType[]) => SqlClass
   ) =>
-  (strings: TemplateStringsArray, ...args: ArgType[]) =>
+  <T extends ArgType[]>(strings: TemplateStringsArray, ...args: T) =>
     new Factory(strings, args);

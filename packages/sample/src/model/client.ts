@@ -1,7 +1,8 @@
 import ModelClient from '@withtyped/server/lib/model-client/index.js';
 import type Model from '@withtyped/server/lib/model/index.js';
-import { sql } from '@withtyped/server/lib/query/sql/postgres.js';
-import type { Json } from '@withtyped/server/lib/types.js';
+import type { PostgresJson } from '@withtyped/server/lib/query/sql/postgres.js';
+import { sql, identifier, jsonIfNeeded } from '@withtyped/server/lib/query/sql/postgres.js';
+import type { PoolConfig } from 'pg';
 
 import PostgresQueryClient from './query.js';
 
@@ -10,20 +11,34 @@ type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : 
 export default class PostgresModelClient<
   Table extends string,
   // eslint-disable-next-line @typescript-eslint/ban-types
-  CreateType extends Record<string, Json> = {},
+  CreateType extends Record<string, PostgresJson> = {},
   ModelType extends CreateType = CreateType
 > extends ModelClient<Table, CreateType, ModelType> {
-  protected queryClient = new PostgresQueryClient();
+  protected queryClient: PostgresQueryClient;
 
-  constructor(readonly model: Model<Table, CreateType, ModelType>) {
+  constructor(readonly model: Model<Table, CreateType, ModelType>, config?: PoolConfig) {
     super();
+    this.queryClient = new PostgresQueryClient(config);
+  }
+
+  async connect() {
+    return this.queryClient.connect();
+  }
+
+  async end() {
+    return this.queryClient.end();
   }
 
   async create(data: CreateType): Promise<ModelType> {
+    const entries = Object.entries<PostgresJson | undefined>(data).filter(
+      (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
+    );
+
     const { rows } = await this.queryClient.query(sql`
-      insert into ${this.model.tableName} (${Object.keys(data)})
-      values (${Object.values(data)})
-      returning ${this.model.keys}
+      insert into ${identifier(this.model.tableName)}
+        (${entries.map(([key]) => identifier(key))})
+      values (${entries.map(([, value]) => jsonIfNeeded(value))})
+      returning ${this.model.keys.map((key) => identifier(key))}
     `);
 
     return this.model.parse(rows[0]);
@@ -31,15 +46,19 @@ export default class PostgresModelClient<
 
   async readAll(): Promise<{ rows: ModelType[]; rowCount: number }> {
     const { rows, rowCount } = await this.queryClient.query(sql`
-      select (${this.model.keys}) from ${this.model.tableName}
+      select ${this.model.keys.map((key) => identifier(key))}
+      from ${identifier(this.model.tableName)}
     `);
+
+    console.log('rows', rows);
 
     return { rows: rows.map((value) => this.model.parse(value)), rowCount };
   }
 
   async read(id: string): Promise<ModelType> {
     const { rows } = await this.queryClient.query(sql`
-      select (${this.model.keys}) from ${this.model.tableName}
+      select (${this.model.keys.map((key) => identifier(key))})
+      from ${identifier(this.model.tableName)}
       where id=${id}
     `);
 
@@ -47,23 +66,25 @@ export default class PostgresModelClient<
   }
 
   async update(id: string, data: Partial<CreateType>): Promise<ModelType> {
-    const entries = Object.entries<Json | undefined>(data).filter(
-      (element): element is NonUndefinedValueTuple<Json> => element[1] !== undefined
+    const entries = Object.entries<PostgresJson | undefined>(data).filter(
+      (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
     );
 
     const { rows } = await this.queryClient.query(sql`
-      update ${this.model.tableName}
-      set ${entries.map(([key, value]) => sql`${key}=${value}`)}
+      update ${identifier(this.model.tableName)}
+      set ${entries.map(([key, value]) => sql`${identifier(key)}=${jsonIfNeeded(value)}`)}
       where id=${id}
-      returning ${this.model.keys}
+      returning ${this.model.keys.map((key) => identifier(key))}
     `);
+
+    console.log(rows);
 
     return this.model.parse(rows[0]);
   }
 
   async delete(id: string): Promise<boolean> {
     const { rowCount } = await this.queryClient.query(sql`
-      delete from ${this.model.tableName}
+      delete from ${identifier(this.model.tableName)}
       where id=${id}
     `);
 

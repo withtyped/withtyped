@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-import { describe, it } from 'node:test';
 
+import { describe, it } from 'node:test';
 import { z } from 'zod';
 
 import { guardInput, parsePathParams, searchParamsToObject } from './utils.js';
@@ -65,7 +65,7 @@ describe('searchParamsToObject()', () => {
 
 describe('guardInput()', () => {
   it('should return a proper guarded object', () => {
-    assert.deepStrictEqual(guardInput('/', new URL('/', base), {}, {}), {
+    assert.deepStrictEqual(guardInput('', '/', new URL('/', base), {}, {}), {
       params: {},
       search: undefined,
       body: undefined,
@@ -81,7 +81,7 @@ describe('guardInput()', () => {
     };
 
     assert.deepStrictEqual(
-      guardInput('/:foo', url, body, {
+      guardInput('', '/:foo', url, body, {
         search: z.object({
           'foo[]': z.string(),
           foo: z.string().array(),
@@ -101,7 +101,7 @@ describe('guardInput()', () => {
       }
     );
     assert.deepStrictEqual(
-      guardInput('/:foo/:bar', url, body, {
+      guardInput('/:foo/', '/:bar', url, body, {
         search: z.object({
           foo: z.string().array(),
           baz: z.string().min(3),
@@ -138,12 +138,18 @@ describe('guardInput()', () => {
     };
 
     assert.throws(() =>
-      guardInput('/:foo', url, body, {
+      guardInput('', '/:foo', url, body, {
         body: z.object({ what: z.object({ when: z.number(), who: z.string().array().min(2) }) }),
       })
     );
     assert.throws(() =>
-      guardInput('/:foo', url, body, {
+      guardInput('', '/:foo', url, body, {
+        search: z.object({ foo: z.string().optional() }),
+        body: z.object({ what: z.object({ when: z.number(), who: z.string().array().min(1) }) }),
+      })
+    );
+    assert.throws(() =>
+      guardInput('/bar', '/:foo', url, body, {
         search: z.object({ foo: z.string().optional() }),
         body: z.object({ what: z.object({ when: z.number(), who: z.string().array().min(1) }) }),
       })

@@ -1,3 +1,4 @@
+import type { JsonObject } from '../types.js';
 import type { CamelCase, PrimitiveType, PrimitiveTypeMap, RawParserConfig } from './types.js';
 
 export const normalizeString = (raw: string) =>
@@ -13,10 +14,13 @@ export const findType = (raw?: string): PrimitiveType | undefined => {
   if (
     raw.includes('int') ||
     raw.endsWith('serial') ||
-    ['decimal', 'numeric', 'real'].includes(raw) ||
-    raw.startsWith('timestamp')
+    ['decimal', 'numeric', 'real'].includes(raw)
   ) {
     return 'number';
+  }
+
+  if (raw.startsWith('timestamp')) {
+    return 'date';
   }
 
   if (raw.startsWith('bool')) {
@@ -74,30 +78,38 @@ export const parseRawConfigs = (raw: string): Record<string, RawParserConfig> =>
   return Object.fromEntries(columns);
 };
 
-export const testType = (
+// eslint-disable-next-line complexity
+export const parsePrimitiveType = (
   value: unknown,
   type: PrimitiveType
-): value is PrimitiveTypeMap[typeof type] => {
+): PrimitiveTypeMap[typeof type] | undefined => {
   switch (type) {
     case 'boolean':
-      return typeof value === 'boolean';
+      return typeof value === 'boolean' ? value : undefined;
+
     case 'number':
-      return typeof value === 'number';
+      if (typeof value === 'number') {
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        return Number(value);
+      }
+
+      return;
     case 'string':
-      return typeof value === 'string';
+      return typeof value === 'string' ? value : undefined;
     case 'json':
-      return isObject(value); // TODO: Perform more strict check
+      return isObject(value) || Array.isArray(value) ? value : undefined; // TODO: Perform more strict check (make sure it is a json object)
+    case 'date':
+      return value instanceof Date ? value : undefined;
     default:
       throw new TypeError(`Unexpected type ${String(type)}`);
   }
 };
 
-// No need for this in TS 4.9, but VSCode not support yet
-// See https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-rc/#unlisted-property-narrowing-with-the-in-operator
-export const isObject = (
-  value: unknown
-  // eslint-disable-next-line @typescript-eslint/ban-types
-): value is object & Record<string, unknown> => typeof value === 'object' && value !== null;
+export const isObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null;
 
 export const camelCase = <T extends string>(value: T): CamelCase<T> =>
   // eslint-disable-next-line no-restricted-syntax
