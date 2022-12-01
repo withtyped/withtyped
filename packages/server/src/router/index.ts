@@ -1,4 +1,3 @@
-import RequestError from '../errors/RequestError.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
@@ -120,31 +119,19 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
       log.debug('matched route', this.prefix, route.path);
 
-      try {
-        await route.runnable(
-          originalContext,
-          async (context) => {
-            const responseGuard = route.guard.response;
+      await route.runnable(
+        originalContext,
+        async (context) => {
+          const responseGuard = route.guard.response;
 
-            if (responseGuard) {
-              responseGuard.parse(context.json);
-            }
+          if (responseGuard) {
+            responseGuard.parse(context.json);
+          }
 
-            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
-          },
-          http
-        );
-      } catch (error: unknown) {
-        if (error instanceof RequestError) {
-          return next({
-            ...originalContext,
-            status: error.status,
-            json: { message: error.message },
-          });
-        }
-
-        throw error;
-      }
+          return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+        },
+        http
+      );
     };
   }
 

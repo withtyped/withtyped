@@ -98,9 +98,25 @@ export type RawParserConfig = {
 
 export type TableName<Raw extends string> =
   Lowercase<Raw> extends `${string}create table ${infer Name}(${string}` ? Normalize<Name> : never;
-export type Entity<Raw extends string> = RawModel<SplitRawColumns<Normalize<CreateTableBody<Raw>>>>;
-export type CreateEntity<Raw extends string> = RawCreateModel<
-  SplitRawColumns<Normalize<CreateTableBody<Raw>>>
->;
+
+export type NormalizedBody<Raw extends string> = Normalize<CreateTableBody<Raw>>;
+export type Entity<Columns extends Array<ColumnLiteral<string>>> = RawModel<Columns>;
+export type CreateEntity<Columns extends Array<ColumnLiteral<string>>> = RawCreateModel<Columns>;
+
+// TODO: Support multiple keys
+export type ColumnPrimaryKey<Column extends string> =
+  Column extends `${infer Name} ${string} ${string}primary key${string}` ? Name : never;
+export type PrimaryKey<NormalizedBody extends string> =
+  NormalizedBody extends `${infer A},${infer B}`
+    ? ColumnPrimaryKey<A> extends never
+      ? PrimaryKey<B>
+      : ColumnPrimaryKey<A>
+    : ColumnPrimaryKey<NormalizedBody>;
+
+export type KeyOfType<T, V> = keyof {
+  [P in keyof T as T[P] extends V ? P : never]: unknown;
+};
+
+export type IdKeys<T> = KeyOfType<T, string>;
 
 export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;

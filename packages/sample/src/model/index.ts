@@ -14,14 +14,18 @@ const Book = Model.create(
     authors jsonb not null default '[]',
     price decimal not null default 99.99,
     year int,
-    created_at timestamptz not null default(now())
+    created_at timestamptz not null default(now()),
+    primary key id
   );
 `
 ).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 const modelClient = new PostgresModelClient(Book, { database: 'withtyped' });
 const modelRouter = new ModelRouter(modelClient, '/books').withCrud();
-const server = createServer({ composer: createComposer().and(modelRouter.routes()) });
+
+const server = createServer({
+  composer: createComposer().and(modelRouter.routes()),
+});
 
 await modelClient.connect();
 

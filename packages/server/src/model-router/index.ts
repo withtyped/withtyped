@@ -1,5 +1,6 @@
 import RequestError from '../errors/RequestError.js';
 import type ModelClient from '../model-client/index.js';
+import type { IdKeys } from '../model/types.js';
 import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
 import { createParser } from '../utils.js';
@@ -11,14 +12,34 @@ export default class ModelRouter<
   Table extends string,
   CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
+  IdKey extends IdKeys<ModelType> = 'id' extends IdKeys<ModelType> ? 'id' : never,
   Routes extends BaseRoutes = BaseRoutes
   /* eslint-enable @typescript-eslint/ban-types */
 > extends Router<Routes, `/${Table}`> {
+  public readonly idKey: IdKeys<ModelType>;
+
   constructor(
     protected readonly client: ModelClient<Table, CreateType, ModelType>,
-    public readonly prefix: NormalizedPrefix<`/${Table}`>
+    public readonly prefix: NormalizedPrefix<`/${Table}`>,
+    idKey?: IdKey
   ) {
     super(prefix);
+
+    if (idKey) {
+      this.idKey = idKey;
+    } else {
+      // Define this const to make TypeScript happy
+      const id = 'id';
+
+      if (client.model.isIdKey(id)) {
+        this.idKey = id;
+      } else {
+        throw new TypeError(
+          `No ID key provided while the default key \`${id}\` is not a valid ID key in this model.\n` +
+            'A valid ID key should have a string value in the model.'
+        );
+      }
+    }
   }
 
   get model() {
@@ -37,7 +58,13 @@ export default class ModelRouter<
     );
 
     // eslint-disable-next-line no-restricted-syntax
-    return newThis as ModelRouter<Table, CreateType, ModelType, RouterRoutes<typeof newThis>>;
+    return newThis as ModelRouter<
+      Table,
+      CreateType,
+      ModelType,
+      IdKey,
+      RouterRoutes<typeof newThis>
+    >;
   }
 
   withRead() {
@@ -50,11 +77,17 @@ export default class ModelRouter<
     ).get<'/:id', unknown, unknown, ModelType>('/:id', {}, async (context, next) => {
       const { id } = context.request.params;
 
-      return next({ ...context, json: await this.client.read(id) });
+      return next({ ...context, json: await this.client.read(this.idKey, id) });
     });
 
     // eslint-disable-next-line no-restricted-syntax
-    return newThis as ModelRouter<Table, CreateType, ModelType, RouterRoutes<typeof newThis>>;
+    return newThis as ModelRouter<
+      Table,
+      CreateType,
+      ModelType,
+      IdKey,
+      RouterRoutes<typeof newThis>
+    >;
   }
 
   withUpdate() {
@@ -67,7 +100,7 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.client.update(id, body) });
+        return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }
     ).put<'/:id', unknown, CreateType, ModelType>(
       '/:id',
@@ -78,12 +111,18 @@ export default class ModelRouter<
           body,
         } = context.request;
 
-        return next({ ...context, json: await this.client.update(id, body) });
+        return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }
     );
 
     // eslint-disable-next-line no-restricted-syntax
-    return newThis as ModelRouter<Table, CreateType, ModelType, RouterRoutes<typeof newThis>>;
+    return newThis as ModelRouter<
+      Table,
+      CreateType,
+      ModelType,
+      IdKey,
+      RouterRoutes<typeof newThis>
+    >;
   }
 
   withDelete() {
@@ -93,7 +132,7 @@ export default class ModelRouter<
       async (context, next) => {
         const { id } = context.request.params;
 
-        if (!(await this.client.delete(id))) {
+        if (!(await this.client.delete(this.idKey, id))) {
           throw new RequestError(`Resource with ID ${id} does not exist.`, 404);
         }
 
@@ -102,7 +141,13 @@ export default class ModelRouter<
     );
 
     // eslint-disable-next-line no-restricted-syntax
-    return newThis as ModelRouter<Table, CreateType, ModelType, RouterRoutes<typeof newThis>>;
+    return newThis as ModelRouter<
+      Table,
+      CreateType,
+      ModelType,
+      IdKey,
+      RouterRoutes<typeof newThis>
+    >;
   }
 
   withCrud() {

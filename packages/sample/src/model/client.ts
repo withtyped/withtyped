@@ -1,4 +1,4 @@
-import ModelClient from '@withtyped/server/lib/model-client/index.js';
+import ModelClient, { ModelClientError } from '@withtyped/server/lib/model-client/index.js';
 import type Model from '@withtyped/server/lib/model/index.js';
 import type { PostgresJson } from '@withtyped/server/lib/query/sql/postgres.js';
 import { sql, identifier, jsonIfNeeded } from '@withtyped/server/lib/query/sql/postgres.js';
@@ -7,6 +7,8 @@ import type { PoolConfig } from 'pg';
 import PostgresQueryClient from './query.js';
 
 type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : Value];
+
+type ValidKey = string | number | symbol;
 
 export default class PostgresModelClient<
   Table extends string,
@@ -50,22 +52,24 @@ export default class PostgresModelClient<
       from ${identifier(this.model.tableName)}
     `);
 
-    console.log('rows', rows);
-
     return { rows: rows.map((value) => this.model.parse(value)), rowCount };
   }
 
-  async read(id: string): Promise<ModelType> {
+  async read(whereKey: ValidKey, value: string): Promise<ModelType> {
     const { rows } = await this.queryClient.query(sql`
       select (${this.model.keys.map((key) => identifier(key))})
       from ${identifier(this.model.tableName)}
-      where id=${id}
+      where ${identifier(String(whereKey))}=${value}
     `);
+
+    if (!rows[0]) {
+      throw new ModelClientError('entity_not_found');
+    }
 
     return this.model.parse(rows[0]);
   }
 
-  async update(id: string, data: Partial<CreateType>): Promise<ModelType> {
+  async update(whereKey: ValidKey, value: string, data: Partial<CreateType>): Promise<ModelType> {
     const entries = Object.entries<PostgresJson | undefined>(data).filter(
       (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
     );
@@ -73,19 +77,21 @@ export default class PostgresModelClient<
     const { rows } = await this.queryClient.query(sql`
       update ${identifier(this.model.tableName)}
       set ${entries.map(([key, value]) => sql`${identifier(key)}=${jsonIfNeeded(value)}`)}
-      where id=${id}
+      where ${identifier(String(whereKey))}=${value}
       returning ${this.model.keys.map((key) => identifier(key))}
     `);
 
-    console.log(rows);
+    if (!rows[0]) {
+      throw new ModelClientError('entity_not_found');
+    }
 
     return this.model.parse(rows[0]);
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(whereKey: ValidKey, value: string): Promise<boolean> {
     const { rowCount } = await this.queryClient.query(sql`
       delete from ${identifier(this.model.tableName)}
-      where id=${id}
+      where ${identifier(String(whereKey))}=${value}
     `);
 
     return rowCount > 0;

@@ -1,5 +1,14 @@
 import type { Parser } from '../types.js';
-import type { CreateEntity, Entity, RawParserConfig, TableName } from './types.js';
+import type {
+  CreateEntity,
+  Entity,
+  IdKeys,
+  NormalizedBody,
+  PrimaryKey,
+  RawParserConfig,
+  SplitRawColumns,
+  TableName,
+} from './types.js';
 import {
   camelCase,
   isObject,
@@ -13,14 +22,25 @@ export default class Model<
   Table extends string = '',
   CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
+  IdKey extends string = never,
   ExtendGuard extends Record<string, Parser<unknown>> = {}
   /* eslint-enable @typescript-eslint/ban-types */
 > {
-  static create = <Raw extends string>(raw: Raw) =>
-    new Model<TableName<Raw>, CreateEntity<Raw>, Entity<Raw>>(raw, Object.freeze({}));
+  static create = <Raw extends string>(raw: Raw) => {
+    type Normalized = NormalizedBody<Raw>;
+
+    type Columns = SplitRawColumns<Normalized>;
+
+    return new Model<
+      TableName<Raw>,
+      CreateEntity<Columns>,
+      Entity<Columns>,
+      PrimaryKey<Normalized>
+    >(raw, Object.freeze({}));
+  };
 
   public readonly tableName: Table;
-  public readonly rawConfigs: Record<string, RawParserConfig>;
+  public readonly rawConfigs: Record<string | number | symbol, RawParserConfig>;
 
   constructor(public readonly raw: string, public readonly extendedConfigs: ExtendGuard) {
     const tableName = parseTableName(raw);
@@ -38,11 +58,16 @@ export default class Model<
     return Object.keys(this.rawConfigs);
   }
 
+  isIdKey(key: keyof ModelType): key is IdKeys<ModelType> {
+    return ['string', 'number'].includes(this.rawConfigs[key].type);
+  }
+
   extend<Key extends keyof ModelType, Type>(key: Key, parser: Parser<Type>) {
     return new Model<
       Table,
       Omit<CreateType, Key> & { [key in Key]: Type },
       Omit<ModelType, Key> & { [key in Key]: Type },
+      IdKey,
       ExtendGuard & { [key in Key]: Parser<Type> }
     >(
       this.raw,
@@ -143,5 +168,3 @@ export default class Model<
     return result as ModelType | CreateType | Partial<CreateType>;
   }
 }
-
-export type Infer<M extends Model> = M extends Model<string, infer DataType> ? DataType : never;

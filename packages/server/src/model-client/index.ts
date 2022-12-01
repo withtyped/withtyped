@@ -13,9 +13,15 @@ export default abstract class ModelClient<
 
   abstract readAll(): Promise<{ rows: ModelType[]; rowCount: number }>;
 
-  abstract read(id: string): Promise<ModelType>;
+  abstract read<Key extends keyof ModelType>(whereKey: Key, value: string): Promise<ModelType>;
 
-  abstract update(id: string, data: Partial<CreateType>): Promise<ModelType>;
+  abstract update<Key extends keyof ModelType>(
+    whereKey: Key,
+    value: string,
+    data: Partial<CreateType>
+  ): Promise<ModelType>;
 
-  abstract delete(id: string): Promise<boolean>;
+  abstract delete<Key extends keyof ModelType>(whereKey: Key, value: string): Promise<boolean>;
 }
+
+export * from './errors.js';

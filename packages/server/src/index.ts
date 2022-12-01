@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 
 import type { Composer } from './compose.js';
 import compose from './compose.js';
+import RequestError from './errors/RequestError.js';
 import type { BaseContext } from './middleware.js';
 import { getWriteResponse, writeContextToResponse } from './response.js';
 import { color, log } from './utils.js';
@@ -14,6 +15,22 @@ export type CreateServer<
 > = {
   port?: number;
   composer?: Composer<T, InputContext, OutputContext>;
+};
+
+export const handleError = async (response: http.ServerResponse, error: unknown) => {
+  log.debug(error);
+
+  const requestError = error instanceof RequestError ? error : undefined;
+
+  if (!response.headersSent) {
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    response.statusCode = requestError?.status ?? 500;
+    response.setHeader('content-type', 'application/json');
+  }
+
+  await getWriteResponse(response)({
+    message: requestError?.message ?? 'Internal server error.',
+  });
 };
 
 export default function createServer<T extends unknown[], OutputContext extends BaseContext>({
@@ -34,15 +51,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
       });
     } catch (error: unknown) {
       // Global error handling
-      log.debug(error);
-
-      if (!response.headersSent) {
-        // eslint-disable-next-line @silverhand/fp/no-mutation
-        response.statusCode = 500;
-        response.setHeader('content-type', 'application/json');
-      }
-
-      await getWriteResponse(response)({ message: 'Internal server error.' });
+      await handleError(response, error);
     }
 
     // End
