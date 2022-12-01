@@ -83,6 +83,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
   };
 }
 
+export * from './types.js';
 export { default as RequestError } from './errors/RequestError.js';
 export * from './middleware/index.js';
 export * from './openapi/openapi-types.js';
@@ -91,3 +92,9 @@ export * from './router/index.js';
 export { default as compose } from './compose.js';
 export * from './middleware.js';
 export { RequestMethod } from '@withtyped/shared';
+
+export { default as Model } from './model/index.js';
+export { default as ModelClient } from './model-client/index.js';
+export * from './model-client/index.js';
+export { default as ModelRouter } from './model-router/index.js';
+export * from './query/index.js';

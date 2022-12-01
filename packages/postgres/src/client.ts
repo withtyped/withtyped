@@ -1,10 +1,10 @@
-import ModelClient, { ModelClientError } from '@withtyped/server/lib/model-client/index.js';
-import type Model from '@withtyped/server/lib/model/index.js';
-import type { PostgresJson } from '@withtyped/server/lib/query/sql/postgres.js';
-import { sql, identifier, jsonIfNeeded } from '@withtyped/server/lib/query/sql/postgres.js';
+import type { Model } from '@withtyped/server';
+import { ModelClientError, ModelClient } from '@withtyped/server';
 import type { PoolConfig } from 'pg';
 
 import PostgresQueryClient from './query.js';
+import type { PostgresJson } from './sql.js';
+import { identifier, jsonIfNeeded, sql } from './sql.js';
 
 type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : Value];
 

@@ -1,8 +1,9 @@
-import QueryClient from '@withtyped/server/lib/query/client.js';
-import type { QueryResult } from '@withtyped/server/lib/query/index.js';
-import type PostgreSql from '@withtyped/server/lib/query/sql/postgres.js';
+import { QueryClient } from '@withtyped/server';
+import type { QueryResult } from '@withtyped/server';
 import type { PoolConfig } from 'pg';
 import pg from 'pg';
+
+import type { PostgreSql } from './sql.js';
 
 export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   public pool: pg.Pool;

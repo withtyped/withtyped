@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { normalizeString } from '../../model/utils.js';
-import { id, sql } from './postgres.js';
+import { normalizeString } from '@withtyped/shared';
+
+import { id, sql } from './sql.js';
 
 describe('postgres sql tag', () => {
   it('should convert query to a safe string with args', () => {

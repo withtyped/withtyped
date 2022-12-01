@@ -1,7 +1,6 @@
+import type { Json, JsonArray, JsonObject } from '@withtyped/server';
+import { createIdentifierSqlFunction, createSqlTag, Sql } from '@withtyped/server';
 import { log } from '@withtyped/shared';
-
-import type { Json, JsonArray, JsonObject } from '../../types.js';
-import Sql, { createIdentifierSqlFunction, createSqlTag } from './abstract.js';
 
 export class IdentifierPostgreSql extends Sql {
   public compose(rawArray: string[], _: unknown[], indexInit = 0) {
@@ -20,13 +19,13 @@ export const identifier = createIdentifierSqlFunction(IdentifierPostgreSql);
 export const id = identifier;
 
 export type PostgresJson = Json | Date;
-export type InputArg =
+export type InputArgument =
   | PostgresJson
   | Sql
   | Array<Sql | Exclude<PostgresJson, JsonArray | JsonObject>>;
 
 /** Sql tag class for `pg` (i.e. node-pg) */
-export default class PostgreSql extends Sql<PostgresJson, InputArg> {
+export class PostgreSql extends Sql<PostgresJson, InputArgument> {
   public compose(rawArray: string[], args: PostgresJson[], indexInit = 0) {
     /* eslint-disable @silverhand/fp/no-mutating-methods, @silverhand/fp/no-let, @silverhand/fp/no-mutation */
     let globalIndex = indexInit;
@@ -37,20 +36,20 @@ export default class PostgreSql extends Sql<PostgresJson, InputArg> {
       globalIndex = lastIndex;
     };
 
-    const handle = (arg?: InputArg) => {
-      console.log('handle', arg);
+    const handle = (argument?: InputArgument) => {
+      console.log('handle', argument);
 
-      if (arg === undefined) {
+      if (argument === undefined) {
         return;
       }
 
-      if (arg instanceof Sql) {
+      if (argument instanceof Sql) {
         console.log('handle is sql!');
-        combineSql(arg);
-      } else if (Array.isArray(arg)) {
+        combineSql(argument);
+      } else if (Array.isArray(argument)) {
         console.log('handle is array!');
 
-        const [first, ...rest] = arg;
+        const [first, ...rest] = argument;
 
         if (first) {
           handle(first);
@@ -64,7 +63,7 @@ export default class PostgreSql extends Sql<PostgresJson, InputArg> {
         console.log('handle is others!');
         globalIndex += 1;
         rawArray.push(`$${globalIndex}`);
-        args.push(arg);
+        args.push(argument);
       }
     };
 

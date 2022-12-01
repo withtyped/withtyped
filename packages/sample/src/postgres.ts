@@ -1,10 +1,7 @@
-import createServer from '@withtyped/server';
-import ModelRouter from '@withtyped/server/lib/model-router/index.js';
-import Model from '@withtyped/server/lib/model/index.js';
+import { PostgresModelClient } from '@withtyped/postgres';
+import createServer, { ModelRouter, Model } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 import { z } from 'zod';
-
-import PostgresModelClient from './client.js';
 
 const Book = Model.create(
   /* Sql */ `

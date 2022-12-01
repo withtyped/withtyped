@@ -1,5 +1,5 @@
 import type { QueryResult } from './index.js';
-import type Sql from './sql/abstract.js';
+import type { Sql } from './utils.js';
 
 export default abstract class QueryClient<SqlTag extends Sql = Sql> {
   abstract connect<T>(config?: T): Promise<void>;

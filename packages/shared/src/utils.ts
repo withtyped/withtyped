@@ -31,3 +31,6 @@ export const log: Log = {
 
 export const normalizePathname = (pathname: string) =>
   '/' + pathname.split('/').filter(Boolean).join('/');
+
+export const normalizeString = (raw: string) =>
+  raw.toLowerCase().replaceAll('\n', ' ').trim().replaceAll(/ {2,}/g, ' ');

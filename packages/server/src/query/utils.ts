@@ -1,4 +1,4 @@
-export default abstract class Sql<OutputArg = unknown, InputArg = OutputArg> {
+export abstract class Sql<OutputArg = unknown, InputArg = OutputArg> {
   constructor(public readonly strings: TemplateStringsArray, public readonly args: InputArg[]) {}
 
   public abstract compose(

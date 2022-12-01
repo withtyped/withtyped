@@ -1,8 +1,7 @@
+import { normalizeString } from '@withtyped/shared';
+
 import type { JsonObject } from '../types.js';
 import type { CamelCase, PrimitiveType, PrimitiveTypeMap, RawParserConfig } from './types.js';
-
-export const normalizeString = (raw: string) =>
-  raw.toLowerCase().replaceAll('\n', ' ').trim().replaceAll(/ {2,}/g, ' ');
 
 // eslint-disable-next-line complexity
 export const findType = (raw?: string): PrimitiveType | undefined => {
