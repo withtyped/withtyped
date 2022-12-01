@@ -43,7 +43,9 @@ export type ColumnHasDefault<T> = T extends `${string}default${string}` ? true :
 export type ColumnIsArray<T> = T extends `${string}array${string}` ? true : false;
 
 export type ColumnLiteral<T> = T extends `${infer Name} ${infer Type} ${infer Props}`
-  ? [Name, DataType<Type>, ColumnNotNull<Props>, ColumnHasDefault<Props>, ColumnIsArray<Props>]
+  ? Name extends 'constraint' | 'like'
+    ? never
+    : [Name, DataType<Type>, ColumnNotNull<Props>, ColumnHasDefault<Props>, ColumnIsArray<Props>]
   : T extends `${infer Name} ${infer Type}`
   ? [Name, DataType<Type>, false, false, false]
   : never;
@@ -96,8 +98,12 @@ export type RawParserConfig = {
   hasDefault: boolean;
 };
 
+export type AfterLastSpace<S> = S extends `${string} ${infer A}` ? AfterLastSpace<A> : S;
+
 export type TableName<Raw extends string> =
-  Lowercase<Raw> extends `${string}create table ${infer Name}(${string}` ? Normalize<Name> : never;
+  Lowercase<Raw> extends `${string}create ${string}table ${infer Name}(${string}`
+    ? AfterLastSpace<Normalize<Name>>
+    : never;
 
 export type NormalizedBody<Raw extends string> = Normalize<CreateTableBody<Raw>>;
 export type Entity<Columns extends Array<ColumnLiteral<string>>> = RawModel<Columns>;

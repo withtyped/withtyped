@@ -12,12 +12,15 @@ export type WithCorsConfig<T extends string> = {
   maxAge?: number;
 };
 
-export default function withCors<InputContext extends RequestContext, T extends string>({
+export default function withCors<
+  InputContext extends RequestContext,
+  T extends string = 'adaptive'
+>({
   allowedOrigin = 'adaptive',
   allowedHeaders = '*',
   allowedMethods = '*',
   maxAge = 2_592_000, // 30 days
-}: WithCorsConfig<T>) {
+}: WithCorsConfig<T> = {}) {
   const matchOrigin = (url: URL) => {
     if (allowedOrigin === 'adaptive') {
       return url.origin;

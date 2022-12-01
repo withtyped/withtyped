@@ -15,7 +15,7 @@ const Book = Model.create(
     price decimal not null default 99.99,
     year int,
     created_at timestamptz not null default(now()),
-    primary key id
+    constraint primary key id
   );
 `
 ).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
