@@ -1,14 +1,13 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { noop, RequestMethod } from '@withtyped/shared';
 import sinon from 'sinon';
 import { z } from 'zod';
 
 import RequestError from '../errors/RequestError.js';
-import { RequestMethod } from '../request.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.js';
 import { createHttpContext, createRequestContext } from '../test-utils/request.js';
-import { noop } from '../utils.js';
 import Router from './index.js';
 
 describe('Router', () => {
@@ -99,7 +98,7 @@ describe('Router', () => {
     );
   });
 
-  it('should set context with proper status and message when RequestError throws', async () => {
+  it('should throws error', async () => {
     const run = new Router()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
         throw new RequestError('Message 1');
@@ -109,22 +108,14 @@ describe('Router', () => {
       })
       .routes();
 
-    await run(
-      createRequestContext(RequestMethod.GET, '/books'),
-      async ({ status, json }) => {
-        assert.strictEqual(status, 400);
-        assert.deepStrictEqual(json, { message: 'Message 1' });
-      },
-      createHttpContext()
+    await assert.rejects(
+      run(createRequestContext(RequestMethod.GET, '/books'), noop, createHttpContext()),
+      new RequestError('Message 1')
     );
 
-    await run(
-      createRequestContext(RequestMethod.GET, '/books/1'),
-      async ({ status, json }) => {
-        assert.strictEqual(status, 401);
-        assert.deepStrictEqual(json, { message: 'Message 2' });
-      },
-      createHttpContext()
+    await assert.rejects(
+      run(createRequestContext(RequestMethod.GET, '/books/1'), noop, createHttpContext()),
+      new RequestError('Message 2', 401)
     );
   });
 

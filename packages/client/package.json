@@ -39,7 +39,8 @@
   },
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "dependencies": {
-    "@withtyped/server": "workspace:^0.1.0"
+    "@withtyped/shared": "workspace:*",
+    "@withtyped/server": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { noop } from '../utils.js';
+import { noop } from '@withtyped/shared';
+
 import Route from './route/index.js';
 import { matchRoute } from './utils.js';
 

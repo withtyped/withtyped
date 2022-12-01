@@ -1,5 +1,6 @@
+import { normalizePathname } from '@withtyped/shared';
+
 import type { Guarded, Params, RequestGuard } from '../types.js';
-import { normalizePathname } from '../utils.js';
 
 // Consider build params during matching routes to improve efficiency
 /**

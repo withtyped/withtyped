@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
 import sinon from 'sinon';
 
-import { RequestMethod } from '../request.js';
 import { createHttpContext } from '../test-utils/request.js';
 import koaAdapter from './koa.js';
 

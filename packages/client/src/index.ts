@@ -1,15 +1,16 @@
 import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
+import type { RequestMethod } from '@withtyped/shared';
+import { log, normalizePathname } from '@withtyped/shared';
 
 import type {
   RouterClient,
   RouterRoutes,
-  RequestMethod,
   ClientRequestHandler,
   ClientPayload,
   ClientConfig,
   ClientConfigInit,
 } from './types.js';
-import { buildSearchString, log, normalizePathname, tryJson } from './utils.js';
+import { buildSearchString, tryJson } from './utils.js';
 
 export default class Client<R extends Router, Routes extends BaseRoutes = RouterRoutes<R>>
   implements RouterClient<Routes>

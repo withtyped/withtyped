@@ -1,5 +1,6 @@
+import type { RequestMethod } from '@withtyped/shared';
+
 import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
-import type { RequestMethod } from '../request.js';
 import type { Parser } from '../types.js';
 
 export type MergeRoutes<A, B> = {

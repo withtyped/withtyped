@@ -30,8 +30,8 @@
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
     "@silverhand/essentials": "^1.3.0",
-    "@withtyped/client": "workspace:^0.1.0",
-    "@withtyped/server": "workspace:^0.1.0",
+    "@withtyped/client": "workspace:*",
+    "@withtyped/server": "workspace:*",
     "nanoid": "^4.0.0",
     "pg": "^8.8.0",
     "slonik": "^32.0.0",

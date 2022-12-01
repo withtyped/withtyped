@@ -1,12 +1,13 @@
 import http from 'node:http';
 import { promisify } from 'node:util';
 
+import { color, log } from '@withtyped/shared';
+
 import type { Composer } from './compose.js';
 import compose from './compose.js';
 import RequestError from './errors/RequestError.js';
 import type { BaseContext } from './middleware.js';
 import { getWriteResponse, writeContextToResponse } from './response.js';
-import { color, log } from './utils.js';
 
 export type CreateServer<
   T extends unknown[],
@@ -89,4 +90,4 @@ export { default as Router } from './router/index.js';
 export * from './router/index.js';
 export { default as compose } from './compose.js';
 export * from './middleware.js';
-export * from './request.js';
+export { RequestMethod } from '@withtyped/shared';

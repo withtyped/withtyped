@@ -2,9 +2,10 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { Socket } from 'node:net';
 import { TLSSocket } from 'node:tls';
 
+import type { RequestMethod } from '@withtyped/shared';
+
 import type { HttpContext } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
-import type { RequestMethod } from '../request.js';
 
 export const createHttpContext: (isHttps?: boolean) => HttpContext = (isHttps = false) => {
   const request = new IncomingMessage(isHttps ? new TLSSocket(new Socket()) : new Socket());

@@ -1,5 +1,6 @@
+import { log } from '@withtyped/shared';
+
 import type { Json, JsonArray, JsonObject } from '../../types.js';
-import { log } from '../../utils.js';
 import Sql, { createIdentifierSqlFunction, createSqlTag } from './abstract.js';
 
 export class IdentifierPostgreSql extends Sql {

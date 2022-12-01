@@ -1,10 +1,5 @@
-import type {
-  RequestMethod,
-  Router,
-  BaseRoutes,
-  GuardedPayload,
-  GuardedResponse,
-} from '@withtyped/server';
+import type { Router, BaseRoutes, GuardedPayload, GuardedResponse } from '@withtyped/server';
+import type { RequestMethod } from '@withtyped/shared';
 
 export type ClientPayload = {
   params?: Record<string, string>;
@@ -52,4 +47,4 @@ export type ClientConfigInit = {
     | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
 };
 
-export { type RequestMethod } from '@withtyped/server/lib/request.js';
+export { RequestMethod } from '@withtyped/shared';
