@@ -19,6 +19,7 @@
     "lib"
   ],
   "scripts": {
+    "precommit": "lint-staged",
     "prepack": "pnpm build",
     "build": "rm -rf lib/ && tsc",
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
@@ -35,6 +36,7 @@
     "@types/sinon": "^10.0.13",
     "c8": "^7.12.0",
     "eslint": "^8.28.0",
+    "lint-staged": "^13.0.4",
     "prettier": "^2.7.1",
     "sinon": "^14.0.2",
     "tap-arc": "^0.3.5",
