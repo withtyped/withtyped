@@ -1,8 +1,8 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import { contentTypes, RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
-import { describe, it } from 'node:test';
 import sinon from 'sinon';
 
 import { createHttpContext, stubResponseWrite } from '../test-utils/http.js';

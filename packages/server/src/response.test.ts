@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import { contentTypes } from '@withtyped/shared';
-import { describe, it } from 'node:test';
 
 import { getWriteResponse, writeContextToResponse } from './response.js';
 import { createHttpContext, stubResponseWrite } from './test-utils/http.js';

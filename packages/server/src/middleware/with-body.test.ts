@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 
 import { contentTypes, noop, RequestMethod } from '@withtyped/shared';
-import { describe, it } from 'node:test';
 
 import RequestError from '../errors/RequestError.js';
 import { createHttpContext } from '../test-utils/http.js';
