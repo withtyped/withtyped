@@ -28,6 +28,10 @@ export const writeContextToResponse = async (
   // eslint-disable-next-line @silverhand/fp/no-mutation
   response.statusCode = status ?? 404;
 
+  if (json) {
+    response.setHeader('content-type', 'application/json');
+  }
+
   if (headers) {
     for (const [key, value] of Object.entries(headers)) {
       if (value) {
@@ -38,7 +42,6 @@ export const writeContextToResponse = async (
 
   // Send JSON body
   if (json) {
-    response.setHeader('content-type', 'application/json');
     await getWriteResponse(response)(json);
   }
 };

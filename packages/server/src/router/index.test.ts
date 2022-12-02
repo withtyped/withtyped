@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import RequestError from '../errors/RequestError.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.js';
-import { createHttpContext, createRequestContext } from '../test-utils/request.js';
+import { createHttpContext, createRequestContext } from '../test-utils/http.js';
 import Router from './index.js';
 
 describe('Router', () => {

@@ -3,6 +3,7 @@ import { Socket } from 'node:net';
 import { TLSSocket } from 'node:tls';
 
 import type { RequestMethod } from '@withtyped/shared';
+import sinon from 'sinon';
 
 import type { HttpContext } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
@@ -28,3 +29,15 @@ export const createRequestContext = (
     body,
   },
 });
+
+export const stubResponseWrite = (response: ServerResponse) =>
+  sinon.stub(response, 'write').callsFake((_, callback, callback2) => {
+    if (typeof callback === 'function') {
+      // @ts-expect-error compatible with the function overload
+      callback(null);
+    } else {
+      callback2?.(null);
+    }
+
+    return true;
+  });

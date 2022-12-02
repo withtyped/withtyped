@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { noop, RequestMethod } from '@withtyped/shared';
 
 import { assertContext } from '../test-utils/middleware.js';
-import { createHttpContext } from '../test-utils/request.js';
+import { createHttpContext } from '../test-utils/http.js';
 import withRequest from './with-request.js';
 
 describe('withRequest()', () => {

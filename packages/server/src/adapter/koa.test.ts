@@ -1,11 +1,11 @@
 import assert from 'node:assert';
-import { describe, it } from 'node:test';
 
 import { RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
+import { describe, it } from 'node:test';
 import sinon from 'sinon';
 
-import { createHttpContext } from '../test-utils/request.js';
+import { createHttpContext, stubResponseWrite } from '../test-utils/http.js';
 import koaAdapter from './koa.js';
 
 describe('koaAdapter()', () => {
@@ -54,11 +54,7 @@ describe('koaAdapter()', () => {
     request.url = '/';
     /* eslint-enable @silverhand/fp/no-mutation */
 
-    const stub = sinon.stub(response, 'write').callsFake((_, __, callback) => {
-      callback?.(null);
-
-      return true;
-    });
+    const stub = stubResponseWrite(response);
 
     await koaAdapter(async (context, next) => {
       return next({
