@@ -27,7 +27,7 @@ export default function withCors<
     }
 
     if (typeof allowedOrigin === 'string') {
-      return allowedOrigin;
+      return allowedOrigin === url.origin ? allowedOrigin : undefined;
     }
 
     return allowedOrigin.test(url.origin) ? url.origin : undefined;
@@ -52,11 +52,11 @@ export default function withCors<
     return next({
       ...context,
       headers: {
-        ...headers,
-        ...(allowOrigin && { 'Access-Control-Allow-Origin': allowOrigin }),
-        'Access-Control-Allow-Headers': matchHeaders(headers),
-        'Access-Control-Allow-Methods': allowMethods,
-        'Access-Control-Max-Age': maxAge,
+        ...context.headers,
+        ...(allowOrigin && { 'access-control-allow-origin': allowOrigin }),
+        'access-control-allow-headers': matchHeaders(headers),
+        'access-control-allow-methods': allowMethods,
+        'access-control-max-age': maxAge,
       },
     });
   };
