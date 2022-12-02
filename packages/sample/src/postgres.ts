@@ -1,5 +1,5 @@
-import { PostgresModelClient } from '@withtyped/postgres';
-import createServer, { ModelRouter, Model } from '@withtyped/server';
+import { createModelRouter, createQueryClient } from '@withtyped/postgres';
+import createServer, { Model } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 import { z } from 'zod';
 
@@ -17,15 +17,14 @@ const Book = Model.create(
 `
 ).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
-const modelClient = new PostgresModelClient(Book, { database: 'withtyped' });
-const modelRouter = new ModelRouter(modelClient, '/books').withCrud();
+const queryClient = createQueryClient({ database: 'withtyped' });
+const modelRouter = createModelRouter(Book, queryClient).withCrud();
 
 const server = createServer({
+  queryClients: [queryClient],
   composer: createComposer().and(modelRouter.routes()),
 });
 
-await modelClient.connect();
-
-server.listen(() => {
+await server.listen(() => {
   console.log('Listening', 9001);
 });

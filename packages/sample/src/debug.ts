@@ -85,6 +85,6 @@ export const router = new Router()
 
 const server = createServer({ composer: createComposer().and(router.routes()) });
 
-server.listen(() => {
+await server.listen(() => {
   console.log('Listening', 9001);
 });

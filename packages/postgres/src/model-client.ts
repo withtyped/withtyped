@@ -1,8 +1,7 @@
 import type { Model } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
-import type { PoolConfig } from 'pg';
 
-import PostgresQueryClient from './query.js';
+import type PostgresQueryClient from './query-client.js';
 import type { PostgresJson } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';
 
@@ -16,11 +15,11 @@ export default class PostgresModelClient<
   CreateType extends Record<string, PostgresJson> = {},
   ModelType extends CreateType = CreateType
 > extends ModelClient<Table, CreateType, ModelType> {
-  protected queryClient: PostgresQueryClient;
-
-  constructor(readonly model: Model<Table, CreateType, ModelType>, config?: PoolConfig) {
+  constructor(
+    public readonly model: Model<Table, CreateType, ModelType>,
+    public readonly queryClient: PostgresQueryClient
+  ) {
     super();
-    this.queryClient = new PostgresQueryClient(config);
   }
 
   async connect() {
@@ -97,3 +96,6 @@ export default class PostgresModelClient<
     return rowCount > 0;
   }
 }
+
+export const createModelClient = (...args: ConstructorParameters<typeof PostgresModelClient>) =>
+  new PostgresModelClient(...args);

@@ -1,3 +1,6 @@
-export { default as PostgresModelClient } from './client.js';
-export { default as PostgresQueryClient } from './query.js';
+export { default as PostgresModelClient } from './model-client.js';
+export * from './model-client.js';
+export { default as PostgresQueryClient } from './query-client.js';
+export * from './query-client.js';
 export * from './sql.js';
+export * from './utils.js';

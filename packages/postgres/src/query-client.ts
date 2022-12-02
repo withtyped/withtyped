@@ -27,3 +27,6 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
     return this.pool.query(raw, args);
   }
 }
+
+export const createQueryClient = (...args: ConstructorParameters<typeof PostgresQueryClient>) =>
+  new PostgresQueryClient(...args);

@@ -4,7 +4,6 @@ import type {
   Entity,
   IdKeys,
   NormalizedBody,
-  PrimaryKey,
   RawParserConfig,
   SplitRawColumns,
   TableName,
@@ -22,7 +21,6 @@ export default class Model<
   Table extends string = '',
   CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
-  IdKey extends string = never,
   ExtendGuard extends Record<string, Parser<unknown>> = {}
   /* eslint-enable @typescript-eslint/ban-types */
 > {
@@ -31,12 +29,10 @@ export default class Model<
 
     type Columns = SplitRawColumns<Normalized>;
 
-    return new Model<
-      TableName<Raw>,
-      CreateEntity<Columns>,
-      Entity<Columns>,
-      PrimaryKey<Normalized>
-    >(raw, Object.freeze({}));
+    return new Model<TableName<Raw>, CreateEntity<Columns>, Entity<Columns>>(
+      raw,
+      Object.freeze({})
+    );
   };
 
   public readonly tableName: Table;
@@ -67,7 +63,6 @@ export default class Model<
       Table,
       Omit<CreateType, Key> & { [key in Key]: Type },
       Omit<ModelType, Key> & { [key in Key]: Type },
-      IdKey,
       ExtendGuard & { [key in Key]: Parser<Type> }
     >(
       this.raw,
@@ -168,3 +163,6 @@ export default class Model<
     return result as ModelType | CreateType | Partial<CreateType>;
   }
 }
+
+export const createModel = Model.create;
+export * from './types.js';

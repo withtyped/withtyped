@@ -7,6 +7,7 @@ import type { Composer } from './compose.js';
 import compose from './compose.js';
 import RequestError from './errors/RequestError.js';
 import type { BaseContext } from './middleware.js';
+import type QueryClient from './query/client.js';
 import { getWriteResponse, writeContextToResponse } from './response.js';
 
 export type CreateServer<
@@ -16,6 +17,7 @@ export type CreateServer<
 > = {
   port?: number;
   composer?: Composer<T, InputContext, OutputContext>;
+  queryClients?: QueryClient[];
 };
 
 export const handleError = async (response: http.ServerResponse, error: unknown) => {
@@ -37,6 +39,7 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
 export default function createServer<T extends unknown[], OutputContext extends BaseContext>({
   port = 9001,
   composer,
+  queryClients,
 }: CreateServer<T, BaseContext, OutputContext>) {
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
@@ -69,9 +72,37 @@ export default function createServer<T extends unknown[], OutputContext extends 
     );
   });
 
+  // eslint-disable-next-line @silverhand/fp/no-let
+  let killed = false;
+
+  const kill = async () => {
+    if (killed) {
+      return;
+    }
+
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    killed = true;
+
+    if (queryClients) {
+      await Promise.all(queryClients.map(async (client) => client.end()));
+    }
+
+    console.log('Exited');
+    // eslint-disable-next-line unicorn/no-process-exit
+    process.exit(0);
+  };
+
   return {
     server,
-    listen: (listener?: (port: number) => void) => {
+    listen: async (listener?: (port: number) => void) => {
+      process.on('SIGINT', kill);
+      process.on('SIGQUIT', kill);
+      process.on('SIGTERM', kill);
+
+      if (queryClients) {
+        await Promise.all(queryClients.map(async (client) => client.connect()));
+      }
+
       server.listen(port);
 
       if (listener) {
@@ -94,6 +125,7 @@ export * from './middleware.js';
 export { RequestMethod } from '@withtyped/shared';
 
 export { default as Model } from './model/index.js';
+export * from './model/index.js';
 export { default as ModelClient } from './model-client/index.js';
 export * from './model-client/index.js';
 export { default as ModelRouter } from './model-router/index.js';
