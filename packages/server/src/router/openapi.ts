@@ -1,8 +1,9 @@
+import { contentTypes } from '@withtyped/shared';
+
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
 import type { MethodRoutesMap } from './index.js';
 
-const contentJson = 'application/json';
 const defaultInfo: OpenAPIV3.InfoObject = { title: 'API reference', version: '0.1.0' };
 const defaultResponses: OpenAPIV3.ResponsesObject = {
   '204': {
@@ -39,13 +40,13 @@ export const buildOpenApiJson = (
         parameters: [...parseParameters(path), ...parseSearch(guard.search)],
         requestBody: guard.body && {
           required: true,
-          content: { [contentJson]: { schema: parse(guard.body) } },
+          content: { [contentTypes.json]: { schema: parse(guard.body) } },
         },
         responses: guard.response
           ? {
               '200': {
                 description: 'OK',
-                content: { [contentJson]: { schema: parse(guard.response) } },
+                content: { [contentTypes.json]: { schema: parse(guard.response) } },
               },
             }
           : defaultResponses,

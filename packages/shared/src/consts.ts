@@ -8,3 +8,7 @@ export const lowerRequestMethods = Object.freeze(
     (value) => value.toLowerCase() as Lowercase<RequestMethod>
   )
 );
+
+export const contentTypes = Object.freeze({
+  json: 'application/json',
+});

@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RequestMethod } from '@withtyped/shared';
+import { contentTypes, RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
 import { describe, it } from 'node:test';
 import sinon from 'sinon';
@@ -68,7 +68,7 @@ describe('koaAdapter()', () => {
     assert.ok(koaNext.calledOnceWithExactly());
     assert.ok(!response.headersSent);
     assert.strictEqual(response.statusCode, 200);
-    assert.strictEqual(response.getHeader('Content-Type'), 'application/json');
+    assert.strictEqual(response.getHeader('Content-Type'), contentTypes.json);
     assert.strictEqual(response.getHeader('Test'), 'foo/bar');
     assert.ok(
       stub.calledOnceWith(JSON.stringify({ host: 'localtest:3000', foo: ['bar'] }), 'utf8')

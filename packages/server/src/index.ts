@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { promisify } from 'node:util';
 
-import { color, log } from '@withtyped/shared';
+import { color, contentTypes, log } from '@withtyped/shared';
 
 import type { Composer } from './compose.js';
 import compose from './compose.js';
@@ -28,7 +28,7 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
   if (!response.headersSent) {
     // eslint-disable-next-line @silverhand/fp/no-mutation
     response.statusCode = requestError?.status ?? 500;
-    response.setHeader('content-type', 'application/json');
+    response.setHeader('content-type', contentTypes.json);
   }
 
   await getWriteResponse(response)({

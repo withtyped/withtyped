@@ -1,3 +1,6 @@
+import { contentTypes, log } from '@withtyped/shared';
+
+import RequestError from '../errors/RequestError.js';
 import type { HttpContext, NextFunction } from '../middleware.js';
 import type { Json } from '../types.js';
 import type { MergeRequestContext, RequestContext } from './with-request.js';
@@ -12,7 +15,9 @@ const tryParse = (body: Buffer): Json | undefined => {
     // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return JSON.parse(body.toString());
-  } catch {}
+  } catch (error: unknown) {
+    log.debug('Failed to parse JSON string in `withBody()`', error);
+  }
 };
 
 export default function withBody<InputContext extends RequestContext>() {
@@ -21,11 +26,18 @@ export default function withBody<InputContext extends RequestContext>() {
     next: NextFunction<WithBodyContext<InputContext>>,
     { request }: HttpContext
   ) => {
+    if (context.request.headers['content-type'] !== contentTypes.json) {
+      throw new RequestError(
+        `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,
+        400
+      );
+    }
+
     const readBody = async () =>
       new Promise<Buffer>((resolve, reject) => {
         const body: Uint8Array[] = [];
         // eslint-disable-next-line @silverhand/fp/no-mutating-methods
-        const pushToBody = (chunk: Uint8Array) => body.push(chunk);
+        const pushToBody = (chunk: Uint8Array | Buffer) => body.push(chunk);
 
         request
           .on('data', pushToBody)

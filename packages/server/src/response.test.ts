@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 
+import { contentTypes } from '@withtyped/shared';
 import { describe, it } from 'node:test';
 
 import { getWriteResponse, writeContextToResponse } from './response.js';
@@ -20,7 +21,7 @@ describe('writeContextToResponse()', () => {
 
     await writeContextToResponse(response, { json: { foo: 'bar' } });
     assert.strictEqual(response.statusCode, 404);
-    assert.strictEqual(response.getHeader('content-type'), 'application/json');
+    assert.strictEqual(response.getHeader('content-type'), contentTypes.json);
     assert.ok(stub.calledOnceWith(JSON.stringify({ foo: 'bar' }), 'utf8'));
   });
 
