@@ -18,17 +18,18 @@ export const createHttpContext: (isHttps?: boolean) => HttpContext = (isHttps = 
 };
 
 export const createRequestContext = (
-  method: RequestMethod,
+  method: RequestMethod | undefined,
   path: string,
   body?: unknown
-): RequestContext => ({
-  request: {
-    method,
-    url: new URL(path, 'https://localtest'),
-    headers: {},
-    body,
-  },
-});
+): RequestContext =>
+  Object.freeze({
+    request: {
+      method,
+      url: new URL(path, 'https://localtest'),
+      headers: {},
+      body,
+    },
+  });
 
 export const stubResponseWrite = (response: ServerResponse) =>
   sinon.stub(response, 'write').callsFake((_, callback, callback2) => {

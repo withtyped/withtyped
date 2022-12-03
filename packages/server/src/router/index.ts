@@ -139,7 +139,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
   public withOpenApi(
     parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
-    info?: OpenAPIV3.InfoObject
+    info?: Partial<OpenAPIV3.InfoObject>
   ) {
     return this.get<'/openapi.json', unknown, unknown, OpenAPIV3.Document>(
       '/openapi.json',

@@ -5,7 +5,7 @@ import { noop } from '@withtyped/shared';
 
 import compose, { ComposeError } from './compose.js';
 import type { BaseContext, MiddlewareFunction } from './middleware.js';
-import { createHttpContext } from './test-utils/http.js';
+import { createHttpContext } from './test-utils/http.test.js';
 
 type Ctx1 = BaseContext & { c1: string };
 

@@ -5,7 +5,7 @@ import { contentTypes, RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
 import sinon from 'sinon';
 
-import { createHttpContext, stubResponseWrite } from '../test-utils/http.js';
+import { createHttpContext, stubResponseWrite } from '../test-utils/http.test.js';
 import koaAdapter from './koa.js';
 
 describe('koaAdapter()', () => {

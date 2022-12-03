@@ -2,12 +2,14 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
 import { noop, RequestMethod } from '@withtyped/shared';
+import OpenAPISchemaValidator from 'openapi-schema-validator';
 import sinon from 'sinon';
 import { z } from 'zod';
 
 import RequestError from '../errors/RequestError.js';
-import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.js';
-import { createHttpContext, createRequestContext } from '../test-utils/http.js';
+import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
+import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
+import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
 import Router from './index.js';
 
 describe('Router', () => {
@@ -166,5 +168,74 @@ describe('Router', () => {
     assert.throws(() => new Router('/foo/:asd'), TypeError);
     // @ts-expect-error for testing
     assert.throws(() => new Router('/foo/bar/'), TypeError);
+  });
+
+  it('should do nothing when no route matches', async () => {
+    const run = new Router()
+      .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
+        throw new RequestError('Message 1');
+      })
+      .get('/books/:id', { response: bookGuard }, () => {
+        throw new RequestError('Message 2', 401);
+      })
+      .routes();
+    const context1 = createRequestContext(RequestMethod.GET, '/books1');
+    const context2 = createRequestContext(RequestMethod.GET, '/books/1/ok');
+    const context3 = createRequestContext(undefined, '/books');
+
+    await run(
+      context1,
+      async (context) => {
+        assert.deepStrictEqual(context1, context);
+      },
+      createHttpContext()
+    );
+    await run(
+      context2,
+      async (context) => {
+        assert.deepStrictEqual(context2, context);
+      },
+      createHttpContext()
+    );
+    await run(
+      context3,
+      async (context) => {
+        assert.deepStrictEqual(context3, context);
+      },
+      createHttpContext()
+    );
+  });
+
+  it('should build proper OpenAPI JSON', async () => {
+    // @ts-expect-error have to do this, looks like a module loader issue
+    const Validator = OpenAPISchemaValidator.default as typeof OpenAPISchemaValidator;
+
+    const validator = new Validator({ version: 3 });
+    const run = new Router()
+      .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
+        throw new RequestError('Message 1');
+      })
+      .post(
+        '/books/:id',
+        {
+          search: z.object({ key: z.string().optional() }),
+          body: bookGuard.partial(),
+          response: bookGuard,
+        },
+        () => {
+          throw new RequestError('Message 2', 401);
+        }
+      )
+      .withOpenApi(zodTypeToParameters, zodTypeToSwagger, { title: 'withtyped' })
+      .routes();
+
+    await run(
+      createRequestContext(RequestMethod.GET, '/openapi.json'),
+      async (context) => {
+        // @ts-expect-error for testing
+        assert.deepStrictEqual(validator.validate(context.json).errors, []);
+      },
+      createHttpContext()
+    );
   });
 });

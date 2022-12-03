@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { contentTypes } from '@withtyped/shared';
 
 import { getWriteResponse, writeContextToResponse } from './response.js';
-import { createHttpContext, stubResponseWrite } from './test-utils/http.js';
+import { createHttpContext, stubResponseWrite } from './test-utils/http.test.js';
 
 describe('writeContextToResponse()', () => {
   it('should write correct value to response based on context', async () => {

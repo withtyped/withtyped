@@ -26,7 +26,7 @@ export const buildOpenApiJson = (
   routesMap: MethodRoutesMap,
   parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
   parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
-  info = defaultInfo
+  info?: Partial<OpenAPIV3.InfoObject>
 ): OpenAPIV3.Document => {
   type MethodMap = {
     [key in OpenAPIV3.HttpMethods]?: OpenAPIV3.OperationObject;
@@ -61,7 +61,7 @@ export const buildOpenApiJson = (
 
   return {
     openapi: '3.0.1',
-    info,
+    info: { ...defaultInfo, ...info },
     paths: Object.fromEntries(pathMap),
   };
 };

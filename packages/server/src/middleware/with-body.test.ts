@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { contentTypes, noop, RequestMethod } from '@withtyped/shared';
 
 import RequestError from '../errors/RequestError.js';
-import { createHttpContext } from '../test-utils/http.js';
+import { createHttpContext } from '../test-utils/http.test.js';
 import withBody from './with-body.js';
 import type { RequestContext } from './with-request.js';
 
