@@ -41,8 +41,14 @@ export const parseTableName = (raw: string): string | undefined => {
   return match?.[1] ?? undefined;
 };
 
+/**
+ * Parse a SQL string to column configs with camelCase keys.
+ *
+ * @param raw The raw SQL string.
+ * @returns An object with camelCase keys, while their values are the column configs read from SQL.
+ */
 export const parseRawConfigs = (raw: string): Record<string, RawParserConfig> => {
-  const matchBody = /create table [^ ]+ \((.*)\);/.exec(normalizeString(raw));
+  const matchBody = /create table [^()]+ \((.*)\);/.exec(normalizeString(raw));
   const body = matchBody?.[1];
 
   if (!body) {
@@ -58,14 +64,15 @@ export const parseRawConfigs = (raw: string): Record<string, RawParserConfig> =>
       const props = rest.join(' ');
       const type = findType(rawType);
 
-      if (!name || !type) {
+      if (!name || !type || ['constraint', 'like'].includes(name)) {
         return;
       }
 
       return [
-        name,
+        camelCase(name),
         {
           type,
+          rawKey: name,
           isArray: props.includes('array'),
           isNullable: !props.includes('not null'),
           hasDefault: props.includes('default'),
@@ -76,6 +83,8 @@ export const parseRawConfigs = (raw: string): Record<string, RawParserConfig> =>
 
   return Object.fromEntries(columns);
 };
+
+const undefinedIfNaN = (number: number) => (Number.isNaN(number) ? undefined : number);
 
 // eslint-disable-next-line complexity
 export const parsePrimitiveType = (
@@ -88,11 +97,11 @@ export const parsePrimitiveType = (
 
     case 'number':
       if (typeof value === 'number') {
-        return value;
+        return undefinedIfNaN(value);
       }
 
       if (typeof value === 'string') {
-        return Number(value);
+        return undefinedIfNaN(Number(value));
       }
 
       return;
@@ -110,9 +119,13 @@ export const parsePrimitiveType = (
 export const isObject = (value: unknown): value is JsonObject =>
   typeof value === 'object' && value !== null;
 
-export const camelCase = <T extends string>(value: T): CamelCase<T> =>
-  // eslint-disable-next-line no-restricted-syntax
-  value
-    .split('_')
+export const camelCase = <T extends string>(value: T): CamelCase<T> => {
+  // Convert to PascalCase first to prevent unexpected prefix or suffix
+  const pascalCase = value
+    .split(/[_-]/)
     .map((value, index) => (index === 0 ? value : (value[0] ?? '').toUpperCase() + value.slice(1)))
-    .join('') as CamelCase<T>;
+    .join('');
+
+  // eslint-disable-next-line no-restricted-syntax
+  return ((pascalCase[0] ?? '').toLowerCase() + pascalCase.slice(1)) as CamelCase<T>;
+};

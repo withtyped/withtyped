@@ -8,13 +8,7 @@ import type {
   SplitRawColumns,
   TableName,
 } from './types.js';
-import {
-  camelCase,
-  isObject,
-  parsePrimitiveType,
-  parseRawConfigs,
-  parseTableName,
-} from './utils.js';
+import { isObject, parsePrimitiveType, parseRawConfigs, parseTableName } from './utils.js';
 
 export default class Model<
   /* eslint-disable @typescript-eslint/ban-types */
@@ -86,31 +80,40 @@ export default class Model<
 
     /* eslint-disable @silverhand/fp/no-mutation */
     for (const [key, config] of Object.entries(this.extendedConfigs)) {
-      const camelCaseKey = camelCase(key);
-      const value = data[key] === undefined ? data[camelCaseKey] : data[key];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const snakeCaseKey = this.rawConfigs[key]!.rawKey; // Should be ensured during init
+      const value = data[key] === undefined ? data[snakeCaseKey] : data[key];
 
-      if (
-        value === undefined &&
-        ((forType === 'create' && Boolean(this.rawConfigs[key]?.hasDefault)) || forType === 'patch')
-      ) {
-        continue;
+      if (value === undefined) {
+        if (
+          (forType === 'create' && Boolean(this.rawConfigs[key]?.hasDefault)) ||
+          forType === 'patch'
+        ) {
+          continue;
+        }
+
+        throw new TypeError(
+          `Key \`${key}\` received unexpected ${String(
+            value
+          )}. If you are trying to provide an explicit empty value, use null instead.`
+        );
       }
 
-      result[camelCaseKey] = config.parse(value);
+      result[key] = config.parse(value);
     }
 
     for (const [key, config] of Object.entries(this.rawConfigs)) {
-      const camelCaseKey = camelCase(key);
+      const snakeCaseKey = config.rawKey;
 
-      if (key in this.extendedConfigs || camelCaseKey in this.extendedConfigs) {
+      if (key in this.extendedConfigs || snakeCaseKey in this.extendedConfigs) {
         continue;
       }
 
-      const value = data[key] === undefined ? data[camelCaseKey] : data[key];
+      const value = data[key] === undefined ? data[snakeCaseKey] : data[key];
 
       if (value === null) {
         if (config.isNullable) {
-          result[camelCaseKey] = null;
+          result[key] = null;
           continue;
         } else {
           throw new TypeError(`Key \`${key}\` is not nullable but received ${String(value)}`);
@@ -120,13 +123,13 @@ export default class Model<
       if (value === undefined) {
         if ((forType === 'create' && config.hasDefault) || forType === 'patch') {
           continue;
-        } else {
-          throw new TypeError(
-            `Key \`${key}\` received unexpected ${String(
-              value
-            )}. If you are trying to provide an explicit empty value, use null instead.`
-          );
         }
+
+        throw new TypeError(
+          `Key \`${key}\` received unexpected ${String(
+            value
+          )}. If you are trying to provide an explicit empty value, use null instead.`
+        );
       }
 
       if (config.isArray) {
@@ -140,7 +143,7 @@ export default class Model<
           );
         }
 
-        result[camelCaseKey] = parsed;
+        result[key] = parsed;
         continue;
       } else {
         const parsed = parsePrimitiveType(value, config.type);
@@ -153,7 +156,7 @@ export default class Model<
           );
         }
 
-        result[camelCaseKey] = parsed;
+        result[key] = parsed;
         continue;
       }
     }

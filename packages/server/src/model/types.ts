@@ -92,6 +92,7 @@ export type RawCreateModel<S extends Array<[string, unknown]>> = S extends never
     };
 
 export type RawParserConfig = {
+  rawKey: string;
   type: PrimitiveType;
   isArray: boolean;
   isNullable: boolean;
