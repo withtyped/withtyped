@@ -37,11 +37,9 @@ export default function withCors<
     return allowedOrigin.test(origin) ? origin : undefined;
   };
 
-  const matchHeaders = (headers: IncomingHttpHeaders) => {
+  const matchHeaders = (requestHeaders: string[]) => {
     if (allowedHeaders instanceof RegExp) {
-      return Object.keys(headers)
-        .filter((value) => allowedHeaders.test(value))
-        .join(', ');
+      return requestHeaders.filter((value) => allowedHeaders.test(value)).join(', ');
     }
 
     return Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders;
@@ -58,7 +56,9 @@ export default function withCors<
       headers: {
         ...context.headers,
         ...(allowOrigin && { 'access-control-allow-origin': allowOrigin }),
-        'access-control-allow-headers': matchHeaders(headers),
+        'access-control-allow-headers': matchHeaders(
+          headers['access-control-request-headers']?.split(',').map((value) => value.trim()) ?? []
+        ),
         'access-control-allow-methods': allowMethods,
         'access-control-max-age': maxAge,
       },

@@ -91,9 +91,7 @@ describe('withCors()', () => {
     await withCorsRegExp(
       mockContext(endpointUrl, {
         origin: 'http://localhost:3000',
-        'content-type': 'some-type',
-        'content-encoding': 'some-encoding',
-        'accept-language': 'some-language',
+        'access-control-request-headers': 'content-type, content-encoding, accept-language',
       }),
       async (context) => {
         assertHeaders(context, 'http://localhost:3000', 'content-type, content-encoding');
@@ -109,10 +107,10 @@ describe('withCors()', () => {
   });
 
   it('should show proper methods', async () => {
-    await withCors({ allowedMethods: ['GET', 'OPTIONS'] })(
+    await withCors({ allowedMethods: ['GET', 'DELETE'] })(
       mockContext(endpointUrl),
       async (context) => {
-        assertHeaders(context, 'https://localhost', undefined, 'GET, OPTIONS');
+        assertHeaders(context, 'https://localhost', undefined, 'GET, DELETE');
       }
     );
   });
