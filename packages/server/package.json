@@ -25,7 +25,8 @@
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
     "dev:test": "pnpm build && pnpm test",
     "lint": "eslint src/",
-    "test": "c8 node --test | tap-arc"
+    "test": "c8 node --test | tap-arc",
+    "test:all": "c8 --all node --test | tap-arc"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

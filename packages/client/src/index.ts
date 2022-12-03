@@ -1,6 +1,6 @@
 import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
 import type { RequestMethod } from '@withtyped/shared';
-import { log, normalizePathname } from '@withtyped/shared';
+import { contentTypes, log, normalizePathname } from '@withtyped/shared';
 
 import type {
   RouterClient,
@@ -73,9 +73,9 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
     const { headers } = this.config;
 
     return {
-      'content-type': 'application/json; charset=utf-8',
+      'content-type': contentTypes.json,
       host: url.host,
-      accept: 'application/json',
+      accept: contentTypes.json,
       ...(typeof headers === 'function' ? headers(url, method) : headers),
     };
   }
