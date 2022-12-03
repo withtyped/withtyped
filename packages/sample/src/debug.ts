@@ -1,11 +1,14 @@
 import { faker } from '@faker-js/faker';
 import createServer, { RequestError, Router } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
+import {
+  zodTypeToParameters,
+  zodTypeToSwagger,
+} from '@withtyped/server/lib/test-utils/openapi.test.js';
 import { z } from 'zod';
 
 import type { Book } from './book.js';
 import { bookGuard, createBook } from './book.js';
-import { zodTypeToParameters, zodTypeToSwagger } from './openapi.js';
 
 // eslint-disable-next-line @silverhand/fp/no-let
 let books = Array.from({ length: 10 }).map(() => createBook());
@@ -45,7 +48,7 @@ export const router = new Router()
   )
   .patch(
     '/books/:id',
-    { body: bookGuard.omit({ id: true }), response: bookGuard },
+    { body: bookGuard.omit({ id: true }).partial(), response: bookGuard },
     async (context, next) => {
       const bookIndex = books.findIndex(({ id }) => id === context.request.params.id);
 
@@ -85,6 +88,6 @@ export const router = new Router()
 
 const server = createServer({ composer: createComposer().and(router.routes()) });
 
-server.listen(() => {
+await server.listen(() => {
   console.log('Listening', 9001);
 });

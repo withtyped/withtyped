@@ -30,6 +30,7 @@
     "@silverhand/ts-config": "^1.2.1",
     "@types/node": "^18.11.9",
     "eslint": "^8.28.0",
+    "lint-staged": "^13.0.4",
     "prettier": "^2.7.1",
     "tap-arc": "^0.3.5",
     "typescript": "^4.9.3"
@@ -39,7 +40,8 @@
   },
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "dependencies": {
-    "@withtyped/server": "workspace:^0.1.0"
+    "@withtyped/server": "workspace:*",
+    "@withtyped/shared": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

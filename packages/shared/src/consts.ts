@@ -1,13 +1,4 @@
-export enum RequestMethod {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  PATCH = 'PATCH',
-  DELETE = 'DELETE',
-  COPY = 'COPY',
-  HEAD = 'HEAD',
-  OPTIONS = 'OPTIONS',
-}
+import { RequestMethod } from './types.js';
 
 export const requestMethods = Object.freeze(Object.values(RequestMethod));
 export const lowerRequestMethods = Object.freeze(
@@ -17,3 +8,7 @@ export const lowerRequestMethods = Object.freeze(
     (value) => value.toLowerCase() as Lowercase<RequestMethod>
   )
 );
+
+export const contentTypes = Object.freeze({
+  json: 'application/json',
+});

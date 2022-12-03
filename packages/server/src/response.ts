@@ -1,6 +1,8 @@
 import type { ServerResponse } from 'http';
 import { promisify } from 'node:util';
 
+import { contentTypes } from '@withtyped/shared';
+
 import type { BaseContext } from './middleware.js';
 
 // Need `null` to make callback be compatible with `promisify()`
@@ -28,6 +30,10 @@ export const writeContextToResponse = async (
   // eslint-disable-next-line @silverhand/fp/no-mutation
   response.statusCode = status ?? 404;
 
+  if (json) {
+    response.setHeader('content-type', contentTypes.json);
+  }
+
   if (headers) {
     for (const [key, value] of Object.entries(headers)) {
       if (value) {
@@ -38,7 +44,6 @@ export const writeContextToResponse = async (
 
   // Send JSON body
   if (json) {
-    response.setHeader('content-type', 'application/json');
     await getWriteResponse(response)(json);
   }
 };

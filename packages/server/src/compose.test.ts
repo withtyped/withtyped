@@ -1,10 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { noop } from '@withtyped/shared';
+
 import compose, { ComposeError } from './compose.js';
 import type { BaseContext, MiddlewareFunction } from './middleware.js';
-import { createHttpContext } from './test-utils/request.js';
-import { noop } from './utils.js';
+import { createHttpContext } from './test-utils/http.test.js';
 
 type Ctx1 = BaseContext & { c1: string };
 

@@ -1,9 +1,10 @@
-import RequestError from '../errors/RequestError.js';
+import type { RequestMethod } from '@withtyped/shared';
+import { log } from '@withtyped/shared';
+
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
-import type { RequestMethod } from '../request.js';
-import { log } from '../utils.js';
+import type { Parser } from '../types.js';
 import { buildOpenApiJson } from './openapi.js';
 import type { RouteLike } from './route/index.js';
 import Route from './route/index.js';
@@ -13,7 +14,6 @@ import type {
   MergeRoutes,
   Normalized,
   NormalizedPrefix,
-  Parser,
   PathGuard,
   RequestGuard,
   RoutesWithPrefix,
@@ -34,7 +34,7 @@ export type RouterWithRoute<
   Response
 > = Router<
   {
-    [method in keyof Routes]: method extends Method
+    [method in Lowercase<RequestMethod>]: method extends Method
       ? Routes[method] & {
           [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<Path, Search, Body, Response>;
         }
@@ -61,6 +61,12 @@ export type BuildRoute<
 type BaseRouter<Routes extends BaseRoutes, Prefix extends string> = {
   [key in Lowercase<RequestMethod>]: BuildRoute<Routes, Prefix, key>;
 };
+
+export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
+  infer Routes
+>
+  ? Routes
+  : never;
 
 export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix extends string = ''>
   implements BaseRouter<Routes, Prefix>
@@ -114,38 +120,26 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
       log.debug('matched route', this.prefix, route.path);
 
-      try {
-        await route.runnable(
-          originalContext,
-          async (context) => {
-            const responseGuard = route.guard.response;
+      await route.runnable(
+        originalContext,
+        async (context) => {
+          const responseGuard = route.guard.response;
 
-            if (responseGuard) {
-              responseGuard.parse(context.json);
-            }
+          if (responseGuard) {
+            responseGuard.parse(context.json);
+          }
 
-            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
-          },
-          http
-        );
-      } catch (error: unknown) {
-        if (error instanceof RequestError) {
-          return next({
-            ...originalContext,
-            status: error.status,
-            json: { message: error.message },
-          });
-        }
-
-        throw error;
-      }
+          return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+        },
+        http
+      );
     };
   }
 
   public withOpenApi(
     parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
-    info?: OpenAPIV3.InfoObject
+    info?: Partial<OpenAPIV3.InfoObject>
   ) {
     return this.get<'/openapi.json', unknown, unknown, OpenAPIV3.Document>(
       '/openapi.json',
@@ -190,7 +184,8 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
         new Route(this.prefix, path, guard, run)
       );
 
-      return this;
+      // eslint-disable-next-line no-restricted-syntax
+      return this as ReturnType<ReturnType<typeof this.buildRoute<Method>>>;
     };
   }
 }

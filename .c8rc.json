@@ -1,0 +1,4 @@
+{
+  "reporter": "html",
+  "src": "./lib"
+}

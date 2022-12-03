@@ -1,17 +1,9 @@
+import { contentTypes, log } from '@withtyped/shared';
+
+import RequestError from '../errors/RequestError.js';
 import type { HttpContext, NextFunction } from '../middleware.js';
+import type { Json } from '../types.js';
 import type { MergeRequestContext, RequestContext } from './with-request.js';
-
-// Manually define JSON types since `JSON.prase()` returns any
-// https://github.com/Microsoft/TypeScript/issues/15225
-/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/consistent-indexed-object-style */
-
-/** Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#return_value */
-export type Json = JsonObject | JsonArray | string | number | boolean | null;
-export type JsonArray = Json[];
-export type JsonObject = {
-  [key: string]: Json;
-};
-/* eslint-enable @typescript-eslint/ban-types, @typescript-eslint/consistent-indexed-object-style */
 
 export type WithBodyContext<InputContext extends RequestContext> = MergeRequestContext<
   InputContext,
@@ -20,10 +12,18 @@ export type WithBodyContext<InputContext extends RequestContext> = MergeRequestC
 
 const tryParse = (body: Buffer): Json | undefined => {
   try {
+    const string = body.toString();
+
+    if (!string) {
+      return;
+    }
+
     // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(body.toString());
-  } catch {}
+    return JSON.parse(string);
+  } catch (error: unknown) {
+    log.debug('Failed to parse JSON string in `withBody()`', error);
+  }
 };
 
 export default function withBody<InputContext extends RequestContext>() {
@@ -32,11 +32,18 @@ export default function withBody<InputContext extends RequestContext>() {
     next: NextFunction<WithBodyContext<InputContext>>,
     { request }: HttpContext
   ) => {
+    if (context.request.headers['content-type'] !== contentTypes.json) {
+      throw new RequestError(
+        `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,
+        400
+      );
+    }
+
     const readBody = async () =>
       new Promise<Buffer>((resolve, reject) => {
         const body: Uint8Array[] = [];
         // eslint-disable-next-line @silverhand/fp/no-mutating-methods
-        const pushToBody = (chunk: Uint8Array) => body.push(chunk);
+        const pushToBody = (chunk: Uint8Array | Buffer) => body.push(chunk);
 
         request
           .on('data', pushToBody)

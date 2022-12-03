@@ -35,6 +35,6 @@ const server = createServer({
     }),
 });
 
-server.listen((port) => {
+await server.listen((port) => {
   console.log('Server is listening port', port);
 });

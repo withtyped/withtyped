@@ -2,7 +2,6 @@ import assert from 'node:assert';
 
 import type { ValuesOf } from '@silverhand/essentials';
 import { conditional } from '@silverhand/essentials';
-import type { OpenAPIV3 } from '@withtyped/server/lib/openapi/openapi-types.js';
 import type { ZodStringDef } from 'zod';
 import {
   ZodOptional,
@@ -19,6 +18,8 @@ import {
   ZodBoolean,
   ZodEffects,
 } from 'zod';
+
+import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 
 // https://github.com/colinhacks/zod#literals
 const zodLiteralToSwagger = (zodLiteral: ZodLiteral<unknown>): OpenAPIV3.SchemaObject => {
@@ -126,7 +127,7 @@ export const zodTypeToSwagger = (config: unknown): OpenAPIV3.SchemaObject => {
   if (config instanceof ZodUnion) {
     return {
       // ZodUnion.options type is any
-      // eslint-disable-next-line no-restricted-syntax
+
       oneOf: (config.options as unknown[]).map((option) => zodTypeToSwagger(option)),
     };
   }

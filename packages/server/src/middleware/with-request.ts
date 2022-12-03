@@ -1,9 +1,10 @@
 import type { IncomingHttpHeaders } from 'http';
 import { TLSSocket } from 'tls';
 
+import type { RequestMethod } from '@withtyped/shared';
+import { requestMethods } from '@withtyped/shared';
+
 import type { BaseContext, HttpContext, NextFunction } from '../middleware.js';
-import type { RequestMethod } from '../request.js';
-import { requestMethods } from '../request.js';
 
 export type WithRequestContext<InputContext> = InputContext & {
   request: { method?: RequestMethod; headers: IncomingHttpHeaders; url: URL; body?: unknown };

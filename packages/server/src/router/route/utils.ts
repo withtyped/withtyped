@@ -1,3 +1,5 @@
+import { normalizePathname } from '@withtyped/shared';
+
 import type { Guarded, Params, RequestGuard } from '../types.js';
 
 // Consider build params during matching routes to improve efficiency
@@ -68,15 +70,17 @@ export const searchParamsToObject = (
 };
 
 export const guardInput = <Path extends string, Search, Body>(
+  prefix: string,
   path: Path,
   url: URL,
   body: unknown,
   guard: RequestGuard<Search, Body, unknown>
+  // eslint-disable-next-line max-params
 ): Guarded<Path, Search, Body> =>
   // The compiler cannot infer the output
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, no-restricted-syntax
   ({
-    params: parsePathParams(path, url),
+    params: parsePathParams(normalizePathname(prefix + path), url),
     search: guard.search?.parse(searchParamsToObject(url.searchParams)),
     body: guard.body?.parse(body),
   } as Guarded<Path, Search, Body>);

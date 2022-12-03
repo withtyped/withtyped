@@ -1,8 +1,9 @@
-import type { OpenAPIV3 } from '../openapi/openapi-types.js';
-import type { MethodRoutesMap } from './index.js';
-import type { Parser } from './types.js';
+import { contentTypes } from '@withtyped/shared';
 
-const contentJson = 'application/json';
+import type { OpenAPIV3 } from '../openapi/openapi-types.js';
+import type { Parser } from '../types.js';
+import type { MethodRoutesMap } from './index.js';
+
 const defaultInfo: OpenAPIV3.InfoObject = { title: 'API reference', version: '0.1.0' };
 const defaultResponses: OpenAPIV3.ResponsesObject = {
   '204': {
@@ -25,7 +26,7 @@ export const buildOpenApiJson = (
   routesMap: MethodRoutesMap,
   parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
   parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
-  info = defaultInfo
+  info?: Partial<OpenAPIV3.InfoObject>
 ): OpenAPIV3.Document => {
   type MethodMap = {
     [key in OpenAPIV3.HttpMethods]?: OpenAPIV3.OperationObject;
@@ -39,13 +40,13 @@ export const buildOpenApiJson = (
         parameters: [...parseParameters(path), ...parseSearch(guard.search)],
         requestBody: guard.body && {
           required: true,
-          content: { [contentJson]: { schema: parse(guard.body) } },
+          content: { [contentTypes.json]: { schema: parse(guard.body) } },
         },
         responses: guard.response
           ? {
               '200': {
                 description: 'OK',
-                content: { [contentJson]: { schema: parse(guard.response) } },
+                content: { [contentTypes.json]: { schema: parse(guard.response) } },
               },
             }
           : defaultResponses,
@@ -60,7 +61,7 @@ export const buildOpenApiJson = (
 
   return {
     openapi: '3.0.1',
-    info,
+    info: { ...defaultInfo, ...info },
     paths: Object.fromEntries(pathMap),
   };
 };

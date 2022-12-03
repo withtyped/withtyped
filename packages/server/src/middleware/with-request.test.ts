@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { RequestMethod } from '../request.js';
-import { assertContext } from '../test-utils/middleware.js';
-import { createHttpContext } from '../test-utils/request.js';
-import { noop } from '../utils.js';
+import { noop, RequestMethod } from '@withtyped/shared';
+
+import { createHttpContext } from '../test-utils/http.test.js';
+import { assertContext } from '../test-utils/middleware.test.js';
 import withRequest from './with-request.js';
 
 describe('withRequest()', () => {
@@ -14,6 +14,7 @@ describe('withRequest()', () => {
   /* eslint-disable @silverhand/fp/no-mutation */
   it('should set `context.request` properly with basic info', async () => {
     const httpContext = createHttpContext();
+    httpContext.request.url = undefined;
     httpContext.request.method = RequestMethod.DELETE;
     httpContext.request.headers.host = 'localhost';
 
