@@ -52,7 +52,7 @@ describe('ModelRouter', () => {
         },
       },
       async (context) => {
-        client.create.calledOnceWithExactly({ id: 'foo' });
+        assert.ok(client.create.calledOnceWithExactly({ id: 'foo' }));
         assert.deepStrictEqual(context.json, { action: 'create' });
       },
       httpContext
@@ -70,7 +70,7 @@ describe('ModelRouter', () => {
       run(
         { request: { method: RequestMethod.GET, url: buildUrl('/tests/123'), headers: {} } },
         async (context) => {
-          client.read.calledOnceWithExactly('foo', '123');
+          assert.ok(client.read.calledOnceWithExactly('foo', '123'));
           assert.deepStrictEqual(context.json, { action: 'read' });
         },
         httpContext
@@ -103,7 +103,7 @@ describe('ModelRouter', () => {
         },
       },
       async (context) => {
-        client.update.calledOnceWithExactly('foo', '123', { bar: 128 });
+        assert.ok(client.update.calledOnceWithExactly('foo', '123', { bar: 128 }));
         assert.deepStrictEqual(context.json, { action: 'update' });
       },
       httpContext
@@ -120,7 +120,7 @@ describe('ModelRouter', () => {
         },
       },
       async (context) => {
-        client.update.calledOnceWithExactly('foo', '123', { foo: 'abc', bar: 256 });
+        assert.ok(client.update.calledOnceWithExactly('foo', '123', { foo: 'abc', bar: 256 }));
         assert.deepStrictEqual(context.json, { action: 'update' });
       },
       httpContext
@@ -145,7 +145,7 @@ describe('ModelRouter', () => {
         },
       },
       async (context) => {
-        client.delete.calledOnceWithExactly('foo', '123');
+        assert.ok(client.delete.calledOnceWithExactly('foo', '123'));
         // eslint-disable-next-line unicorn/no-useless-undefined
         assert.deepStrictEqual(context.json, undefined);
       },

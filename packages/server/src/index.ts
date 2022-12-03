@@ -40,11 +40,11 @@ export default function createServer<T extends unknown[], OutputContext extends 
   port = 9001,
   composer,
   queryClients,
-}: CreateServer<T, BaseContext, OutputContext>) {
+}: CreateServer<T, BaseContext, OutputContext> = {}) {
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
     // Start log
-    console.log(color(' in', 'blue'), color(request.method ?? 'N/A', 'bright'), request.url);
+    console.log(color(' in', 'blue'), color(request.method, 'bright'), request.url);
     const startTime = Date.now();
 
     // Run the middleware chain
@@ -65,7 +65,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // End log
     console.log(
       color('out', 'magenta'),
-      color(request.method ?? 'N/A', 'bright'),
+      color(request.method, 'bright'),
       request.url,
       response.statusCode,
       `${Date.now() - startTime}ms`
@@ -88,6 +88,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     }
 
     console.log('Exited');
+    server.closeAllConnections();
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
   };

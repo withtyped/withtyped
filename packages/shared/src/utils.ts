@@ -14,8 +14,8 @@ export const colors = Object.freeze({
   cyan: '\u001B[36m',
 });
 
-export const color = (string: string, color: keyof typeof colors) =>
-  colors[color] + string + colors.reset;
+export const color = (string: string | undefined, color: keyof typeof colors) =>
+  colors[color] + (string ?? 'undefined') + colors.reset;
 
 type Log = {
   debug: typeof console.log;
