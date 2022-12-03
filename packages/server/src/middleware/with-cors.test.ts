@@ -64,21 +64,26 @@ describe('withCors()', () => {
   });
 
   it('should return no origin header if match failed', async () => {
-    await withCors({ allowedOrigin: 'http://localhost' })(
-      mockContext(endpointUrl),
-      async (context) => {
+    await Promise.all([
+      withCors({ allowedOrigin: 'http://localhost' })(mockContext(endpointUrl), async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
         assertHeaders(context, undefined);
-      }
-    );
-
-    await withCors({ allowedOrigin: /https?:\/\/logto.io/ })(
-      mockContext(endpointUrl, { origin: 'https://local.io' }),
-      async (context) => {
-        // eslint-disable-next-line unicorn/no-useless-undefined
-        assertHeaders(context, undefined);
-      }
-    );
+      }),
+      withCors({ allowedOrigin: /https?:\/\/logto.io/ })(
+        mockContext(endpointUrl, { origin: 'https://local.io' }),
+        async (context) => {
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          assertHeaders(context, undefined);
+        }
+      ),
+      withCors({ allowedOrigin: 'http://localhost' })(
+        mockContext(endpointUrl, { origin: '' }),
+        async (context) => {
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          assertHeaders(context, undefined);
+        }
+      ),
+    ]);
   });
 
   it('should show proper origin', async () => {

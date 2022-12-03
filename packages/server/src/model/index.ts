@@ -49,6 +49,10 @@ export default class Model<
   }
 
   isIdKey(key: keyof ModelType): key is IdKeys<ModelType> {
+    if (!(key in this.rawConfigs)) {
+      return false;
+    }
+
     return ['string', 'number'].includes(this.rawConfigs[key].type);
   }
 

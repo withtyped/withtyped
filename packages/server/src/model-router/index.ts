@@ -19,7 +19,7 @@ export default class ModelRouter<
   public readonly idKey: IdKeys<ModelType>;
 
   constructor(
-    protected readonly client: ModelClient<Table, CreateType, ModelType>,
+    public readonly client: ModelClient<Table, CreateType, ModelType>,
     public readonly prefix: NormalizedPrefix<`/${Table}`>,
     idKey?: IdKey
   ) {
