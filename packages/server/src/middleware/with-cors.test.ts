@@ -14,10 +14,12 @@ const mockContext: (url: URL, headers?: IncomingHttpHeaders) => Readonly<Request
   Object.freeze({
     request: {
       method: RequestMethod.POST,
-      headers: { 'content-type': contentTypes.json, ...headers },
+      headers: { 'content-type': contentTypes.json, origin: 'https://localhost', ...headers },
       url,
     },
   });
+
+const endpointUrl = new URL('https://to.log:3000');
 
 describe('withCors()', () => {
   const assertHeaders = (
@@ -37,17 +39,20 @@ describe('withCors()', () => {
   };
 
   it('should be adaptive for origin by default', async () => {
-    await withCors()(mockContext(new URL('http://localhost:3000')), async (context) => {
-      assertHeaders(context, 'http://localhost:3000');
-    });
-    await withCors()(mockContext(new URL('https://logto.io')), async (context) => {
+    await withCors()(
+      mockContext(endpointUrl, { origin: 'http://localhost:3000' }),
+      async (context) => {
+        assertHeaders(context, 'http://localhost:3000');
+      }
+    );
+    await withCors()(mockContext(endpointUrl, { origin: 'https://logto.io' }), async (context) => {
       assertHeaders(context, 'https://logto.io');
     });
   });
 
   it('should return no origin header if match failed', async () => {
     await withCors({ allowedOrigin: 'http://localhost' })(
-      mockContext(new URL('http://localhost:3000')),
+      mockContext(endpointUrl),
       async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
         assertHeaders(context, undefined);
@@ -55,7 +60,7 @@ describe('withCors()', () => {
     );
 
     await withCors({ allowedOrigin: /https?:\/\/logto.io/ })(
-      mockContext(new URL('http://localhost:3000')),
+      mockContext(endpointUrl, { origin: 'https://local.io' }),
       async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
         assertHeaders(context, undefined);
@@ -66,15 +71,15 @@ describe('withCors()', () => {
   it('should show proper origin', async () => {
     const withCorsRegExp = withCors({ allowedOrigin: /https?:\/\/logto.io/ });
     await Promise.all(
-      ['http://logto.io', 'https://logto.io:2000'].map(async (url) =>
-        withCorsRegExp(mockContext(new URL(url)), async (context) => {
-          assertHeaders(context, url);
+      ['http://logto.io', 'https://logto.io:2000'].map(async (origin) =>
+        withCorsRegExp(mockContext(endpointUrl, { origin }), async (context) => {
+          assertHeaders(context, origin);
         })
       )
     );
 
     await withCors({ allowedOrigin: 'http://localhost:3000' })(
-      mockContext(new URL('http://localhost:3000')),
+      mockContext(endpointUrl, { origin: 'http://localhost:3000' }),
       async (context) => {
         assertHeaders(context, 'http://localhost:3000');
       }
@@ -84,7 +89,8 @@ describe('withCors()', () => {
   it('should show proper headers', async () => {
     const withCorsRegExp = withCors({ allowedHeaders: /content-.*/ });
     await withCorsRegExp(
-      mockContext(new URL('http://localhost:3000'), {
+      mockContext(endpointUrl, {
+        origin: 'http://localhost:3000',
         'content-type': 'some-type',
         'content-encoding': 'some-encoding',
         'accept-language': 'some-language',
@@ -95,7 +101,7 @@ describe('withCors()', () => {
     );
 
     await withCors({ allowedHeaders: ['foo', 'bar'] })(
-      mockContext(new URL('https://localhost')),
+      mockContext(endpointUrl),
       async (context) => {
         assertHeaders(context, 'https://localhost', 'foo, bar');
       }
@@ -104,7 +110,7 @@ describe('withCors()', () => {
 
   it('should show proper methods', async () => {
     await withCors({ allowedMethods: ['GET', 'OPTIONS'] })(
-      mockContext(new URL('https://localhost')),
+      mockContext(endpointUrl),
       async (context) => {
         assertHeaders(context, 'https://localhost', undefined, 'GET, OPTIONS');
       }
@@ -112,7 +118,7 @@ describe('withCors()', () => {
   });
 
   it('should show proper max-age', async () => {
-    await withCors({ maxAge: 100 })(mockContext(new URL('https://localhost')), async (context) => {
+    await withCors({ maxAge: 100 })(mockContext(endpointUrl), async (context) => {
       assertHeaders(context, 'https://localhost', undefined, undefined, 100);
     });
   });

@@ -21,16 +21,20 @@ export default function withCors<
   allowedMethods = '*',
   maxAge = 2_592_000, // 30 days
 }: WithCorsConfig<T> = {}) {
-  const matchOrigin = (url: URL) => {
+  const matchOrigin = ({ origin }: IncomingHttpHeaders) => {
+    if (!origin) {
+      return;
+    }
+
     if (allowedOrigin === 'adaptive') {
-      return url.origin;
+      return origin;
     }
 
     if (typeof allowedOrigin === 'string') {
-      return allowedOrigin === url.origin ? allowedOrigin : undefined;
+      return allowedOrigin === origin ? allowedOrigin : undefined;
     }
 
-    return allowedOrigin.test(url.origin) ? url.origin : undefined;
+    return allowedOrigin.test(origin) ? origin : undefined;
   };
 
   const matchHeaders = (headers: IncomingHttpHeaders) => {
@@ -46,8 +50,8 @@ export default function withCors<
   const allowMethods = Array.isArray(allowedMethods) ? allowedMethods.join(', ') : allowedMethods;
 
   return async (context: InputContext, next: NextFunction<InputContext>) => {
-    const { url, headers } = context.request;
-    const allowOrigin = matchOrigin(url);
+    const { headers } = context.request;
+    const allowOrigin = matchOrigin(headers);
 
     return next({
       ...context,
