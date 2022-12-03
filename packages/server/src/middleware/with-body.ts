@@ -1,4 +1,4 @@
-import { contentTypes, log } from '@withtyped/shared';
+import { contentTypes, log, RequestMethod } from '@withtyped/shared';
 
 import RequestError from '../errors/RequestError.js';
 import type { HttpContext, NextFunction } from '../middleware.js';
@@ -12,15 +12,9 @@ export type WithBodyContext<InputContext extends RequestContext> = MergeRequestC
 
 const tryParse = (body: Buffer): Json | undefined => {
   try {
-    const string = body.toString();
-
-    if (!string) {
-      return;
-    }
-
     // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(string);
+    return JSON.parse(body.toString());
   } catch (error: unknown) {
     log.debug('Failed to parse JSON string in `withBody()`', error);
   }
@@ -32,6 +26,16 @@ export default function withBody<InputContext extends RequestContext>() {
     next: NextFunction<WithBodyContext<InputContext>>,
     { request }: HttpContext
   ) => {
+    if (
+      !context.request.method ||
+      [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD].includes(
+        context.request.method
+      )
+    ) {
+      // eslint-disable-next-line no-restricted-syntax
+      return next(context as WithBodyContext<InputContext>); // No need to spread since nothing needs to change
+    }
+
     if (context.request.headers['content-type'] !== contentTypes.json) {
       throw new RequestError(
         `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,

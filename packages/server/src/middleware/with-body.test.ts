@@ -18,7 +18,7 @@ describe('withBody()', () => {
     },
   });
 
-  it('should throw when `content-type` is unexpected', async () => {
+  it('should throw when `content-type` is unexpected and method is valid', async () => {
     const httpContext = createHttpContext();
     await assert.rejects(
       run(
@@ -28,6 +28,39 @@ describe('withBody()', () => {
       ),
       RequestError
     );
+  });
+
+  it('should do nothing for certain methods even body has value', async () => {
+    const httpContext = createHttpContext();
+    const promise = Promise.all(
+      [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, undefined].map(
+        async (method) => {
+          const originalContext = {
+            ...mockContext,
+            request: { ...mockContext.request, method, headers: { 'content-type': 'foo' } },
+          };
+
+          await run(
+            originalContext,
+            async (context) => {
+              assert.deepStrictEqual(context, originalContext);
+            },
+            httpContext
+          );
+        }
+      )
+    );
+
+    const raw = '{     "foo": "bar",|   \n  "baz": 1,| \n\n"bar": [true,| false]}';
+    const stringArray = raw.split('|');
+
+    for (const value of stringArray) {
+      httpContext.request.emit('data', Buffer.from(value));
+    }
+
+    httpContext.request.emit('end');
+
+    await promise;
   });
 
   it('should read JSON string and convert to object', async () => {
