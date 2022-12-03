@@ -12,9 +12,15 @@ export type WithBodyContext<InputContext extends RequestContext> = MergeRequestC
 
 const tryParse = (body: Buffer): Json | undefined => {
   try {
+    const string = body.toString();
+
+    if (!string) {
+      return;
+    }
+
     // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(body.toString());
+    return JSON.parse(string);
   } catch (error: unknown) {
     log.debug('Failed to parse JSON string in `withBody()`', error);
   }
