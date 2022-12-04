@@ -7,6 +7,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "precommit": "lint-staged",
     "prepack": "pnpm build",
     "build": "rm -rf lib/ && tsc",
     "start": "node lib/index.js",

@@ -10,11 +10,11 @@ export type WithBodyContext<InputContext extends RequestContext> = MergeRequestC
   { body?: Json }
 >;
 
-const tryParse = (body: Buffer): Json | undefined => {
+const tryParse = (body: string): Json | undefined => {
   try {
     // `body` is not `any`, but `JSON.parse()` returns `any`. :shrug:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(body.toString());
+    return JSON.parse(body);
   } catch (error: unknown) {
     log.debug('Failed to parse JSON string in `withBody()`', error);
   }
@@ -36,13 +36,6 @@ export default function withBody<InputContext extends RequestContext>() {
       return next(context as WithBodyContext<InputContext>); // No need to spread since nothing needs to change
     }
 
-    if (context.request.headers['content-type'] !== contentTypes.json) {
-      throw new RequestError(
-        `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,
-        400
-      );
-    }
-
     const readBody = async () =>
       new Promise<Buffer>((resolve, reject) => {
         const body: Uint8Array[] = [];
@@ -62,7 +55,20 @@ export default function withBody<InputContext extends RequestContext>() {
       });
 
     const raw = await readBody();
+    const rawString = raw.toString();
 
-    return next({ ...context, request: { ...context.request, body: tryParse(raw) } });
+    if (!rawString) {
+      // eslint-disable-next-line no-restricted-syntax
+      return next(context as WithBodyContext<InputContext>);
+    }
+
+    if (context.request.headers['content-type'] !== contentTypes.json) {
+      throw new RequestError(
+        `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,
+        400
+      );
+    }
+
+    return next({ ...context, request: { ...context.request, body: tryParse(rawString) } });
   };
 }
