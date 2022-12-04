@@ -16,7 +16,7 @@ const getNormalizedPrefix = <T extends string>(table: string): NormalizedPrefix<
 
 export const createModelRouter = <
   Table extends string,
-  CreateType extends Record<string, PostgresJson>,
+  CreateType extends Record<string, PostgresJson | undefined>,
   ModelType extends CreateType,
   ExtendGuard extends Record<string, Parser<unknown>>,
   Q extends PostgresQueryClient

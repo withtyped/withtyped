@@ -86,8 +86,7 @@ export type RawCreateModel<S extends Array<[string, unknown]>> = S extends never
   ? S
   : {
       [Entry in S[number] as CamelCase<Entry[0]>]: Entry[3] extends true
-        ? // eslint-disable-next-line @typescript-eslint/ban-types
-          ColumnType<Entry> | null
+        ? ColumnType<Entry> | undefined
         : ColumnType<Entry>;
     };
 

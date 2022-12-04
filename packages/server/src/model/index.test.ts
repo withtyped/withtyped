@@ -30,15 +30,15 @@ describe('Model class', () => {
       data2: null,
     };
 
-    assert.deepStrictEqual(forms.keys, [
+    assert.deepStrictEqual(forms.rawKeys, [
       'id',
-      'remoteAddress',
+      'remote_address',
       'headers',
       'data',
-      'data2',
+      'data_2',
       'num',
       'test',
-      'createdAt',
+      'created_at',
     ]);
 
     assert.deepStrictEqual(
