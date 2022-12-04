@@ -31,6 +31,24 @@ describe('withBody()', () => {
     await assert.rejects(promise, RequestError);
   });
 
+  it('should do nothing when body is empty', async () => {
+    const httpContext = createHttpContext();
+    const originalContext = {
+      ...mockContext,
+      request: { ...mockContext.request, headers: { 'content-type': 'foo' } },
+    };
+    const promise = run(
+      originalContext,
+      async (context) => {
+        assert.deepStrictEqual(context, originalContext);
+      },
+      httpContext
+    );
+    httpContext.request.emit('data', Buffer.from(''));
+    httpContext.request.emit('end');
+    await promise;
+  });
+
   it('should do nothing for certain methods even body has value', async () => {
     const runs = [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, undefined].map<
       [Promise<void>, HttpContext]

@@ -53,7 +53,7 @@ export default class PostgresModelClient<
 
   async read(whereKey: ValidKey, value: string): Promise<ModelType> {
     const { rows } = await this.queryClient.query(sql`
-      select (${this.model.rawKeys.map((key) => identifier(key))})
+      select ${this.model.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
       where ${identifier(String(whereKey))}=${value}
     `);

@@ -16,8 +16,7 @@ describe('createServer()', () => {
   it('should be able to run a composer', async () => {
     const composer = sinon.spy(compose());
     // @ts-expect-error for testing
-    const { server } = createServer({ composer, logLevel: 'none' });
-    sinon.stub(server, 'listen');
+    const { server } = createServer({ composer });
 
     await request(server).get('/');
     assert.ok(composer.calledOnce && composer.calledWith({}));
@@ -31,7 +30,6 @@ describe('createServer()', () => {
     );
     // @ts-expect-error for testing
     const { server } = createServer({ composer, logLevel: 'none' });
-    sinon.stub(server, 'listen');
 
     await request(server).get('/').expect(500);
     assert.ok(composer.calledOnce && composer.calledWith({}));
@@ -45,7 +43,6 @@ describe('createServer()', () => {
     );
     // @ts-expect-error for testing
     const { server } = createServer({ composer, logLevel: 'none' });
-    sinon.stub(server, 'listen');
 
     await request(server).get('/').expect(400, { message: 'composer error' });
     assert.ok(composer.calledOnce && composer.calledWith({}));
@@ -64,8 +61,12 @@ describe('createServer()', () => {
   });
 
   it('should be able to respond signal', async () => {
-    /* eslint-disable @silverhand/fp/no-mutation, @silverhand/fp/no-mutating-assign, no-global-assign */
-    const fakeProcess = Object.assign(new EventEmitter(), { exit: sinon.stub() });
+    class FakeEventEmitter extends EventEmitter {
+      exit = sinon.stub();
+    }
+
+    /* eslint-disable @silverhand/fp/no-mutation, no-global-assign */
+    const fakeProcess = new FakeEventEmitter();
     const originalProcess = process;
 
     // @ts-expect-error for testing
@@ -94,7 +95,13 @@ describe('createServer()', () => {
       client.end.calledOnceWithExactly();
     }
 
-    process = originalProcess;
-    /* eslint-enable @silverhand/fp/no-mutation, @silverhand/fp/no-mutating-assign, no-global-assign */
+    fakeProcess.removeAllListeners();
+
+    // Wait promises to be executed
+    setTimeout(() => {
+      console.log('resetting');
+      process = originalProcess;
+    }, 0);
+    /* eslint-enable @silverhand/fp/no-mutation, no-global-assign */
   });
 });

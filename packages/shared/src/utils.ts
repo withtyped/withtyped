@@ -15,7 +15,9 @@ export const colors = Object.freeze({
 });
 
 export const color = (string: string | undefined, color: keyof typeof colors) =>
-  colors[color] + (string ?? 'undefined') + colors.reset;
+  process.stdout.isTTY
+    ? colors[color] + (string ?? 'undefined') + colors.reset
+    : string ?? 'undefined';
 
 type Log = {
   debug: typeof console.log;

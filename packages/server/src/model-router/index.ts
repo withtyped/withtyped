@@ -25,20 +25,16 @@ export default class ModelRouter<
   ) {
     super(prefix);
 
-    if (idKey) {
-      this.idKey = idKey;
-    } else {
-      // Define this const to make TypeScript happy
-      const id = 'id';
+    // eslint-disable-next-line no-restricted-syntax
+    this.idKey = idKey ?? ('id' as IdKey); // Use `as` here since we'll check validity below
 
-      if (client.model.isIdKey(id)) {
-        this.idKey = id;
-      } else {
-        throw new TypeError(
-          `No ID key provided while the default key \`${id}\` is not a valid ID key in this model.\n` +
-            'A valid ID key should have a string value in the model.'
-        );
-      }
+    if (!client.model.isIdKey(this.idKey)) {
+      throw new TypeError(
+        `No ID key provided while the default key \`${String(
+          this.idKey
+        )}\` is not a valid ID key in this model.\n` +
+          'A valid ID key should have a string value in the model.'
+      );
     }
   }
 

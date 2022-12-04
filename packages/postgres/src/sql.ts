@@ -113,6 +113,7 @@ export const json = (data: PostgresJson) =>
 export const jsonIfNeeded = (
   data: PostgresJson | PostgreSql
 ): PostgreSql | Exclude<PostgresJson, JsonArray | JsonObject> =>
-  Array.isArray(data) || (typeof data === 'object' && data !== null && !(data instanceof Sql))
+  Array.isArray(data) ||
+  (typeof data === 'object' && data !== null && !(data instanceof Sql || data instanceof Date))
     ? json(data)
     : data;

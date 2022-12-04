@@ -18,13 +18,22 @@ describe('ModelRouter', () => {
     assert.ok(new ModelRouter(new TestModelClient(Model.create(sql)), '/tests'));
   });
 
-  it('should throw TypeError when `id` is not available for the ID key', () => {
+  it('should throw TypeError when the given key is not available for the ID key', () => {
     const sql = `create table tests (foo bool not null);`;
 
     assert.throws(
       () => new ModelRouter(new TestModelClient(Model.create(sql)), '/tests'),
       new TypeError(
         'No ID key provided while the default key `id` is not a valid ID key in this model.\n' +
+          'A valid ID key should have a string value in the model.'
+      )
+    );
+
+    assert.throws(
+      // @ts-expect-error for testing
+      () => new ModelRouter(new TestModelClient(Model.create(sql)), '/tests', 'bar'),
+      new TypeError(
+        'No ID key provided while the default key `bar` is not a valid ID key in this model.\n' +
           'A valid ID key should have a string value in the model.'
       )
     );

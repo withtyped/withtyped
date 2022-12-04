@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { Model } from '@withtyped/server';
+import { Model, ModelClientError } from '@withtyped/server';
 import { normalizeString } from '@withtyped/shared';
 import sinon from 'sinon';
 import { z } from 'zod';
@@ -43,7 +43,7 @@ describe('PostgresModelClient', () => {
       created_at timestamptz not null default(now())
     );`
   )
-    .extend('data', z.object({ foo: z.string(), bar: z.number() }))
+    .extend('data', z.object({ foo: z.string(), bar: z.number().optional() }))
     .extend('data2', z.number().gt(10).nullable());
 
   it('should call query client methods accordingly', () => {
@@ -62,7 +62,7 @@ describe('PostgresModelClient', () => {
     );
   });
 
-  it('should call create and perform query properly', async () => {
+  it('should call `.create()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -70,7 +70,7 @@ describe('PostgresModelClient', () => {
       id: 'foo',
       remoteAddress: null,
       headers: {},
-      data: { foo: '1', bar: 2 },
+      data: { foo: '1' },
       data2: 123,
       num: [111],
       test: undefined,
@@ -78,7 +78,6 @@ describe('PostgresModelClient', () => {
     });
 
     const data: unknown = fakeQueryClient.query.args[0]?.[0];
-
     assert.ok(data instanceof PostgreSql);
 
     const { raw, args } = data.composed;
@@ -92,9 +91,87 @@ describe('PostgresModelClient', () => {
       'foo',
       null,
       JSON.stringify({}),
-      JSON.stringify({ foo: '1', bar: 2 }),
+      JSON.stringify({ foo: '1' }),
       123,
       JSON.stringify([111]),
     ]);
+  });
+
+  it('should call `.readAll()` and perform query properly', async () => {
+    const fakeQueryClient = new FakeQueryClient();
+    const client = createModelClient(forms, fakeQueryClient);
+
+    await client.readAll();
+
+    const data: unknown = fakeQueryClient.query.args[0]?.[0];
+    assert.ok(data instanceof PostgreSql);
+
+    const { raw, args } = data.composed;
+    assert.strictEqual(
+      normalizeString(raw),
+      'select "id", "remote_address", "headers", "data", "data_2", "num", "test", "created_at" from "forms"'
+    );
+    assert.deepStrictEqual(args, []);
+  });
+
+  it('should call `.read()` and perform query properly', async () => {
+    const fakeQueryClient = new FakeQueryClient();
+    const client = createModelClient(forms, fakeQueryClient);
+
+    await client.read('id', 'foo');
+
+    const data: unknown = fakeQueryClient.query.args[0]?.[0];
+    assert.ok(data instanceof PostgreSql);
+
+    const { raw, args } = data.composed;
+    assert.strictEqual(
+      normalizeString(raw),
+      'select "id", "remote_address", "headers", "data", "data_2", "num", "test", "created_at" from "forms" where "id"=$1'
+    );
+    assert.deepStrictEqual(args, ['foo']);
+
+    fakeQueryClient.query.resolves({ rows: [], rowCount: 0 });
+    await assert.rejects(client.read('id', 'foo'), new ModelClientError('entity_not_found'));
+  });
+
+  it('should call `.update()` and perform query properly', async () => {
+    const fakeQueryClient = new FakeQueryClient();
+    const client = createModelClient(forms, fakeQueryClient);
+
+    await client.update('id', 'foo', {
+      id: '111',
+      headers: { foo: 'bar' },
+      createdAt: new Date(12_345),
+    });
+
+    const data: unknown = fakeQueryClient.query.args[0]?.[0];
+    assert.ok(data instanceof PostgreSql);
+
+    const { raw, args } = data.composed;
+    assert.strictEqual(
+      normalizeString(raw),
+      'update "forms" ' +
+        'set "id"=$1, "headers"=$2::json, "created_at"=$3 ' +
+        'where "id"=$4 ' +
+        'returning "id", "remote_address", "headers", "data", "data_2", "num", "test", "created_at"'
+    );
+    assert.deepStrictEqual(args, ['111', JSON.stringify({ foo: 'bar' }), new Date(12_345), 'foo']);
+
+    fakeQueryClient.query.resolves({ rows: [], rowCount: 0 });
+    await assert.rejects(client.update('id', 'foo', {}), new ModelClientError('entity_not_found'));
+  });
+
+  it('should call `.update()` and perform query properly', async () => {
+    const fakeQueryClient = new FakeQueryClient();
+    const client = createModelClient(forms, fakeQueryClient);
+
+    assert.ok(await client.delete('id', 'foo'));
+
+    const data: unknown = fakeQueryClient.query.args[0]?.[0];
+    assert.ok(data instanceof PostgreSql);
+
+    const { raw, args } = data.composed;
+    assert.strictEqual(normalizeString(raw), 'delete from "forms" where "id"=$1');
+    assert.deepStrictEqual(args, ['foo']);
   });
 });
