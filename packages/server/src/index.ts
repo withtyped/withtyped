@@ -95,6 +95,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
 
     console.log('Exited');
     server.closeAllConnections();
+    server.close();
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
   };
