@@ -2,13 +2,12 @@ import type { Model } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
 
 import type PostgresQueryClient from './query-client.js';
-import type { PostgresJson } from './sql.js';
+import type { PostgresJson, PostgreSql } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';
 
 type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : Value];
 
 type ValidKey = string | number | symbol;
-
 export default class PostgresModelClient<
   Table extends string,
   CreateType extends Record<string, PostgresJson | undefined>,
@@ -55,7 +54,7 @@ export default class PostgresModelClient<
     const { rows } = await this.queryClient.query(sql`
       select ${this.model.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
-      where ${identifier(String(whereKey))}=${value}
+      ${this.whereClause(whereKey, value)}
     `);
 
     if (!rows[0]) {
@@ -71,7 +70,7 @@ export default class PostgresModelClient<
     const { rows } = await this.queryClient.query(sql`
       update ${identifier(this.model.tableName)}
       set ${entries.map(([key, value]) => sql`${identifier(key)}=${jsonIfNeeded(value)}`)}
-      where ${identifier(String(whereKey))}=${value}
+      ${this.whereClause(whereKey, value)}
       returning ${this.model.rawKeys.map((key) => identifier(key))}
     `);
 
@@ -85,10 +84,26 @@ export default class PostgresModelClient<
   async delete(whereKey: ValidKey, value: string): Promise<boolean> {
     const { rowCount } = await this.queryClient.query(sql`
       delete from ${identifier(this.model.tableName)}
-      where ${identifier(String(whereKey))}=${value}
+      ${this.whereClause(whereKey, value)}
     `);
 
     return rowCount > 0;
+  }
+
+  protected whereClause(whereKey: ValidKey, value: string): PostgreSql {
+    const config = this.model.rawConfigs[whereKey];
+
+    if (!config) {
+      throw new ModelClientError('key_not_found');
+    }
+
+    if (!['string', 'number'].includes(config.type)) {
+      throw new TypeError('Key in where clause must map to a string or number value');
+    }
+
+    return sql`where ${identifier(config.rawKey)}=${
+      config.type === 'number' ? Number(value) : value
+    }`;
   }
 
   protected convertToEntries(data: Partial<CreateType>) {

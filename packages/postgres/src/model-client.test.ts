@@ -118,7 +118,8 @@ describe('PostgresModelClient', () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
-    await client.read('id', 'foo');
+    // Convert to incoming string to number
+    await client.read('data2', '123');
 
     const data: unknown = fakeQueryClient.query.args[0]?.[0];
     assert.ok(data instanceof PostgreSql);
@@ -126,9 +127,18 @@ describe('PostgresModelClient', () => {
     const { raw, args } = data.composed;
     assert.strictEqual(
       normalizeString(raw),
-      'select "id", "remote_address", "headers", "data", "data_2", "num", "test", "created_at" from "forms" where "id"=$1'
+      'select "id", "remote_address", "headers", "data", "data_2", "num", "test", "created_at" from "forms" where "data_2"=$1'
     );
-    assert.deepStrictEqual(args, ['foo']);
+    assert.deepStrictEqual(args, [123]);
+
+    await assert.rejects(
+      client.read('remote_address', 'foo'), // Should be camelCase key
+      new ModelClientError('key_not_found')
+    );
+    await assert.rejects(
+      client.read('headers', '{}'),
+      new TypeError('Key in where clause must map to a string or number value')
+    );
 
     fakeQueryClient.query.resolves({ rows: [], rowCount: 0 });
     await assert.rejects(client.read('id', 'foo'), new ModelClientError('entity_not_found'));
@@ -157,11 +167,13 @@ describe('PostgresModelClient', () => {
     );
     assert.deepStrictEqual(args, ['111', JSON.stringify({ foo: 'bar' }), new Date(12_345), 'foo']);
 
+    await assert.rejects(client.update('id1', 'foo', {}), new ModelClientError('key_not_found'));
+
     fakeQueryClient.query.resolves({ rows: [], rowCount: 0 });
     await assert.rejects(client.update('id', 'foo', {}), new ModelClientError('entity_not_found'));
   });
 
-  it('should call `.update()` and perform query properly', async () => {
+  it('should call `.delete()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -173,5 +185,7 @@ describe('PostgresModelClient', () => {
     const { raw, args } = data.composed;
     assert.strictEqual(normalizeString(raw), 'delete from "forms" where "id"=$1');
     assert.deepStrictEqual(args, ['foo']);
+
+    await assert.rejects(client.delete('data_2', 'foo'), new ModelClientError('key_not_found'));
   });
 });

@@ -25,7 +25,7 @@ describe('ModelRouter', () => {
       () => new ModelRouter(new TestModelClient(Model.create(sql)), '/tests'),
       new TypeError(
         'No ID key provided while the default key `id` is not a valid ID key in this model.\n' +
-          'A valid ID key should have a string value in the model.'
+          'A valid ID key should have a string or number value in the model.'
       )
     );
 
@@ -34,19 +34,19 @@ describe('ModelRouter', () => {
       () => new ModelRouter(new TestModelClient(Model.create(sql)), '/tests', 'bar'),
       new TypeError(
         'No ID key provided while the default key `bar` is not a valid ID key in this model.\n' +
-          'A valid ID key should have a string value in the model.'
+          'A valid ID key should have a string or number value in the model.'
       )
     );
   });
 
   it('should be able to specify a valid ID key and read with that key', async () => {
-    const sql = `create table tests (foo varchar(128) not null);`;
-    assert.ok(new ModelRouter(new TestModelClient(Model.create(sql)), '/tests', 'foo'));
+    const sql = `create table tests (foo_bar varchar(128) not null);`;
+    assert.ok(new ModelRouter(new TestModelClient(Model.create(sql)), '/tests', 'fooBar'));
   });
 
   it('should be able to create after calling `.withCreate()`', async () => {
     const httpContext = createHttpContext();
-    const sql = `create table tests (id varchar(128) not null);`;
+    const sql = `create table tests (id int16 not null);`;
     const client = new TestModelClient(Model.create(sql));
     const router = new ModelRouter(client, '/tests');
     const run = router.withCreate().routes();
@@ -57,11 +57,11 @@ describe('ModelRouter', () => {
           method: RequestMethod.POST,
           url: buildUrl('/tests'),
           headers: {},
-          body: { id: 'foo' },
+          body: { id: 123 },
         },
       },
       async (context) => {
-        assert.ok(client.create.calledOnceWithExactly({ id: 'foo' }));
+        assert.ok(client.create.calledOnceWithExactly({ id: 123 }));
         assert.deepStrictEqual(context.json, { action: 'create' });
       },
       httpContext

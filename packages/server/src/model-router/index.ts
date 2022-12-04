@@ -33,7 +33,7 @@ export default class ModelRouter<
         `No ID key provided while the default key \`${String(
           this.idKey
         )}\` is not a valid ID key in this model.\n` +
-          'A valid ID key should have a string value in the model.'
+          'A valid ID key should have a string or number value in the model.'
       );
     }
   }

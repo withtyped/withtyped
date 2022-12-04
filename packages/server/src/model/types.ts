@@ -123,6 +123,6 @@ export type KeyOfType<T, V> = keyof {
   [P in keyof T as T[P] extends V ? P : never]: unknown;
 };
 
-export type IdKeys<T> = KeyOfType<T, string>;
+export type IdKeys<T> = KeyOfType<T, string | number>;
 
 export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;
