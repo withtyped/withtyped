@@ -7,13 +7,14 @@ import { createQueryClient } from './query-client.js';
 import { sql } from './sql.js';
 
 class FakePg {
-  connect = sinon.stub();
+  clientQuery = sinon.stub();
+  connect = sinon.stub().resolves({ query: this.clientQuery, release: sinon.fake() });
   end = sinon.stub();
   query = sinon.stub();
 }
 
 describe('PostgresQueryClient', () => {
-  it('should call the inner instance methods accordingly', () => {
+  it('should call the inner instance methods accordingly', async () => {
     const queryClient = createQueryClient();
     const fakePg = new FakePg();
     // @ts-expect-error for testing
@@ -24,14 +25,14 @@ describe('PostgresQueryClient', () => {
       [true, true, true]
     );
 
-    void queryClient.connect();
+    await queryClient.connect();
     assert.ok(fakePg.connect.calledOnce);
 
-    void queryClient.end();
+    await queryClient.end();
     assert.ok(fakePg.end.calledOnce);
 
     const query = sql`select * from ${'foo'}`;
-    void queryClient.query(query);
-    assert.ok(fakePg.query.calledOnceWithExactly('select * from $1', ['foo']));
+    await queryClient.query(query);
+    assert.ok(fakePg.clientQuery.calledOnceWithExactly('select * from $1', ['foo']));
   });
 });
