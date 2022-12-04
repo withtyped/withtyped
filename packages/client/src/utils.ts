@@ -1,11 +1,18 @@
-export const buildSearchString = (record?: Record<string, string | string[]>) =>
-  record
-    ? Object.entries(record)
-        .flatMap(([key, value]) =>
-          Array.isArray(value) ? value.map((value) => `${key}=${value}`) : `${key}=${value}`
-        )
-        .join('&')
-    : '';
+export const buildSearch = (record?: Record<string, string | string[]>) => {
+  const parameters = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(record ?? {})) {
+    if (Array.isArray(value)) {
+      for (const element of value) {
+        parameters.append(key, element);
+      }
+    } else {
+      parameters.append(key, value);
+    }
+  }
+
+  return parameters;
+};
 
 export const tryJson = async (response: Response) => {
   try {

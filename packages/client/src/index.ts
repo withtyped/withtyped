@@ -1,6 +1,5 @@
 import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
-import type { RequestMethod } from '@withtyped/shared';
-import { contentTypes, log, normalizePathname } from '@withtyped/shared';
+import { RequestMethod, contentTypes, log, normalizePathname } from '@withtyped/shared';
 
 import type {
   RouterClient,
@@ -10,7 +9,17 @@ import type {
   ClientConfig,
   ClientConfigInit,
 } from './types.js';
-import { buildSearchString, tryJson } from './utils.js';
+import { buildSearch, tryJson } from './utils.js';
+
+export class ResponseError extends Error {
+  constructor(public readonly response: Response) {
+    super(`Response error ${response.status}: ${response.statusText}`);
+  }
+
+  get status() {
+    return this.response.status;
+  }
+}
 
 export default class Client<R extends Router, Routes extends BaseRoutes = RouterRoutes<R>>
   implements RouterClient<Routes>
@@ -39,17 +48,17 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
     log.debug(this.config);
   }
 
-  private buildUrl(pathname: string, search?: Record<string, string | string[]>): URL {
+  protected buildUrl(pathname: string, search?: Record<string, string | string[]>): URL {
     const { baseUrl } = this.config;
     const url = new URL(normalizePathname(baseUrl.pathname + pathname), baseUrl.origin);
     // Reassign to search to avoid unexpected `?`
     // eslint-disable-next-line @silverhand/fp/no-mutation
-    url.search = buildSearchString(search);
+    url.search = buildSearch(search).toString();
 
     return url;
   }
 
-  private buildPathname(path: string, parameters?: Record<string, string>): string {
+  protected buildPathname(path: string, parameters?: Record<string, string>): string {
     return path
       .split('/')
       .map((value) => {
@@ -61,7 +70,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
         const parameter = parameters?.[key];
 
         if (!parameter) {
-          throw new Error(`URL parameter ${key} not found`);
+          throw new TypeError(`URL parameter \`${key}\` not found`);
         }
 
         return parameter;
@@ -69,18 +78,28 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       .join('/');
   }
 
-  private buildHeaders(url: URL, method: Lowercase<RequestMethod>): Record<string, string> {
+  protected buildHeaders(
+    url: URL,
+    method: Lowercase<RequestMethod>,
+    body: unknown
+  ): Record<string, string> {
     const { headers } = this.config;
+    const needsJson =
+      ![RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD]
+        .map((value) => value.toLowerCase())
+        .includes(method) &&
+      typeof body !== 'undefined' &&
+      body !== null;
 
     return {
-      'content-type': contentTypes.json,
       host: url.host,
       accept: contentTypes.json,
+      ...(needsJson && { 'content-type': contentTypes.json }),
       ...(typeof headers === 'function' ? headers(url, method) : headers),
     };
   }
 
-  private buildHandler<Method extends Lowercase<RequestMethod>>(method: Method) {
+  protected buildHandler<Method extends Lowercase<RequestMethod>>(method: Method) {
     type MethodRoutes = Routes[Method];
 
     const handler: ClientRequestHandler<MethodRoutes> = async <T extends keyof MethodRoutes>(
@@ -102,7 +121,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
 
       const response = await fetch(url, {
         method: method.toUpperCase(),
-        headers: this.buildHeaders(url, method),
+        headers: this.buildHeaders(url, method, body),
         body:
           typeof body === 'string' || typeof body === 'undefined' || body === null
             ? body
@@ -110,7 +129,7 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
       });
 
       if (!response.ok) {
-        throw new Error(`Response status ${response.status}`);
+        throw new ResponseError(response);
       }
 
       // Trust backend since it has been guarded
@@ -121,3 +140,5 @@ export default class Client<R extends Router, Routes extends BaseRoutes = Router
     return handler;
   }
 }
+
+export * from './types.js';
