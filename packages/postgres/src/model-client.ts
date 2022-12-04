@@ -11,9 +11,8 @@ type ValidKey = string | number | symbol;
 
 export default class PostgresModelClient<
   Table extends string,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  CreateType extends Record<string, PostgresJson> = {},
-  ModelType extends CreateType = CreateType
+  CreateType extends Record<string, PostgresJson>,
+  ModelType extends CreateType
 > extends ModelClient<Table, CreateType, ModelType> {
   constructor(
     public readonly model: Model<Table, CreateType, ModelType>,
@@ -97,5 +96,11 @@ export default class PostgresModelClient<
   }
 }
 
-export const createModelClient = (...args: ConstructorParameters<typeof PostgresModelClient>) =>
-  new PostgresModelClient(...args);
+export const createModelClient = <
+  Table extends string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  CreateType extends Record<string, PostgresJson> = {},
+  ModelType extends CreateType = CreateType
+>(
+  ...args: ConstructorParameters<typeof PostgresModelClient<Table, CreateType, ModelType>>
+) => new PostgresModelClient<Table, CreateType, ModelType>(...args);

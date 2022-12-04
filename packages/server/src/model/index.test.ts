@@ -8,20 +8,19 @@ import Model from './index.js';
 describe('Model class', () => {
   const forms = Model.create(
     /* Sql */ `
-  CREATE table forms ( 
-    id VARCHAR(32) not null,
-    remote_address varchar(128),
-    headers jsonb not null,
-    data jsonb,
-    data_2 bigint,
-    num bigint array,
-    test decimal not null array default([]),
-    created_at timestamptz not null default(now())
-  );
-`
+    CREATE table forms (
+      id VARCHAR(32) not null,
+      remote_address varchar(128),
+      headers jsonb not null,
+      data jsonb,
+      data_2 bigint,
+      num bigint array,
+      test decimal not null array default([]),
+      created_at timestamptz not null default(now())
+    );`
   )
     .extend('data', z.object({ foo: z.string(), bar: z.number() }))
-    .extend('data2', z.number().gt(10).nullable().optional());
+    .extend('data2', z.number().gt(10).nullable());
 
   it('should construct proper class', () => {
     const baseData = {

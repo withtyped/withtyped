@@ -3,9 +3,34 @@ import { describe, it } from 'node:test';
 
 import { normalizeString } from '@withtyped/shared';
 
-import { id, sql } from './sql.js';
+import type { PostgresJson } from './sql.js';
+import { IdentifierPostgreSql, jsonIfNeeded, id, json, JsonPostgreSql, sql } from './sql.js';
 
-describe('postgres sql tag', () => {
+describe('IdentifierPostgreSql', () => {
+  it('should compose raw strings only', () => {
+    const instance = new IdentifierPostgreSql(
+      Object.assign(['foo', 'bar'], { raw: ['foo', 'bar'] }),
+      ['baz']
+    );
+    const rawArray: string[] = [];
+    const args: unknown[] = [];
+    assert.deepStrictEqual(instance.compose(rawArray, args), { lastIndex: 0 });
+    assert.deepStrictEqual(rawArray, ['"foo"."bar"']);
+    assert.deepStrictEqual(args, []);
+
+    assert.throws(() => instance.composed, new Error('Method not implemented.'));
+  });
+});
+
+describe('JsonPostgreSql', () => {
+  it('should not explode', () => {
+    const instance = new JsonPostgreSql(Object.assign([], { raw: [] }), []);
+    assert.deepStrictEqual(instance.compose([], []), { lastIndex: 0 });
+    assert.throws(() => instance.composed, new Error('Method not implemented.'));
+  });
+});
+
+describe('sql tag', () => {
   it('should convert query to a safe string with args', () => {
     const { raw, args } = sql`
       update ${id('foo')}    
@@ -24,5 +49,35 @@ describe('postgres sql tag', () => {
       'update "foo" set "col1"=$1, "col2"=$2, "col3"=$3, "col4"=$4'
     );
     assert.deepStrictEqual(args, [123, true, null, { foo: 'bar' }]);
+  });
+});
+
+describe('json util', () => {
+  it('should be able to compose with the first argument', () => {
+    const instance = json({ foo: 'bar' });
+    assert.ok(instance instanceof JsonPostgreSql);
+
+    const rawArray: string[] = ['first'];
+    const args: PostgresJson[] = [];
+
+    assert.deepStrictEqual(instance.compose(rawArray, args), { lastIndex: 1 });
+    assert.deepStrictEqual(rawArray, ['first', '$1::json']);
+    assert.deepStrictEqual(args, [JSON.stringify({ foo: 'bar' })]);
+  });
+
+  it('should be able to convert to JSON class when needed', () => {
+    assert.ok(jsonIfNeeded(null) === null);
+    assert.ok(jsonIfNeeded('foo') === 'foo');
+
+    const json1 = jsonIfNeeded([null]);
+    assert.ok(json1 instanceof JsonPostgreSql);
+    assert.deepStrictEqual(json1.args, [[null]]);
+
+    const json2 = jsonIfNeeded({ foo: 'bar' });
+    assert.ok(json2 instanceof JsonPostgreSql);
+    assert.deepStrictEqual(json2.args, [{ foo: 'bar' }]);
+
+    const json3 = sql`select * from somewhere;`;
+    assert.strictEqual(jsonIfNeeded(json3), json3);
   });
 });

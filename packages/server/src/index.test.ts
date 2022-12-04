@@ -16,7 +16,7 @@ describe('createServer()', () => {
   it('should be able to run a composer', async () => {
     const composer = sinon.spy(compose());
     // @ts-expect-error for testing
-    const typed = createServer({ composer });
+    const typed = createServer({ composer, logLevel: 'none' });
 
     await request(typed.server).get('/');
     assert.ok(composer.calledOnce && composer.calledWith({}));
@@ -29,7 +29,7 @@ describe('createServer()', () => {
       })
     );
     // @ts-expect-error for testing
-    const { server } = createServer({ composer });
+    const { server } = createServer({ composer, logLevel: 'none' });
 
     await request(server).get('/').expect(500);
     assert.ok(composer.calledOnce && composer.calledWith({}));
@@ -42,7 +42,7 @@ describe('createServer()', () => {
       })
     );
     // @ts-expect-error for testing
-    const { server } = createServer({ composer });
+    const { server } = createServer({ composer, logLevel: 'none' });
 
     await request(server).get('/').expect(400, { message: 'composer error' });
     assert.ok(composer.calledOnce && composer.calledWith({}));

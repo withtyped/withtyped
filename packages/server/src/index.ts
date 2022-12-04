@@ -18,6 +18,7 @@ export type CreateServer<
   port?: number;
   composer?: Composer<T, InputContext, OutputContext>;
   queryClients?: QueryClient[];
+  logLevel?: 'none' | 'info';
 };
 
 export const handleError = async (response: http.ServerResponse, error: unknown) => {
@@ -40,11 +41,14 @@ export default function createServer<T extends unknown[], OutputContext extends 
   port = 9001,
   composer,
   queryClients,
+  logLevel = 'info',
 }: CreateServer<T, BaseContext, OutputContext> = {}) {
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
     // Start log
-    console.log(color(' in', 'blue'), color(request.method, 'bright'), request.url);
+    if (logLevel !== 'none') {
+      console.debug(color(' in', 'blue'), color(request.method, 'bright'), request.url);
+    }
     const startTime = Date.now();
 
     // Run the middleware chain
@@ -63,13 +67,15 @@ export default function createServer<T extends unknown[], OutputContext extends 
     await end();
 
     // End log
-    console.log(
-      color('out', 'magenta'),
-      color(request.method, 'bright'),
-      request.url,
-      response.statusCode,
-      `${Date.now() - startTime}ms`
-    );
+    if (logLevel !== 'none') {
+      console.debug(
+        color('out', 'magenta'),
+        color(request.method, 'bright'),
+        request.url,
+        response.statusCode,
+        `${Date.now() - startTime}ms`
+      );
+    }
   });
 
   // eslint-disable-next-line @silverhand/fp/no-let
