@@ -1,11 +1,11 @@
-import { describe, it } from 'node:test';
-
 import { identifier, PostgresQueryClient, sql } from '@withtyped/postgres';
 import { log } from '@withtyped/shared';
 import { customAlphabet, urlAlphabet } from 'nanoid';
 import { z } from 'zod';
 
-class PostgresInitClient {
+export const createDatabaseName = () => 'withtyped-' + customAlphabet(urlAlphabet, 8)();
+
+export default class PostgresInitClient {
   constructor(
     public readonly queryClient: PostgresQueryClient,
     public readonly maintenanceDatabase = 'postgres'
@@ -69,14 +69,3 @@ class PostgresInitClient {
     });
   }
 }
-
-describe('test', () => {
-  const database = 'withtyped-' + customAlphabet(urlAlphabet, 8)();
-  const queryClient = new PostgresQueryClient({ database });
-
-  it('seed', async () => {
-    const initClient = new PostgresInitClient(queryClient);
-    await initClient.initialize();
-    await initClient.destroy();
-  });
-});

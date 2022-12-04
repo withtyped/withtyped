@@ -1,5 +1,6 @@
 import { QueryClient } from '@withtyped/server';
 import type { QueryResult } from '@withtyped/server';
+import { log } from '@withtyped/shared';
 import type { PoolConfig } from 'pg';
 import pg from 'pg';
 
@@ -30,6 +31,7 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
     }
 
     const { raw, args } = sql.composed;
+    log.debug('query', raw, args);
 
     return this.client.query(raw, args);
   }
