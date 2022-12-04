@@ -7,24 +7,31 @@ import type { PostgreSql } from './sql.js';
 
 export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   public pool: pg.Pool;
+  protected client?: pg.PoolClient;
 
-  constructor(config?: PoolConfig) {
+  constructor(public readonly config?: PoolConfig) {
     super();
     this.pool = new pg.Pool(config);
   }
 
   async connect() {
-    await this.pool.connect();
+    this.client = await this.pool.connect();
   }
 
   async end() {
+    this.client?.release();
+
     return this.pool.end();
   }
 
   async query(sql: PostgreSql): Promise<QueryResult<Record<string, unknown>>> {
+    if (!this.client) {
+      throw new Error('No client found in database pool. Call `.connect()` first.');
+    }
+
     const { raw, args } = sql.composed;
 
-    return this.pool.query(raw, args);
+    return this.client.query(raw, args);
   }
 }
 

@@ -55,7 +55,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@withtyped/shared": "workspace:^",
+    "@withtyped/shared": "workspace:*",
     "pg": "^8.8.0"
   }
 }

@@ -12,6 +12,7 @@ export const colors = Object.freeze({
   blue: '\u001B[34m',
   magenta: '\u001B[35m',
   cyan: '\u001B[36m',
+  yellow: '\u001B[33m',
 });
 
 export const color = (string: string | undefined, color: keyof typeof colors) =>
@@ -21,6 +22,7 @@ export const color = (string: string | undefined, color: keyof typeof colors) =>
 
 type Log = {
   debug: typeof console.log;
+  warn: typeof console.log;
 };
 
 export const log: Log = {
@@ -28,6 +30,9 @@ export const log: Log = {
     if (['1', 'true', 'y', 'yes'].includes(process.env.DEBUG ?? '')) {
       console.debug(color('dbg', 'dim'), ...args);
     }
+  },
+  warn: (...args) => {
+    console.warn(color('warn', 'yellow'), ...args);
   },
 };
 
