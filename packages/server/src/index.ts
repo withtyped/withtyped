@@ -77,12 +77,22 @@ export default function createServer<T extends unknown[], OutputContext extends 
       );
     }
   });
+
   const closeServer = async () =>
     new Promise((resolve) => {
       server.close((error) => {
         resolve(error);
       });
     });
+
+  const close = async () => {
+    if (queryClients) {
+      await Promise.all(queryClients.map(async (client) => client.end()));
+    }
+
+    console.debug('Exited');
+    await closeServer();
+  };
 
   // eslint-disable-next-line @silverhand/fp/no-let
   let killed = false;
@@ -95,12 +105,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // eslint-disable-next-line @silverhand/fp/no-mutation
     killed = true;
 
-    if (queryClients) {
-      await Promise.all(queryClients.map(async (client) => client.end()));
-    }
-
-    console.debug('Exited');
-    await closeServer();
+    await close();
 
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
@@ -108,7 +113,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
 
   return {
     server,
-    kill,
+    close,
     listen: async (listener?: (port: number) => void) => {
       process.on('SIGINT', kill);
       process.on('SIGQUIT', kill);

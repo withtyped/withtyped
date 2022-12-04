@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
-import createServer, { RequestError, Router } from '@withtyped/server';
-import { createComposer } from '@withtyped/server/lib/preset.js';
+import { RequestError, Router } from '@withtyped/server';
 import {
   zodTypeToParameters,
   zodTypeToSwagger,
@@ -85,9 +84,3 @@ export const router = new Router()
     }
   )
   .withOpenApi(zodTypeToParameters, zodTypeToSwagger);
-
-const server = createServer({ composer: createComposer().and(router.routes()) });
-
-await server.listen(() => {
-  console.log('Listening', 9001);
-});

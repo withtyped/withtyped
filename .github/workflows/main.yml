@@ -31,10 +31,8 @@ jobs:
       - name: Test
         run: pnpm -r test
 
-      - name: Setup debug server
-        working-directory: packages/sample
-        run: node lib/debug.js &
+      - name: Setup Postgres
+        uses: ikalnytskyi/action-setup-postgres@v3
 
       - name: Integration test
-        working-directory: packages/sample
-        run: node --test
+        run: pnpm -r test:integration

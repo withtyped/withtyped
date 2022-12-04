@@ -1,14 +1,29 @@
 import assert from 'node:assert';
-import { describe, it } from 'node:test';
+import { after, before, describe, it } from 'node:test';
 
 import Client, { ResponseError } from '@withtyped/client';
+import createServer from '@withtyped/server';
+import { createComposer } from '@withtyped/server/lib/preset.js';
 
 import { createBook } from './book.js';
-import type { router } from './debug.js';
+import { router } from './router.js';
 
-const client = new Client<typeof router>('http://localhost:9001');
+describe('Router', () => {
+  const server = createServer({
+    composer: createComposer().and(router.routes()),
+    logLevel: 'none',
+    port: 9001,
+  });
+  const client = new Client<typeof router>('http://localhost:9001');
 
-describe('books', () => {
+  before(async () => {
+    await server.listen();
+  });
+
+  after(async () => {
+    await server.close();
+  });
+
   it('should return OpenAPI info', async () => {
     const openapi = await client.get('/openapi.json');
     assert.ok(openapi.info.title);

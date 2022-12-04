@@ -26,6 +26,7 @@
   },
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@withtyped/client": "workspace:*",
     "@withtyped/postgres": "workspace:*",
     "@withtyped/server": "workspace:*",
