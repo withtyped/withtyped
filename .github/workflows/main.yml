@@ -23,7 +23,7 @@ jobs:
           node-version: 19
 
       - name: Build
-        run: pnpm -r build
+        run: pnpm -r build --sourcemap
 
       - name: Lint
         run: pnpm -r lint
