@@ -1,7 +1,11 @@
 # withtyped
 
+[![checks](https://img.shields.io/github/checks-status/withtyped/withtyped/master)](https://github.com/withtyped/withtyped/actions?query=branch%3Amaster)
+[![core coverage](https://img.shields.io/codecov/c/github/withtyped/withtyped)](https://app.codecov.io/gh/withtyped/withtyped)
+[![release](https://img.shields.io/github/v/release/withtyped/withtyped?color=5153FF)](https://github.com/withtyped/withtyped/releases)
+
 > **Note**
-> This project is in the experimental stage and has a lot of work to do. Don't use it in prod.
+> This project is in the beta stage. Although it's fully-tested, things are still subject to change.
 
 ![Banner](./banner.png)
 
