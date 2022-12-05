@@ -47,6 +47,8 @@ export default class ModelRouter<
   }
 
   public routes(): MiddlewareFunction<RequestContext, RequestContext> {
+    // This will also catch all ModelClientError in the middleware chain?
+    // Consider some better approach
     return compose<RequestContext, RequestContext>(async (context, next) => {
       try {
         await next(context);

@@ -34,4 +34,17 @@ describe('PostgresQueryClient', () => {
     await queryClient.query(query);
     assert.ok(fakePg.query.calledOnceWithExactly('select * from $1', ['foo']));
   });
+
+  it("should not call pool's `.end()` twice", async () => {
+    const queryClient = createQueryClient();
+    const fakePg = new FakePg();
+    // @ts-expect-error for testing
+    sinon.replace(queryClient, 'pool', fakePg);
+
+    assert.strictEqual(queryClient.status, 'active');
+    await queryClient.end();
+    await queryClient.end();
+    assert.strictEqual(queryClient.status, 'ended');
+    assert.ok(fakePg.end.calledOnceWithExactly());
+  });
 });

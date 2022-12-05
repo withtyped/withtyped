@@ -66,12 +66,9 @@ describe('createServer()', () => {
       exit = sinon.stub();
     }
 
-    /* eslint-disable @silverhand/fp/no-mutation, no-global-assign */
     const fakeProcess = new FakeEventEmitter();
-    const originalProcess = process;
-
-    // @ts-expect-error for testing
-    process = fakeProcess;
+    const stubProcess = sinon.stub(global, 'process').value(fakeProcess);
+    console.log('Stubbed process');
 
     const queryClients = [new TestQueryClient(), new TestQueryClient()];
     const { server, listen } = createServer({ queryClients });
@@ -100,9 +97,8 @@ describe('createServer()', () => {
 
     // Wait promises to be executed
     setTimeout(() => {
-      console.log('resetting');
-      process = originalProcess;
+      console.log('Restoring process');
+      stubProcess.restore();
     }, 0);
-    /* eslint-enable @silverhand/fp/no-mutation, no-global-assign */
   });
 });
