@@ -4,13 +4,15 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "prepare": "if test \"$NODE_ENV\" != \"production\" && test \"$CI\" != \"true\" ; then husky install ; fi"
+    "prepare": "if test \"$NODE_ENV\" != \"production\" && test \"$CI\" != \"true\" ; then husky install ; fi",
+    "test:all": "c8 pnpm -r test:all"
   },
   "engines": {
     "node": "^18.13.0 || ^19.2.0",
     "pnpm": "^7"
   },
   "devDependencies": {
+    "c8": "^7.12.0",
     "husky": "^8.0.2",
     "typescript": "^4.9.3"
   }

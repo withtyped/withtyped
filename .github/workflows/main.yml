@@ -29,7 +29,9 @@ jobs:
         run: pnpm -r lint
 
       - name: Test
-        run: pnpm -r test:all
+        run: |
+          pnpm test:all
+          rm -rf coverage/tmp
 
       - name: Setup Postgres
         uses: ikalnytskyi/action-setup-postgres@v3
