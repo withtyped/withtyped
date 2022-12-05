@@ -1,4 +1,4 @@
 {
-  "reporter": "html",
+  "reporter": "lcov",
   "src": "./lib"
 }

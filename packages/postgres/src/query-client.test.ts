@@ -7,8 +7,7 @@ import { createQueryClient } from './query-client.js';
 import { sql } from './sql.js';
 
 class FakePg {
-  clientQuery = sinon.stub();
-  connect = sinon.stub().resolves({ query: this.clientQuery, release: sinon.fake() });
+  connect = sinon.stub().resolves({ release: sinon.fake() });
   end = sinon.stub();
   query = sinon.stub();
 }
@@ -33,6 +32,6 @@ describe('PostgresQueryClient', () => {
 
     const query = sql`select * from ${'foo'}`;
     await queryClient.query(query);
-    assert.ok(fakePg.clientQuery.calledOnceWithExactly('select * from $1', ['foo']));
+    assert.ok(fakePg.query.calledOnceWithExactly('select * from $1', ['foo']));
   });
 });

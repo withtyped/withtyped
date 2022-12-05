@@ -62,6 +62,7 @@ describe('createServer()', () => {
 
   it('should be able to respond signal', async () => {
     class FakeEventEmitter extends EventEmitter {
+      env = {};
       exit = sinon.stub();
     }
 
