@@ -2,7 +2,6 @@ import type { Parser } from '../types.js';
 import type {
   CreateEntity,
   Entity,
-  IdKeys,
   NormalizedBody,
   RawParserConfig,
   SplitRawColumns,
@@ -48,7 +47,9 @@ export default class Model<
     return Object.values(this.rawConfigs).map(({ rawKey }) => rawKey);
   }
 
-  isIdKey(key: keyof ModelType): key is IdKeys<ModelType> {
+  // Indicates if `key` is `IdKeys<ModelType>`.
+  // Cannot define as a type guard since it will affects generic array for `DatabaseInitializer`.
+  isIdKey(key: keyof ModelType): boolean {
     if (!(key in this.rawConfigs)) {
       return false;
     }

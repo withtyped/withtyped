@@ -2,13 +2,13 @@ import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
 import Client, { ResponseError } from '@withtyped/client';
-import { PostgreSql, createModelRouter, createQueryClient } from '@withtyped/postgres';
+import { createModelRouter, createQueryClient, PostgresInitializer } from '@withtyped/postgres';
 import createServer, { Model } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 import { z } from 'zod';
 
 import { createBook } from '../utils/book.js';
-import PostgresInitClient, { createDatabaseName } from './init-client.js';
+import { createDatabaseName } from '../utils/database.js';
 
 const is404 = (error: unknown) => {
   return error instanceof ResponseError && error.status === 404;
@@ -31,7 +31,7 @@ describe('ModelRouter', () => {
   const database = createDatabaseName();
   const queryClient = createQueryClient({ database });
   const modelRouter = createModelRouter(Book, queryClient).withCrud();
-  const initClient = new PostgresInitClient(queryClient);
+  const initClient = new PostgresInitializer([Book], queryClient);
   const server = createServer({
     queryClients: [queryClient],
     composer: createComposer().and(modelRouter.routes()),
@@ -41,7 +41,6 @@ describe('ModelRouter', () => {
 
   before(async () => {
     await initClient.initialize();
-    await queryClient.query(new PostgreSql(Object.assign([Book.raw], { raw: [Book.raw] }), []));
     await server.listen((port) => {
       console.log('Listening', port);
     });
