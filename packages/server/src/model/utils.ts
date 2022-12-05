@@ -36,7 +36,7 @@ export const findType = (raw?: string): PrimitiveType | undefined => {
 };
 
 export const parseTableName = (raw: string): string | undefined => {
-  const match = /create table (.*) \(/.exec(normalizeString(raw));
+  const match = /create table ([^(]*) \(/.exec(normalizeString(raw));
 
   return match?.[1] ?? undefined;
 };

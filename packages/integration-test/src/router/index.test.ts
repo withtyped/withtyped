@@ -5,7 +5,7 @@ import Client, { ResponseError } from '@withtyped/client';
 import createServer from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 
-import { createBook } from './book.js';
+import { createBook } from '../utils/book.js';
 import { router } from './router.js';
 
 describe('Router', () => {

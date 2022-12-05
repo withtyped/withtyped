@@ -21,8 +21,10 @@ export class ResponseError extends Error {
   }
 }
 
-export default class Client<R extends Router, Routes extends BaseRoutes = RouterRoutes<R>>
-  implements RouterClient<Routes>
+export default class Client<
+  R extends Router<BaseRoutes, string>,
+  Routes extends BaseRoutes = RouterRoutes<R>
+> implements RouterClient<Routes>
 {
   get = this.buildHandler('get');
   post = this.buildHandler('post');

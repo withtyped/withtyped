@@ -1,5 +1,9 @@
+import compose from '../compose.js';
 import RequestError from '../errors/RequestError.js';
+import type { MiddlewareFunction } from '../middleware.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type ModelClient from '../model-client/index.js';
+import { ModelClientError } from '../model-client/index.js';
 import type { IdKeys } from '../model/types.js';
 import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
@@ -40,6 +44,20 @@ export default class ModelRouter<
 
   get model() {
     return this.client.model;
+  }
+
+  public routes(): MiddlewareFunction<RequestContext, RequestContext> {
+    return compose<RequestContext, RequestContext>(async (context, next) => {
+      try {
+        await next(context);
+      } catch (error: unknown) {
+        if (error instanceof ModelClientError && error.code === 'entity_not_found') {
+          throw new RequestError('Entity not found', 404);
+        }
+
+        throw error;
+      }
+    }).and(super.routes());
   }
 
   withCreate() {
@@ -95,6 +113,10 @@ export default class ModelRouter<
           params: { id },
           body,
         } = context.request;
+
+        if (Object.keys(body).length === 0) {
+          throw new RequestError('Nothing to update', 400);
+        }
 
         return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }

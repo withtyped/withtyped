@@ -43,7 +43,7 @@ export type ColumnHasDefault<T> = T extends `${string}default${string}` ? true :
 export type ColumnIsArray<T> = T extends `${string}array${string}` ? true : false;
 
 export type ColumnLiteral<T> = T extends `${infer Name} ${infer Type} ${infer Props}`
-  ? Name extends 'constraint' | 'like'
+  ? Name extends 'constraint' | 'like' | 'primary' | 'foreign'
     ? never
     : [Name, DataType<Type>, ColumnNotNull<Props>, ColumnHasDefault<Props>, ColumnIsArray<Props>]
   : T extends `${infer Name} ${infer Type}`

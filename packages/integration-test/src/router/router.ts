@@ -6,8 +6,8 @@ import {
 } from '@withtyped/server/lib/test-utils/openapi.test.js';
 import { z } from 'zod';
 
-import type { Book } from './book.js';
-import { bookGuard, createBook } from './book.js';
+import type { Book } from '../utils/book.js';
+import { bookGuard, createBook } from '../utils/book.js';
 
 // eslint-disable-next-line @silverhand/fp/no-let
 let books = Array.from({ length: 10 }).map(() => createBook());

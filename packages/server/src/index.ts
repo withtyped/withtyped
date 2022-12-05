@@ -119,17 +119,21 @@ export default function createServer<T extends unknown[], OutputContext extends 
       process.on('SIGQUIT', kill);
       process.on('SIGTERM', kill);
 
+      log.debug('1111');
+
       if (queryClients) {
         await Promise.all(queryClients.map(async (client) => client.connect()));
       }
 
-      server.listen(port);
+      log.debug('2222');
 
       if (listener) {
         server.on('listening', () => {
           listener(port);
         });
       }
+
+      server.listen(port);
     },
   };
 }
