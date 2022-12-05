@@ -7,13 +7,14 @@ import { contentTypes, RequestMethod } from '@withtyped/shared';
 import withCors from './with-cors.js';
 import type { RequestContext } from './with-request.js';
 
-const mockContext: (url: URL, headers?: IncomingHttpHeaders) => Readonly<RequestContext> = (
-  url,
-  headers
-) =>
+const mockContext: (
+  url: URL,
+  headers?: IncomingHttpHeaders,
+  method?: RequestMethod
+) => Readonly<RequestContext> = (url, headers, method = RequestMethod.OPTIONS) =>
   Object.freeze({
     request: {
-      method: RequestMethod.POST,
+      method,
       headers: { 'content-type': contentTypes.json, origin: 'https://localhost', ...headers },
       url,
     },
@@ -27,16 +28,28 @@ describe('withCors()', () => {
     origin: string | undefined,
     headers = '*',
     methods = '*',
-    maxAge = 2_592_000
+    maxAge = 600,
+    allowCredentials = false
     // eslint-disable-next-line max-params, unicorn/consistent-function-scoping
   ) => {
     assert.deepStrictEqual(context.headers, {
       ...(origin && { 'access-control-allow-origin': origin }),
+      ...(allowCredentials && { 'access-control-allow-credentials': true }),
       'access-control-allow-headers': headers,
       'access-control-allow-methods': methods,
       'access-control-max-age': maxAge,
     });
   };
+
+  it('should set status to 204 for preflight requests', async () => {
+    await withCors()(
+      mockContext(endpointUrl, { origin: 'http://localhost:3000' }),
+      async (context) => {
+        assertHeaders(context, 'http://localhost:3000');
+        assert.strictEqual(context.status, 204);
+      }
+    );
+  });
 
   it('should be adaptive for origin by default', async () => {
     await withCors()(
@@ -51,21 +64,26 @@ describe('withCors()', () => {
   });
 
   it('should return no origin header if match failed', async () => {
-    await withCors({ allowedOrigin: 'http://localhost' })(
-      mockContext(endpointUrl),
-      async (context) => {
+    await Promise.all([
+      withCors({ allowedOrigin: 'http://localhost' })(mockContext(endpointUrl), async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
         assertHeaders(context, undefined);
-      }
-    );
-
-    await withCors({ allowedOrigin: /https?:\/\/logto.io/ })(
-      mockContext(endpointUrl, { origin: 'https://local.io' }),
-      async (context) => {
-        // eslint-disable-next-line unicorn/no-useless-undefined
-        assertHeaders(context, undefined);
-      }
-    );
+      }),
+      withCors({ allowedOrigin: /https?:\/\/logto.io/ })(
+        mockContext(endpointUrl, { origin: 'https://local.io' }),
+        async (context) => {
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          assertHeaders(context, undefined);
+        }
+      ),
+      withCors({ allowedOrigin: 'http://localhost' })(
+        mockContext(endpointUrl, { origin: '' }),
+        async (context) => {
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          assertHeaders(context, undefined);
+        }
+      ),
+    ]);
   });
 
   it('should show proper origin', async () => {
@@ -115,9 +133,25 @@ describe('withCors()', () => {
     );
   });
 
-  it('should show proper max-age', async () => {
-    await withCors({ maxAge: 100 })(mockContext(endpointUrl), async (context) => {
-      assertHeaders(context, 'https://localhost', undefined, undefined, 100);
-    });
+  it('should show proper max-age and allow-credentials header', async () => {
+    await withCors({ maxAge: 100, allowCredentials: true })(
+      mockContext(endpointUrl),
+      async (context) => {
+        assertHeaders(context, 'https://localhost', undefined, undefined, 100, true);
+      }
+    );
+  });
+
+  it('should return only origin header for non-preflight requests', async () => {
+    await withCors({ allowCredentials: true })(
+      mockContext(endpointUrl, { origin: 'http://localhost:3000' }, RequestMethod.POST),
+      async (context) => {
+        assert.deepStrictEqual(context.headers, {
+          'access-control-allow-origin': 'http://localhost:3000',
+          'access-control-allow-credentials': true,
+        });
+        assert.strictEqual(context.status, undefined);
+      }
+    );
   });
 });

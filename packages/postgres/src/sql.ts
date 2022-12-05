@@ -37,18 +37,15 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
     };
 
     const handle = (argument?: InputArgument) => {
-      console.log('handle', argument);
+      log.debug('handle', argument);
 
       if (argument === undefined) {
         return;
       }
 
       if (argument instanceof Sql) {
-        console.log('handle is sql!');
         combineSql(argument);
       } else if (Array.isArray(argument)) {
-        console.log('handle is array!');
-
         const [first, ...rest] = argument;
 
         if (first) {
@@ -60,7 +57,6 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
           handle(sql);
         }
       } else {
-        console.log('handle is others!');
         globalIndex += 1;
         rawArray.push(`$${globalIndex}`);
         args.push(argument);
@@ -117,6 +113,7 @@ export const json = (data: PostgresJson) =>
 export const jsonIfNeeded = (
   data: PostgresJson | PostgreSql
 ): PostgreSql | Exclude<PostgresJson, JsonArray | JsonObject> =>
-  Array.isArray(data) || (typeof data === 'object' && data !== null && !(data instanceof Sql))
+  Array.isArray(data) ||
+  (typeof data === 'object' && data !== null && !(data instanceof Sql || data instanceof Date))
     ? json(data)
     : data;

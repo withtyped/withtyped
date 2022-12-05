@@ -1,7 +1,5 @@
 import type Model from '../model/index.js';
 
-// Abstract class will be an empty class in JS
-/* c8 ignore start */
 export default abstract class ModelClient<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string,
@@ -25,6 +23,5 @@ export default abstract class ModelClient<
 
   abstract delete<Key extends keyof ModelType>(whereKey: Key, value: string): Promise<boolean>;
 }
-/* c8 ignore end */
 
 export * from './errors.js';

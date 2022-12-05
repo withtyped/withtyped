@@ -44,11 +44,15 @@ export default class Model<
     this.rawConfigs = parseRawConfigs(raw);
   }
 
-  get keys() {
-    return Object.keys(this.rawConfigs);
+  get rawKeys() {
+    return Object.values(this.rawConfigs).map(({ rawKey }) => rawKey);
   }
 
   isIdKey(key: keyof ModelType): key is IdKeys<ModelType> {
+    if (!(key in this.rawConfigs)) {
+      return false;
+    }
+
     return ['string', 'number'].includes(this.rawConfigs[key].type);
   }
 

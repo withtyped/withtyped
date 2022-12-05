@@ -8,7 +8,8 @@ export type ClientPayload = {
 };
 
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
-  infer Routes
+  infer Routes,
+  string
 >
   ? Routes
   : never;

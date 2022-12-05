@@ -29,12 +29,12 @@ jobs:
         run: pnpm -r lint
 
       - name: Test
-        run: pnpm -r test
+        run: pnpm -r test:all
 
-      - name: Setup debug server
-        working-directory: packages/sample
-        run: node lib/debug.js &
+      - name: Setup Postgres
+        uses: ikalnytskyi/action-setup-postgres@v3
 
       - name: Integration test
-        working-directory: packages/sample
-        run: node --test
+        run: pnpm -r test:integration
+
+      - uses: codecov/codecov-action@v3

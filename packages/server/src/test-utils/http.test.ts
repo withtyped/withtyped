@@ -17,6 +17,12 @@ export const createHttpContext: (isHttps?: boolean) => HttpContext = (isHttps = 
   };
 };
 
+export const createRequestPayload = (isHttps = false): [IncomingMessage, ServerResponse] => {
+  const { request, response } = createHttpContext(isHttps);
+
+  return [request, response];
+};
+
 export const createRequestContext = (
   method: RequestMethod | undefined,
   path: string,

@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import { contentTypes, noop, RequestMethod } from '@withtyped/shared';
 
 import RequestError from '../errors/RequestError.js';
+import type { HttpContext } from '../middleware.js';
 import { createHttpContext } from '../test-utils/http.test.js';
 import withBody from './with-body.js';
 import type { RequestContext } from './with-request.js';
@@ -20,47 +21,70 @@ describe('withBody()', () => {
 
   it('should throw when `content-type` is unexpected and method is valid', async () => {
     const httpContext = createHttpContext();
-    await assert.rejects(
-      run(
-        { ...mockContext, request: { ...mockContext.request, headers: { 'content-type': 'foo' } } },
-        noop,
-        httpContext
-      ),
-      RequestError
+    const promise = run(
+      { ...mockContext, request: { ...mockContext.request, headers: { 'content-type': 'foo' } } },
+      noop,
+      httpContext
     );
+    httpContext.request.emit('data', Buffer.from('{}'));
+    httpContext.request.emit('end');
+    await assert.rejects(promise, RequestError);
+  });
+
+  it('should do nothing when body is empty', async () => {
+    const httpContext = createHttpContext();
+    const originalContext = {
+      ...mockContext,
+      request: { ...mockContext.request, headers: { 'content-type': 'foo' } },
+    };
+    const promise = run(
+      originalContext,
+      async (context) => {
+        assert.deepStrictEqual(context, originalContext);
+      },
+      httpContext
+    );
+    httpContext.request.emit('data', Buffer.from(''));
+    httpContext.request.emit('end');
+    await promise;
   });
 
   it('should do nothing for certain methods even body has value', async () => {
-    const httpContext = createHttpContext();
-    const promise = Promise.all(
-      [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, undefined].map(
-        async (method) => {
-          const originalContext = {
-            ...mockContext,
-            request: { ...mockContext.request, method, headers: { 'content-type': 'foo' } },
-          };
+    const runs = [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, undefined].map<
+      [Promise<void>, HttpContext]
+    >((method) => {
+      const httpContext = createHttpContext();
+      const originalContext = {
+        ...mockContext,
+        request: { ...mockContext.request, method, headers: { 'content-type': 'foo' } },
+      };
 
-          await run(
-            originalContext,
-            async (context) => {
-              assert.deepStrictEqual(context, originalContext);
-            },
-            httpContext
-          );
-        }
-      )
-    );
+      const promise = run(
+        originalContext,
+        async (context) => {
+          assert.deepStrictEqual(context, originalContext);
+        },
+        httpContext
+      );
+      httpContext.request.emit('end');
+
+      return [promise, httpContext];
+    });
 
     const raw = '{     "foo": "bar",|   \n  "baz": 1,| \n\n"bar": [true,| false]}';
     const stringArray = raw.split('|');
 
     for (const value of stringArray) {
-      httpContext.request.emit('data', Buffer.from(value));
+      for (const [, { request }] of runs) {
+        request.emit('data', Buffer.from(value));
+      }
     }
 
-    httpContext.request.emit('end');
+    for (const [, { request }] of runs) {
+      request.emit('end');
+    }
 
-    await promise;
+    await Promise.all(runs.map(async ([promise]) => promise));
   });
 
   it('should read JSON string and convert to object', async () => {

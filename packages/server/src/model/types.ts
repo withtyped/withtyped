@@ -43,7 +43,7 @@ export type ColumnHasDefault<T> = T extends `${string}default${string}` ? true :
 export type ColumnIsArray<T> = T extends `${string}array${string}` ? true : false;
 
 export type ColumnLiteral<T> = T extends `${infer Name} ${infer Type} ${infer Props}`
-  ? Name extends 'constraint' | 'like'
+  ? Name extends 'constraint' | 'like' | 'primary' | 'foreign'
     ? never
     : [Name, DataType<Type>, ColumnNotNull<Props>, ColumnHasDefault<Props>, ColumnIsArray<Props>]
   : T extends `${infer Name} ${infer Type}`
@@ -86,8 +86,7 @@ export type RawCreateModel<S extends Array<[string, unknown]>> = S extends never
   ? S
   : {
       [Entry in S[number] as CamelCase<Entry[0]>]: Entry[3] extends true
-        ? // eslint-disable-next-line @typescript-eslint/ban-types
-          ColumnType<Entry> | null
+        ? ColumnType<Entry> | undefined
         : ColumnType<Entry>;
     };
 
@@ -124,6 +123,6 @@ export type KeyOfType<T, V> = keyof {
   [P in keyof T as T[P] extends V ? P : never]: unknown;
 };
 
-export type IdKeys<T> = KeyOfType<T, string>;
+export type IdKeys<T> = KeyOfType<T, string | number>;
 
 export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;

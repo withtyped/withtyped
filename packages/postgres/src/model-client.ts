@@ -2,18 +2,16 @@ import type { Model } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
 
 import type PostgresQueryClient from './query-client.js';
-import type { PostgresJson } from './sql.js';
+import type { PostgresJson, PostgreSql } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';
 
 type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : Value];
 
 type ValidKey = string | number | symbol;
-
 export default class PostgresModelClient<
   Table extends string,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  CreateType extends Record<string, PostgresJson> = {},
-  ModelType extends CreateType = CreateType
+  CreateType extends Record<string, PostgresJson | undefined>,
+  ModelType extends CreateType
 > extends ModelClient<Table, CreateType, ModelType> {
   constructor(
     public readonly model: Model<Table, CreateType, ModelType>,
@@ -31,15 +29,13 @@ export default class PostgresModelClient<
   }
 
   async create(data: CreateType): Promise<ModelType> {
-    const entries = Object.entries<PostgresJson | undefined>(data).filter(
-      (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
-    );
+    const entries = this.convertToEntries(data);
 
     const { rows } = await this.queryClient.query(sql`
       insert into ${identifier(this.model.tableName)}
         (${entries.map(([key]) => identifier(key))})
       values (${entries.map(([, value]) => jsonIfNeeded(value))})
-      returning ${this.model.keys.map((key) => identifier(key))}
+      returning ${this.model.rawKeys.map((key) => identifier(key))}
     `);
 
     return this.model.parse(rows[0]);
@@ -47,7 +43,7 @@ export default class PostgresModelClient<
 
   async readAll(): Promise<{ rows: ModelType[]; rowCount: number }> {
     const { rows, rowCount } = await this.queryClient.query(sql`
-      select ${this.model.keys.map((key) => identifier(key))}
+      select ${this.model.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
     `);
 
@@ -56,9 +52,9 @@ export default class PostgresModelClient<
 
   async read(whereKey: ValidKey, value: string): Promise<ModelType> {
     const { rows } = await this.queryClient.query(sql`
-      select (${this.model.keys.map((key) => identifier(key))})
+      select ${this.model.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
-      where ${identifier(String(whereKey))}=${value}
+      ${this.whereClause(whereKey, value)}
     `);
 
     if (!rows[0]) {
@@ -69,15 +65,13 @@ export default class PostgresModelClient<
   }
 
   async update(whereKey: ValidKey, value: string, data: Partial<CreateType>): Promise<ModelType> {
-    const entries = Object.entries<PostgresJson | undefined>(data).filter(
-      (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
-    );
+    const entries = this.convertToEntries(data);
 
     const { rows } = await this.queryClient.query(sql`
       update ${identifier(this.model.tableName)}
       set ${entries.map(([key, value]) => sql`${identifier(key)}=${jsonIfNeeded(value)}`)}
-      where ${identifier(String(whereKey))}=${value}
-      returning ${this.model.keys.map((key) => identifier(key))}
+      ${this.whereClause(whereKey, value)}
+      returning ${this.model.rawKeys.map((key) => identifier(key))}
     `);
 
     if (!rows[0]) {
@@ -90,12 +84,46 @@ export default class PostgresModelClient<
   async delete(whereKey: ValidKey, value: string): Promise<boolean> {
     const { rowCount } = await this.queryClient.query(sql`
       delete from ${identifier(this.model.tableName)}
-      where ${identifier(String(whereKey))}=${value}
+      ${this.whereClause(whereKey, value)}
     `);
 
     return rowCount > 0;
   }
+
+  protected whereClause(whereKey: ValidKey, value: string): PostgreSql {
+    const config = this.model.rawConfigs[whereKey];
+
+    if (!config) {
+      throw new ModelClientError('key_not_found');
+    }
+
+    if (!['string', 'number'].includes(config.type)) {
+      throw new TypeError('Key in where clause must map to a string or number value');
+    }
+
+    return sql`where ${identifier(config.rawKey)}=${
+      config.type === 'number' ? Number(value) : value
+    }`;
+  }
+
+  protected convertToEntries(data: Partial<CreateType>) {
+    return Object.entries<PostgresJson | undefined>(data)
+      .filter(
+        (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
+      )
+      .map<NonUndefinedValueTuple<PostgresJson>>(([key, value]) => [
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.model.rawConfigs[key]!.rawKey,
+        value,
+      ]);
+  }
 }
 
-export const createModelClient = (...args: ConstructorParameters<typeof PostgresModelClient>) =>
-  new PostgresModelClient(...args);
+export const createModelClient = <
+  Table extends string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  CreateType extends Record<string, PostgresJson | undefined> = {},
+  ModelType extends CreateType = CreateType
+>(
+  ...args: ConstructorParameters<typeof PostgresModelClient<Table, CreateType, ModelType>>
+) => new PostgresModelClient<Table, CreateType, ModelType>(...args);

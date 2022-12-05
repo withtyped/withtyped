@@ -15,13 +15,17 @@ importers:
       '@silverhand/eslint-config': ^1.3.0
       '@silverhand/ts-config': ^1.2.1
       '@types/node': ^18.11.9
+      '@types/sinon': ^10.0.13
       '@withtyped/server': workspace:*
       '@withtyped/shared': workspace:*
+      c8: ^7.12.0
       eslint: ^8.28.0
       lint-staged: ^13.0.4
       prettier: ^2.7.1
+      sinon: ^14.0.2
       tap-arc: ^0.3.5
       typescript: ^4.9.3
+      zod: ^3.19.1
     dependencies:
       '@withtyped/server': link:../server
       '@withtyped/shared': link:../shared
@@ -29,10 +33,47 @@ importers:
       '@silverhand/eslint-config': 1.3.0_lodna2kqutudccklmsddzyjx3a
       '@silverhand/ts-config': 1.2.1_typescript@4.9.3
       '@types/node': 18.11.9
+      '@types/sinon': 10.0.13
+      c8: 7.12.0
       eslint: 8.28.0
       lint-staged: 13.0.4
       prettier: 2.7.1
+      sinon: 14.0.2
       tap-arc: 0.3.5
+      typescript: 4.9.3
+      zod: 3.19.1
+
+  packages/integration-test:
+    specifiers:
+      '@faker-js/faker': ^7.6.0
+      '@silverhand/eslint-config': ^1.3.0
+      '@silverhand/ts-config': ^1.2.1
+      '@types/node': ^18.11.9
+      '@withtyped/client': workspace:*
+      '@withtyped/postgres': workspace:*
+      '@withtyped/server': workspace:*
+      '@withtyped/shared': workspace:*
+      eslint: ^8.28.0
+      lint-staged: ^13.0.4
+      nanoid: ^4.0.0
+      prettier: ^2.7.1
+      typescript: ^4.9.3
+      zod: ^3.19.1
+    dependencies:
+      '@faker-js/faker': 7.6.0
+      '@withtyped/client': link:../client
+      '@withtyped/postgres': link:../postgres
+      '@withtyped/server': link:../server
+      '@withtyped/shared': link:../shared
+      nanoid: 4.0.0
+      zod: 3.19.1
+    devDependencies:
+      '@silverhand/eslint-config': 1.3.0_lodna2kqutudccklmsddzyjx3a
+      '@silverhand/ts-config': 1.2.1_typescript@4.9.3
+      '@types/node': 18.11.9
+      eslint: 8.28.0
+      lint-staged: 13.0.4
+      prettier: 2.7.1
       typescript: 4.9.3
 
   packages/postgres:
@@ -41,14 +82,18 @@ importers:
       '@silverhand/ts-config': ^1.2.1
       '@types/node': ^18.11.9
       '@types/pg': ^8.6.5
+      '@types/sinon': ^10.0.13
       '@withtyped/server': workspace:*
-      '@withtyped/shared': workspace:^
+      '@withtyped/shared': workspace:*
+      c8: ^7.12.0
       eslint: ^8.28.0
       lint-staged: ^13.0.4
       pg: ^8.8.0
       prettier: ^2.7.1
+      sinon: ^14.0.2
       tap-arc: ^0.3.5
       typescript: ^4.9.3
+      zod: ^3.19.1
     dependencies:
       '@withtyped/shared': link:../shared
       pg: 8.8.0
@@ -57,16 +102,19 @@ importers:
       '@silverhand/ts-config': 1.2.1_typescript@4.9.3
       '@types/node': 18.11.9
       '@types/pg': 8.6.5
+      '@types/sinon': 10.0.13
       '@withtyped/server': link:../server
+      c8: 7.12.0
       eslint: 8.28.0
       lint-staged: 13.0.4
       prettier: 2.7.1
+      sinon: 14.0.2
       tap-arc: 0.3.5
       typescript: 4.9.3
+      zod: 3.19.1
 
   packages/sample:
     specifiers:
-      '@faker-js/faker': ^7.6.0
       '@silverhand/eslint-config': ^1.3.0
       '@silverhand/essentials': ^1.3.0
       '@silverhand/ts-config': ^1.2.1
@@ -82,7 +130,6 @@ importers:
       typescript: ^4.9.3
       zod: ^3.19.1
     dependencies:
-      '@faker-js/faker': 7.6.0
       '@silverhand/essentials': 1.3.0
       '@withtyped/client': link:../client
       '@withtyped/postgres': link:../postgres
@@ -108,6 +155,7 @@ importers:
       '@types/koa': ^2.13.5
       '@types/node': ^18.11.9
       '@types/sinon': ^10.0.13
+      '@types/supertest': ^2.0.12
       '@withtyped/shared': workspace:*
       c8: ^7.12.0
       eslint: ^8.28.0
@@ -115,6 +163,7 @@ importers:
       openapi-schema-validator: ^12.0.2
       prettier: ^2.7.1
       sinon: ^14.0.2
+      supertest: ^6.3.2
       tap-arc: ^0.3.5
       typescript: ^4.9.3
       zod: ^3.19.1
@@ -128,12 +177,14 @@ importers:
       '@types/koa': 2.13.5
       '@types/node': 18.11.9
       '@types/sinon': 10.0.13
+      '@types/supertest': 2.0.12
       c8: 7.12.0
       eslint: 8.28.0
       lint-staged: 13.0.4
       openapi-schema-validator: 12.0.2
       prettier: 2.7.1
       sinon: 14.0.2
+      supertest: 6.3.2
       tap-arc: 0.3.5
       typescript: 4.9.3
       zod: 3.19.1
@@ -400,6 +451,10 @@ packages:
     resolution: {integrity: sha512-v6LCdKfK6BwcqMo+wYW05rLS12S0ZO0Fl4w1h4aaZMD7bqT3gVUns6FvLJKGZHQmYn3SX55JWGpziwJRwVgutA==}
     dev: true
 
+  /@types/cookiejar/2.1.2:
+    resolution: {integrity: sha512-t73xJJrvdTjXrn4jLS9VSGRbz0nUY3cl2DMGDU48lKl+HR9dbbjW2A9r3g40VA++mQpy6uuHg33gy7du2BKpog==}
+    dev: true
+
   /@types/cookies/0.7.7:
     resolution: {integrity: sha512-h7BcvPUogWbKCzBR2lY4oqaZbO3jXZksexYJVFvkrFeLgbZjQkU4x8pRq6eg2MHXQhY0McQdqmmsxRWlVAHooA==}
     dependencies:
@@ -516,6 +571,19 @@ packages:
 
   /@types/sinonjs__fake-timers/8.1.2:
     resolution: {integrity: sha512-9GcLXF0/v3t80caGs5p2rRfkB+a8VBGLJZVih6CNFkx8IZ994wiKKLSRs9nuFwk1HevWs/1mnUmkApGrSGsShA==}
+    dev: true
+
+  /@types/superagent/4.1.16:
+    resolution: {integrity: sha512-tLfnlJf6A5mB6ddqF159GqcDizfzbMUB1/DeT59/wBNqzRTNNKsaw79A/1TZ84X+f/EwWH8FeuSkjlCLyqS/zQ==}
+    dependencies:
+      '@types/cookiejar': 2.1.2
+      '@types/node': 18.11.9
+    dev: true
+
+  /@types/supertest/2.0.12:
+    resolution: {integrity: sha512-X3HPWTwXRerBZS7Mo1k6vMVR1Z6zmJcDVn5O/31whe0tnjE4te6ZJSJGq1RiqHPjzPdMTfjCFogDJmwng9xHaQ==}
+    dependencies:
+      '@types/superagent': 4.1.16
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.40.1_5foadabyhuofbj4bdrxjdavre4:
@@ -760,6 +828,10 @@ packages:
       es-shim-unscopables: 1.0.0
     dev: true
 
+  /asap/2.0.6:
+    resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
+    dev: true
+
   /astral-regex/2.0.0:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
@@ -768,6 +840,10 @@ packages:
   /astring/1.8.3:
     resolution: {integrity: sha512-sRpyiNrx2dEYIMmUXprS8nlpRg2Drs8m9ElX9vVEXaCB4XEAJhKfs7IcX0IwShjuOAjLR6wzIrgoptz1n19i1A==}
     hasBin: true
+    dev: true
+
+  /asynckit/0.4.0:
+    resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: true
 
   /balanced-match/1.0.2:
@@ -963,9 +1039,20 @@ packages:
     resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
     dev: true
 
+  /combined-stream/1.0.8:
+    resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
+    engines: {node: '>= 0.8'}
+    dependencies:
+      delayed-stream: 1.0.0
+    dev: true
+
   /commander/9.4.1:
     resolution: {integrity: sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==}
     engines: {node: ^12.20.0 || >=14}
+    dev: true
+
+  /component-emitter/1.3.0:
+    resolution: {integrity: sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==}
     dev: true
 
   /concat-map/0.0.1:
@@ -988,6 +1075,10 @@ packages:
 
   /convert-source-map/1.9.0:
     resolution: {integrity: sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==}
+    dev: true
+
+  /cookiejar/2.1.3:
+    resolution: {integrity: sha512-JxbCBUdrfr6AQjOXrxoTvAMJO4HBTUIlBzslcJPAz+/KT8yk53fXun51u+RenNYvad/+Vc2DIz5o9UxlCDymFQ==}
     dev: true
 
   /create-eslint-index/1.0.0:
@@ -1060,6 +1151,18 @@ packages:
     dependencies:
       has-property-descriptors: 1.0.0
       object-keys: 1.1.1
+
+  /delayed-stream/1.0.0:
+    resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
+    engines: {node: '>=0.4.0'}
+    dev: true
+
+  /dezalgo/1.0.4:
+    resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
+    dependencies:
+      asap: 2.0.6
+      wrappy: 1.0.2
+    dev: true
 
   /diff/4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
@@ -1651,7 +1754,6 @@ packages:
 
   /fast-safe-stringify/2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
-    dev: false
 
   /fastq/1.13.0:
     resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}
@@ -1707,6 +1809,24 @@ packages:
     dependencies:
       cross-spawn: 7.0.3
       signal-exit: 3.0.7
+    dev: true
+
+  /form-data/4.0.0:
+    resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
+    engines: {node: '>= 6'}
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      mime-types: 2.1.35
+    dev: true
+
+  /formidable/2.1.1:
+    resolution: {integrity: sha512-0EcS9wCFEzLvfiks7omJ+SiYJAiD+TzK4Pcw1UlUoGnhUxDcMKjt0P7x8wEb0u6OHu8Nb98WG3nxtlF5C7bvUQ==}
+    dependencies:
+      dezalgo: 1.0.4
+      hexoid: 1.0.0
+      once: 1.4.0
+      qs: 6.11.0
     dev: true
 
   /fs.realpath/1.0.0:
@@ -1885,6 +2005,11 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+
+  /hexoid/1.0.0:
+    resolution: {integrity: sha512-QFLV0taWQOZtvIRIAdBChesmogZrtuXvVWsFHZTk2SU+anspqZ2vMnoLg7IE1+Uk16N19APic1BuF8bC8c2m5g==}
+    engines: {node: '>=8'}
+    dev: true
 
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
@@ -2362,12 +2487,35 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
+  /methods/1.1.2:
+    resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
+    engines: {node: '>= 0.6'}
+    dev: true
+
   /micromatch/4.0.5:
     resolution: {integrity: sha512-DMy+ERcEW2q8Z2Po+WNXuw3c5YaUSFjAO5GsJqfEl7UjvtIuFKO6ZrKvcItdy98dwFI2N1tg3zNIdKaQT+aNdA==}
     engines: {node: '>=8.6'}
     dependencies:
       braces: 3.0.2
       picomatch: 2.3.1
+    dev: true
+
+  /mime-db/1.52.0:
+    resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
+    engines: {node: '>= 0.6'}
+    dev: true
+
+  /mime-types/2.1.35:
+    resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
+    engines: {node: '>= 0.6'}
+    dependencies:
+      mime-db: 1.52.0
+    dev: true
+
+  /mime/2.6.0:
+    resolution: {integrity: sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==}
+    engines: {node: '>=4.0.0'}
+    hasBin: true
     dev: true
 
   /mimic-fn/2.1.0:
@@ -2858,6 +3006,13 @@ packages:
     resolution: {integrity: sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==}
     engines: {node: '>=6'}
 
+  /qs/6.11.0:
+    resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.0.4
+    dev: true
+
   /queue-microtask/1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
     dev: true
@@ -3249,6 +3404,34 @@ packages:
   /strip-json-comments/3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
+    dev: true
+
+  /superagent/8.0.5:
+    resolution: {integrity: sha512-lQVE0Praz7nHiSaJLKBM/cZyi7J0E4io8tWnGSBdBrqAzhzrjQ/F5iGP9Zr29CJC8N5zYdhG2kKaNcB6dKxp7g==}
+    engines: {node: '>=6.4.0 <13 || >=14'}
+    dependencies:
+      component-emitter: 1.3.0
+      cookiejar: 2.1.3
+      debug: 4.3.4
+      fast-safe-stringify: 2.1.1
+      form-data: 4.0.0
+      formidable: 2.1.1
+      methods: 1.1.2
+      mime: 2.6.0
+      qs: 6.11.0
+      semver: 7.3.8
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /supertest/6.3.2:
+    resolution: {integrity: sha512-mSmbW/sPpBU6K8w8189ZiHdc62zMe7dCHpC2ktS9tc0/d2DN0FaxNbDJJNFknZD4jCrGJpxkiFoVyemvKgOdwA==}
+    engines: {node: '>=6.4.0'}
+    dependencies:
+      methods: 1.1.2
+      superagent: 8.0.5
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /supports-color/5.5.0:

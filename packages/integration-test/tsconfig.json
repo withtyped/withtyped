@@ -1,0 +1,11 @@
+{
+  "extends": "@silverhand/ts-config/tsconfig.base",
+  "compilerOptions": {
+    "outDir": "lib",
+    "module": "esnext",
+    "target": "es2022"
+  },
+  "include": [
+    "src"
+  ],
+}

@@ -1,5 +1,9 @@
+import compose from '../compose.js';
 import RequestError from '../errors/RequestError.js';
+import type { MiddlewareFunction } from '../middleware.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type ModelClient from '../model-client/index.js';
+import { ModelClientError } from '../model-client/index.js';
 import type { IdKeys } from '../model/types.js';
 import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
@@ -19,31 +23,41 @@ export default class ModelRouter<
   public readonly idKey: IdKeys<ModelType>;
 
   constructor(
-    protected readonly client: ModelClient<Table, CreateType, ModelType>,
+    public readonly client: ModelClient<Table, CreateType, ModelType>,
     public readonly prefix: NormalizedPrefix<`/${Table}`>,
     idKey?: IdKey
   ) {
     super(prefix);
 
-    if (idKey) {
-      this.idKey = idKey;
-    } else {
-      // Define this const to make TypeScript happy
-      const id = 'id';
+    // eslint-disable-next-line no-restricted-syntax
+    this.idKey = idKey ?? ('id' as IdKey); // Use `as` here since we'll check validity below
 
-      if (client.model.isIdKey(id)) {
-        this.idKey = id;
-      } else {
-        throw new TypeError(
-          `No ID key provided while the default key \`${id}\` is not a valid ID key in this model.\n` +
-            'A valid ID key should have a string value in the model.'
-        );
-      }
+    if (!client.model.isIdKey(this.idKey)) {
+      throw new TypeError(
+        `No ID key provided while the default key \`${String(
+          this.idKey
+        )}\` is not a valid ID key in this model.\n` +
+          'A valid ID key should have a string or number value in the model.'
+      );
     }
   }
 
   get model() {
     return this.client.model;
+  }
+
+  public routes(): MiddlewareFunction<RequestContext, RequestContext> {
+    return compose<RequestContext, RequestContext>(async (context, next) => {
+      try {
+        await next(context);
+      } catch (error: unknown) {
+        if (error instanceof ModelClientError && error.code === 'entity_not_found') {
+          throw new RequestError('Entity not found', 404);
+        }
+
+        throw error;
+      }
+    }).and(super.routes());
   }
 
   withCreate() {
@@ -99,6 +113,10 @@ export default class ModelRouter<
           params: { id },
           body,
         } = context.request;
+
+        if (Object.keys(body).length === 0) {
+          throw new RequestError('Nothing to update', 400);
+        }
 
         return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }

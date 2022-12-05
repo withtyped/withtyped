@@ -18,6 +18,7 @@ export type CreateServer<
   port?: number;
   composer?: Composer<T, InputContext, OutputContext>;
   queryClients?: QueryClient[];
+  logLevel?: 'none' | 'info';
 };
 
 export const handleError = async (response: http.ServerResponse, error: unknown) => {
@@ -40,11 +41,14 @@ export default function createServer<T extends unknown[], OutputContext extends 
   port = 9001,
   composer,
   queryClients,
-}: CreateServer<T, BaseContext, OutputContext>) {
+  logLevel = 'info',
+}: CreateServer<T, BaseContext, OutputContext> = {}) {
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
     // Start log
-    console.log(color(' in', 'blue'), color(request.method ?? 'N/A', 'bright'), request.url);
+    if (logLevel !== 'none') {
+      console.debug(color(' in', 'blue'), color(request.method, 'bright'), request.url);
+    }
     const startTime = Date.now();
 
     // Run the middleware chain
@@ -63,14 +67,32 @@ export default function createServer<T extends unknown[], OutputContext extends 
     await end();
 
     // End log
-    console.log(
-      color('out', 'magenta'),
-      color(request.method ?? 'N/A', 'bright'),
-      request.url,
-      response.statusCode,
-      `${Date.now() - startTime}ms`
-    );
+    if (logLevel !== 'none') {
+      console.debug(
+        color('out', 'magenta'),
+        color(request.method, 'bright'),
+        request.url,
+        response.statusCode,
+        `${Date.now() - startTime}ms`
+      );
+    }
   });
+
+  const closeServer = async () =>
+    new Promise((resolve) => {
+      server.close((error) => {
+        resolve(error);
+      });
+    });
+
+  const close = async () => {
+    if (queryClients) {
+      await Promise.all(queryClients.map(async (client) => client.end()));
+    }
+
+    console.debug('Exited');
+    await closeServer();
+  };
 
   // eslint-disable-next-line @silverhand/fp/no-let
   let killed = false;
@@ -83,33 +105,35 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // eslint-disable-next-line @silverhand/fp/no-mutation
     killed = true;
 
-    if (queryClients) {
-      await Promise.all(queryClients.map(async (client) => client.end()));
-    }
+    await close();
 
-    console.log('Exited');
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
   };
 
   return {
     server,
+    close,
     listen: async (listener?: (port: number) => void) => {
       process.on('SIGINT', kill);
       process.on('SIGQUIT', kill);
       process.on('SIGTERM', kill);
 
+      log.debug('1111');
+
       if (queryClients) {
         await Promise.all(queryClients.map(async (client) => client.connect()));
       }
 
-      server.listen(port);
+      log.debug('2222');
 
       if (listener) {
         server.on('listening', () => {
           listener(port);
         });
       }
+
+      server.listen(port);
     },
   };
 }

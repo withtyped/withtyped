@@ -1,14 +1,13 @@
 import { faker } from '@faker-js/faker';
-import createServer, { RequestError, Router } from '@withtyped/server';
-import { createComposer } from '@withtyped/server/lib/preset.js';
+import { RequestError, Router } from '@withtyped/server';
 import {
   zodTypeToParameters,
   zodTypeToSwagger,
 } from '@withtyped/server/lib/test-utils/openapi.test.js';
 import { z } from 'zod';
 
-import type { Book } from './book.js';
-import { bookGuard, createBook } from './book.js';
+import type { Book } from '../utils/book.js';
+import { bookGuard, createBook } from '../utils/book.js';
 
 // eslint-disable-next-line @silverhand/fp/no-let
 let books = Array.from({ length: 10 }).map(() => createBook());
@@ -85,9 +84,3 @@ export const router = new Router()
     }
   )
   .withOpenApi(zodTypeToParameters, zodTypeToSwagger);
-
-const server = createServer({ composer: createComposer().and(router.routes()) });
-
-await server.listen(() => {
-  console.log('Listening', 9001);
-});

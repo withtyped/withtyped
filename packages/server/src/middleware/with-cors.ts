@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders } from 'http';
 
-import type { RequestMethod } from '@withtyped/shared';
+import { RequestMethod } from '@withtyped/shared';
 
 import type { NextFunction } from '../middleware.js';
 import type { RequestContext } from './with-request.js';
@@ -9,6 +9,7 @@ export type WithCorsConfig<T extends string> = {
   allowedOrigin?: (T extends 'adaptive' | '*' ? never : T) | RegExp | 'adaptive';
   allowedHeaders?: string[] | RegExp | '*';
   allowedMethods?: Array<string | RequestMethod> | '*';
+  allowCredentials?: boolean;
   maxAge?: number;
 };
 
@@ -19,7 +20,8 @@ export default function withCors<
   allowedOrigin = 'adaptive',
   allowedHeaders = '*',
   allowedMethods = '*',
-  maxAge = 2_592_000, // 30 days
+  allowCredentials = false,
+  maxAge = 600, // 10 mins
 }: WithCorsConfig<T> = {}) {
   const matchOrigin = ({ origin }: IncomingHttpHeaders) => {
     if (!origin) {
@@ -47,20 +49,39 @@ export default function withCors<
 
   const allowMethods = Array.isArray(allowedMethods) ? allowedMethods.join(', ') : allowedMethods;
 
+  // Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
   return async (context: InputContext, next: NextFunction<InputContext>) => {
-    const { headers } = context.request;
+    const { headers, method } = context.request;
     const allowOrigin = matchOrigin(headers);
+    const universalHeaders = {
+      ...(allowOrigin && { 'access-control-allow-origin': allowOrigin }),
+      ...(allowCredentials && { 'access-control-allow-credentials': true }),
+    };
 
+    // Some headers are only for preflight requests
+    if (method === RequestMethod.OPTIONS) {
+      return next({
+        ...context,
+        status: 204,
+        headers: {
+          ...context.headers,
+          ...universalHeaders,
+          'access-control-allow-headers': matchHeaders(
+            headers['access-control-request-headers']?.split(',').map((value) => value.trim()) ?? []
+          ),
+          'access-control-allow-methods': allowMethods,
+          'access-control-max-age': maxAge,
+        },
+      });
+    }
+
+    // Should we guard per config in backend, or just trust the browser?
+    // Normal requests
     return next({
       ...context,
       headers: {
         ...context.headers,
-        ...(allowOrigin && { 'access-control-allow-origin': allowOrigin }),
-        'access-control-allow-headers': matchHeaders(
-          headers['access-control-request-headers']?.split(',').map((value) => value.trim()) ?? []
-        ),
-        'access-control-allow-methods': allowMethods,
-        'access-control-max-age': maxAge,
+        ...universalHeaders,
       },
     });
   };
