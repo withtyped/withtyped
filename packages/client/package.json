@@ -26,7 +26,7 @@
     "dev:test": "pnpm build && pnpm test",
     "lint": "eslint src/",
     "test": "c8 node --test | tap-arc",
-    "test:all": "c8 --all node --test | tap-arc"
+    "test:only": "node --test | tap-arc"
   },
   "devDependencies": {
     "@silverhand/eslint-config": "^1.3.0",

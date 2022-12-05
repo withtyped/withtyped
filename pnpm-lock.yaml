@@ -4,9 +4,11 @@ importers:
 
   .:
     specifiers:
+      c8: ^7.12.0
       husky: ^8.0.2
       typescript: ^4.9.3
     devDependencies:
+      c8: 7.12.0
       husky: 8.0.2
       typescript: 4.9.3
 
