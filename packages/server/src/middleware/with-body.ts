@@ -16,7 +16,7 @@ const tryParse = (body: string): Json | undefined => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return JSON.parse(body);
   } catch (error: unknown) {
-    log.debug('Failed to parse JSON string in `withBody()`', error);
+    log.debug('failed to parse JSON string in `withBody()`', error);
   }
 };
 

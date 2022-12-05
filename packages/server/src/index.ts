@@ -119,13 +119,9 @@ export default function createServer<T extends unknown[], OutputContext extends 
       process.on('SIGQUIT', kill);
       process.on('SIGTERM', kill);
 
-      log.debug('1111');
-
       if (queryClients) {
         await Promise.all(queryClients.map(async (client) => client.connect()));
       }
-
-      log.debug('2222');
 
       if (listener) {
         server.on('listening', () => {
@@ -153,4 +149,5 @@ export * from './model/index.js';
 export { default as ModelClient } from './model-client/index.js';
 export * from './model-client/index.js';
 export { default as ModelRouter } from './model-router/index.js';
+export { default as DatabaseInitializer } from './database-initializer/index.js';
 export * from './query/index.js';

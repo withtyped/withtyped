@@ -1,16 +1,16 @@
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { PostgreSql, PostgresQueryClient, sql } from '@withtyped/postgres';
+import { PostgresInitializer, PostgreSql, PostgresQueryClient, sql } from '@withtyped/postgres';
 import { Model } from '@withtyped/server';
 import { z } from 'zod';
 
-import PostgresInitClient, { createDatabaseName } from './init-client.js';
+import { createDatabaseName } from '../utils/database.js';
 
 describe('Postgres data model', () => {
   const database = createDatabaseName();
   const queryClient = new PostgresQueryClient({ database });
-  const initClient = new PostgresInitClient(queryClient);
+  const initClient = new PostgresInitializer([], queryClient);
   const forms = Model.create(
     /* Sql */ `
     CREATE table forms (
