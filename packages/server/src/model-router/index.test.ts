@@ -5,6 +5,7 @@ import { noop, RequestMethod } from '@withtyped/shared';
 import sinon from 'sinon';
 
 import RequestError from '../errors/RequestError.js';
+import { ModelClientError } from '../model-client/errors.js';
 import Model from '../model/index.js';
 import { createHttpContext } from '../test-utils/http.test.js';
 import TestModelClient from './client.test.js';
@@ -65,6 +66,24 @@ describe('ModelRouter', () => {
         assert.deepStrictEqual(context.json, { action: 'create' });
       },
       httpContext
+    );
+  });
+
+  it('should throw RequestError when specific ModelClientError occurred', async () => {
+    const httpContext = createHttpContext();
+    const sql = `create table tests (id int16 not null);`;
+    const client = new TestModelClient(Model.create(sql));
+    const router = new ModelRouter(client, '/tests').get('/:id', {}, () => {
+      throw new ModelClientError('entity_not_found');
+    });
+
+    await assert.rejects(
+      router.routes()(
+        { request: { method: RequestMethod.GET, url: buildUrl('/tests/123'), headers: {} } },
+        noop,
+        httpContext
+      ),
+      new RequestError('Entity not found', 404)
     );
   });
 
@@ -133,6 +152,22 @@ describe('ModelRouter', () => {
         assert.deepStrictEqual(context.json, { action: 'update' });
       },
       httpContext
+    );
+
+    await assert.rejects(
+      run(
+        {
+          request: {
+            method: RequestMethod.PATCH,
+            url: buildUrl('/tests/123'),
+            headers: {},
+            body: {},
+          },
+        },
+        noop,
+        httpContext
+      ),
+      new RequestError('Nothing to update', 400)
     );
   });
 
