@@ -130,7 +130,7 @@ modelRouter
   .put('/:id/secret', {}, (context, next) => {});
 ```
 
-Or merge multiple routes:
+Or merge multiple routers:
 
 ```ts
 const router = createRouter()
@@ -148,7 +148,7 @@ The withtyped components work seamlessly together, while every single piece can 
 
 ### A middleware-based HTTP server
 
-Like the concept of KoaJS, but with typed and immutable context (say goodbye to `ctx.body = {}`, huh):
+The HTTP server is similar to the concept of KoaJS, but with typed and immutable context (say goodbye to `ctx.body = {}`, huh):
 
 ```ts
 import createServer, { compose, MiddlewareFunction } from '@withtyped/server';
@@ -214,7 +214,7 @@ server.listen((port) => {
 
 #### Use router in an existing HTTP framework
 
-One advantage of framework-agonistic is you can progressively to adopt a new stuff. With the KoaJS adapter:
+One advantage of framework-agonistic is you can progressively adopt a new stuff. E.g., with the KoaJS adapter:
 
 ```ts
 import { koaAdapter } from '@withtyped/server';
@@ -248,7 +248,7 @@ See [/docs](./docs) folder for reference.
 
 ## Possible future plans
 
-- Database schema alteration
+- Database schema alteration management
 - Integrated auth with [Logto](https://github.com/logto-io/logto)
 
 ## Credit
