@@ -102,7 +102,7 @@ describe('parsePrimitiveType()', () => {
     assert.strictEqual(parsePrimitiveType(Number.NaN, 'number'), undefined);
     assert.strictEqual(parsePrimitiveType({}, 'string'), undefined);
     assert.strictEqual(parsePrimitiveType('json', 'json'), undefined);
-    assert.strictEqual(parsePrimitiveType('12345', 'date'), undefined);
+    assert.strictEqual(parsePrimitiveType('123aaa45', 'date'), undefined);
     // @ts-expect-error for testing
     assert.throws(() => parsePrimitiveType('false', 'expect-error'), TypeError);
   });

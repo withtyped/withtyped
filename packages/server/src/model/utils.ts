@@ -118,7 +118,9 @@ export const parsePrimitiveType = (
       }
 
       if (typeof value === 'string' || typeof value === 'number') {
-        return new Date(value);
+        const date = new Date(value);
+
+        return Number.isNaN(date.valueOf()) ? undefined : date;
       }
 
       return;
