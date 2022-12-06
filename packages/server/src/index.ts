@@ -142,6 +142,7 @@ export { default as Router } from './router/index.js';
 export * from './router/index.js';
 export { default as compose } from './compose.js';
 export * from './middleware.js';
+export { default as koaAdapter } from './adapter/koa.js';
 export { RequestMethod } from '@withtyped/shared';
 
 export { default as Model } from './model/index.js';
