@@ -7,7 +7,7 @@
 > **Note**
 > This project is in the beta stage and things are subject to change.
 
-Write native SQL in TS files and get 4 tailored dev engines with no time:
+Write native SQL-in-TS files and get 4 tailored dev engines with no time:
 
 1. A database initializer
 2. A RESTful API service
