@@ -43,7 +43,7 @@ This package is the core of the withtyped server. It provides:
 
 The main concept is simple:
 
-[![](https://mermaid.ink/img/pako:eNpdkcFugzAMhl8lyqlI9ACtduCw08ZplSa4tezgYbdEg4QlYahCvPsM0bpuliLZ-T79ipVJ1gZJZvJioW_ES1FpweWG93BRJqdR-cZfe0LhyH6RfQvKXy09HRRiSyNYEnUDSt9pS-XJJtdJJLbbR5Gn3KfRPyENbMdsd8dIYxhuTUGfGz4DOR_yyiSAMlnHghxz1xvtKJKx7Mh2oJCXnBavkr6hjiqZcYtgPyoZh_tza0Z-u_ULm0ImKwp4ye4VEJW-LOhhv7C50jOnDz2Cp2dU3liZnaF1FEsYvCmvupaZtwP9SE8h6Wb1oI_G_M60hhzCh6z_Mn8D4Bp-MA?type=png)](https://mermaid.live/edit#pako:eNpdkcFugzAMhl8lyqlI9ACtduCw08ZplSa4tezgYbdEg4QlYahCvPsM0bpuliLZ-T79ipVJ1gZJZvJioW_ES1FpweWG93BRJqdR-cZfe0LhyH6RfQvKXy09HRRiSyNYEnUDSt9pS-XJJtdJJLbbR5Gn3KfRPyENbMdsd8dIYxhuTUGfGz4DOR_yyiSAMlnHghxz1xvtKJKx7Mh2oJCXnBavkr6hjiqZcYtgPyoZh_tza0Z-u_ULm0ImKwp4ye4VEJW-LOhhv7C50jOnDz2Cp2dU3liZnaF1FEsYvCmvupaZtwP9SE8h6Wb1oI_G_M60hhzCh6z_Mn8D4Bp-MA)
+![Middleware chain](assets/middleware-chain.png)
 
 Use `createServer()` to create a withtyped server and `compose()` to create the middleware chain.
 

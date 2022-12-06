@@ -7,17 +7,18 @@
 > **Note**
 > This project is in the beta stage and things are subject to change.
 
-Write native SQL in TS files and get 4 tailored dev engines with no time.
+Write native SQL in TS files and get 4 tailored dev engines with no time:
 
-- 🔄 Sync everything in real-time
-- ✍️ Infer strong types for fullstack
-- 🍃 Native SQL, RESTful, and fetch
-- 🏖 Framework-agonistic
-- ✖️ No code generation
-- ✖️ No new language or concept
-- ✖️ No extra abstractions
+1. A database initializer
+2. A RESTful API service
+3. A type-safe client
+4. An dynamic OpenAPI endpoint
 
-This README focus on features amd use cases, see [/docs](./docs) folder for reference.
+## Highlights
+
+![Highlights](docs/assets/highlights.png)
+
+This README focus on features and use cases, see [/docs](./docs) folder for reference.
 
 ## Get started
 
@@ -108,7 +109,7 @@ client.get('/books/:id', { params: { id: 'book-1' } }); // Promise<Book>
 client.post('/books', { body: { id: 'book-1', name: 'Pale Fire', ... } }); // Promise<Book>
 ```
 
-### An OpenAPI endpoint
+### An dynamic OpenAPI endpoint
 
 ```ts
 // Server
