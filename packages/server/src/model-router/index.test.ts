@@ -71,11 +71,11 @@ describe('ModelRouter', () => {
     );
   });
 
-  it('should throw RequestError when specific ModelClientError occurred', async () => {
+  it('should throw ModelClientError', async () => {
     const httpContext = createHttpContext();
     const sql = `create table tests (id int16 not null);`;
     const client = new TestModelClient(Model.create(sql));
-    const router = new ModelRouter(client, '/tests').get('/:id', {}, () => {
+    const router = new ModelRouter(client, '/tests').get('/:id', {}, async () => {
       throw new ModelClientError('entity_not_found');
     });
 

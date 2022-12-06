@@ -7,6 +7,8 @@ import sinon from 'sinon';
 import { z } from 'zod';
 
 import RequestError from '../errors/RequestError.js';
+import ModelParser from '../model-parser/index.js';
+import { createModel } from '../model/index.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
 import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
 import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
@@ -78,11 +80,23 @@ describe('Router', () => {
     );
   });
 
-  it('should throw error when input or output guard failed', async () => {
+  it('should throw related error when input or output guard failed', async () => {
+    const search = {
+      parse: (data: unknown) => {
+        if (typeof data === 'object' && data !== null && Object.keys(data).length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-throw-literal
+          throw 'Test string error';
+        }
+      },
+    };
     const run = new Router()
       .post(
         '/books',
-        { body: bookGuard.omit({ id: true }), response: bookGuard },
+        {
+          search,
+          body: bookGuard.omit({ id: true }),
+          response: bookGuard,
+        },
         // @ts-expect-error for testing
         async (context, next) => next(context)
       )
@@ -92,7 +106,11 @@ describe('Router', () => {
 
     await assert.rejects(
       run(createRequestContext(RequestMethod.POST, '/books', restBook), noop, createHttpContext()),
-      z.ZodError
+      (error) => error instanceof RequestError && error.status === 400
+    );
+    await assert.rejects(
+      run(createRequestContext(RequestMethod.POST, '/books?foo', book), noop, createHttpContext()),
+      (error) => error instanceof RequestError && error.status === 400
     );
     await assert.rejects(
       run(createRequestContext(RequestMethod.POST, '/books', book), noop, createHttpContext()),
@@ -112,7 +130,7 @@ describe('Router', () => {
 
     await assert.rejects(
       run(createRequestContext(RequestMethod.GET, '/books'), noop, createHttpContext()),
-      new RequestError('Message 1')
+      new RequestError('Message 1', undefined)
     );
 
     await assert.rejects(
@@ -209,8 +227,8 @@ describe('Router', () => {
   it('should build proper OpenAPI JSON', async () => {
     // @ts-expect-error have to do this, looks like a module loader issue
     const Validator = OpenAPISchemaValidator.default as typeof OpenAPISchemaValidator;
-
     const validator = new Validator({ version: 3 });
+
     const run = new Router()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
         throw new RequestError('Message 1');
@@ -227,6 +245,36 @@ describe('Router', () => {
         }
       )
       .withOpenApi(zodTypeToParameters, zodTypeToSwagger, { title: 'withtyped' })
+      .routes();
+
+    await run(
+      createRequestContext(RequestMethod.GET, '/openapi.json'),
+      async (context) => {
+        // @ts-expect-error for testing
+        assert.deepStrictEqual(validator.validate(context.json).errors, []);
+      },
+      createHttpContext()
+    );
+  });
+
+  it('should build proper OpenAPI JSON with Model', async () => {
+    // @ts-expect-error have to do this, looks like a module loader issue
+    const Validator = OpenAPISchemaValidator.default as typeof OpenAPISchemaValidator;
+    const validator = new Validator({ version: 3 });
+
+    const run = new Router()
+      .post(
+        '/books/:id',
+        {
+          search: z.object({ key: z.string().optional() }),
+          body: new ModelParser(createModel(`create table books (id varchar(128));`)),
+          response: bookGuard,
+        },
+        () => {
+          throw new RequestError('Message 2', 401);
+        }
+      )
+      .withOpenApi()
       .routes();
 
     await run(

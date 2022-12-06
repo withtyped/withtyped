@@ -67,11 +67,15 @@ export default class Route<
           http
         );
       } catch (error: unknown) {
-        if (error instanceof TypeError) {
-          throw new RequestError(error.message, 400, error);
+        if (error instanceof RequestError) {
+          throw error;
         }
 
-        throw error;
+        throw new RequestError(
+          error instanceof Error ? error.message : 'Request input error',
+          400,
+          error
+        );
       }
     };
   }

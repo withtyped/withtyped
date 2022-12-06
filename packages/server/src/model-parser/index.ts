@@ -29,7 +29,7 @@ export default class ModelParser<
         case 'json':
           return { type: 'object', format: 'JSON', nullable: isNullable, example: {} };
         case 'date':
-          return { type: 'string', format: 'Date', example: examples.date };
+          return { type: 'string', format: 'Date', nullable: isNullable, example: examples.date };
         default:
           return {
             type,
