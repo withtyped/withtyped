@@ -19,4 +19,5 @@
     "withtyped",
     "openapi",
   ],
+  "markdown.extension.toc.levels": "2..3",
 }

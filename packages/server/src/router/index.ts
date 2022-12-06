@@ -1,8 +1,10 @@
 import type { RequestMethod } from '@withtyped/shared';
 import { log } from '@withtyped/shared';
 
+import RequestError from '../errors/RequestError.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
+import { ModelClientError } from '../model-client/errors.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
 import { buildOpenApiJson } from './openapi.js';
@@ -120,25 +122,34 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
       log.debug('matched route', this.prefix, route.path);
 
-      await route.runnable(
-        originalContext,
-        async (context) => {
-          const responseGuard = route.guard.response;
+      try {
+        await route.runnable(
+          originalContext,
+          async (context) => {
+            const responseGuard = route.guard.response;
 
-          if (responseGuard) {
-            responseGuard.parse(context.json);
-          }
+            if (responseGuard) {
+              responseGuard.parse(context.json);
+            }
 
-          return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
-        },
-        http
-      );
+            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+          },
+          http
+        );
+      } catch (error: unknown) {
+        // TODO: Consider some better approach to decouple ModelClientError with Router
+        if (error instanceof ModelClientError && error.code === 'entity_not_found') {
+          throw new RequestError('Entity not found', 404);
+        }
+
+        throw error;
+      }
     };
   }
 
   public withOpenApi(
-    parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
-    parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
+    parseSearch?: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+    parse?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
     info?: Partial<OpenAPIV3.InfoObject>
   ) {
     return this.get<'/openapi.json', unknown, unknown, OpenAPIV3.Document>(
@@ -189,3 +200,15 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
     };
   }
 }
+
+export type CreateRouter = {
+  (): Router;
+  <Prefix extends string>(prefix: NormalizedPrefix<Prefix>): Router<
+    BaseRoutes,
+    NormalizedPrefix<Prefix>
+  >;
+};
+
+export const createRouter: CreateRouter = <Prefix extends string>(
+  prefix?: NormalizedPrefix<Prefix>
+) => (prefix ? new Router(prefix) : new Router()); // To make TypeScript happy

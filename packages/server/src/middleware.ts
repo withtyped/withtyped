@@ -1,9 +1,13 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 
 export type BaseContext = {
+  /** A dictionary to put request info. Use `withRequest()` and `withBody()` to set it automatically. */
   request?: Record<string, unknown>;
+  /** The response status number. Default to 404. */
   status?: number;
+  /** The response json object. */
   json?: unknown;
+  /** The response (outgoing) headers */
   headers?: OutgoingHttpHeaders;
 };
 

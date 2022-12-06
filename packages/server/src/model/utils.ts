@@ -90,7 +90,9 @@ const undefinedIfNaN = (number: number) => (Number.isNaN(number) ? undefined : n
 export const parsePrimitiveType = (
   value: unknown,
   type: PrimitiveType
-): PrimitiveTypeMap[typeof type] | undefined => {
+  // Investigate why we cannot use generic to perform strict type mapping
+  // Or just wait for VSCode upgrade to TS 4.9 and try `satisfies`
+): PrimitiveTypeMap[PrimitiveType] | undefined => {
   switch (type) {
     case 'boolean':
       return typeof value === 'boolean' ? value : undefined;
@@ -109,8 +111,19 @@ export const parsePrimitiveType = (
       return typeof value === 'string' ? value : undefined;
     case 'json':
       return isObject(value) || Array.isArray(value) ? value : undefined; // TODO: Perform more strict check (make sure it is a json object)
+
     case 'date':
-      return value instanceof Date ? value : undefined;
+      if (value instanceof Date) {
+        return value;
+      }
+
+      if (typeof value === 'string' || typeof value === 'number') {
+        const date = new Date(value);
+
+        return Number.isNaN(date.valueOf()) ? undefined : date;
+      }
+
+      return;
     default:
       throw new TypeError(`Unexpected type ${String(type)}`);
   }

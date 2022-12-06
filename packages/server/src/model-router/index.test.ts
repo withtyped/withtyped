@@ -51,7 +51,9 @@ describe('ModelRouter', () => {
     const client = new TestModelClient(Model.create(sql));
     const router = new ModelRouter(client, '/tests');
     const run = router.withCreate().routes();
+    const body = { id: 123 };
 
+    client.create.resolves(body);
     await run(
       {
         request: {
@@ -62,18 +64,18 @@ describe('ModelRouter', () => {
         },
       },
       async (context) => {
-        assert.ok(client.create.calledOnceWithExactly({ id: 123 }));
-        assert.deepStrictEqual(context.json, { action: 'create' });
+        assert.ok(client.create.calledOnceWithExactly(body));
+        assert.deepStrictEqual(context.json, body);
       },
       httpContext
     );
   });
 
-  it('should throw RequestError when specific ModelClientError occurred', async () => {
+  it('should throw ModelClientError', async () => {
     const httpContext = createHttpContext();
     const sql = `create table tests (id int16 not null);`;
     const client = new TestModelClient(Model.create(sql));
-    const router = new ModelRouter(client, '/tests').get('/:id', {}, () => {
+    const router = new ModelRouter(client, '/tests').get('/:id', {}, async () => {
       throw new ModelClientError('entity_not_found');
     });
 
@@ -94,12 +96,13 @@ describe('ModelRouter', () => {
     const router = new ModelRouter(client, '/tests', 'foo');
     const run = router.withRead().routes();
 
+    client.read.resolves({ foo: '123' });
     await Promise.all([
       run(
         { request: { method: RequestMethod.GET, url: buildUrl('/tests/123'), headers: {} } },
         async (context) => {
           assert.ok(client.read.calledOnceWithExactly('foo', '123'));
-          assert.deepStrictEqual(context.json, { action: 'read' });
+          assert.deepStrictEqual(context.json, { foo: '123' });
         },
         httpContext
       ),
@@ -121,6 +124,7 @@ describe('ModelRouter', () => {
     const router = new ModelRouter(client, '/tests', 'foo');
     const run = router.withUpdate().routes();
 
+    client.update.resolves({ foo: '123', bar: 128 });
     await run(
       {
         request: {
@@ -132,12 +136,13 @@ describe('ModelRouter', () => {
       },
       async (context) => {
         assert.ok(client.update.calledOnceWithExactly('foo', '123', { bar: 128 }));
-        assert.deepStrictEqual(context.json, { action: 'update' });
+        assert.deepStrictEqual(context.json, { foo: '123', bar: 128 });
       },
       httpContext
     );
 
     client.update.resetHistory();
+    client.update.resolves({ foo: 'abc', bar: 256 });
     await run(
       {
         request: {
@@ -149,7 +154,7 @@ describe('ModelRouter', () => {
       },
       async (context) => {
         assert.ok(client.update.calledOnceWithExactly('foo', '123', { foo: 'abc', bar: 256 }));
-        assert.deepStrictEqual(context.json, { action: 'update' });
+        assert.deepStrictEqual(context.json, { foo: 'abc', bar: 256 });
       },
       httpContext
     );

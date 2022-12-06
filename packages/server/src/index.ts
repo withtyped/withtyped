@@ -15,9 +15,13 @@ export type CreateServer<
   InputContext extends BaseContext,
   OutputContext extends BaseContext
 > = {
+  /** Port to listen, default to 9001. */
   port?: number;
+  /** The middleware composer to execute. */
   composer?: Composer<T, InputContext, OutputContext>;
+  /** An array of query clients. The server will automatically init these clients in `listen()` and end these clients when server closing. */
   queryClients?: QueryClient[];
+  /** Use 'none' to turn off the log. */
   logLevel?: 'none' | 'info';
 };
 
@@ -37,12 +41,16 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
   });
 };
 
-export default function createServer<T extends unknown[], OutputContext extends BaseContext>({
-  port = 9001,
-  composer,
-  queryClients,
-  logLevel = 'info',
-}: CreateServer<T, BaseContext, OutputContext> = {}) {
+/**
+ * Create a new withtyped server with the given config.
+ *
+ * @param config The config object.
+ * @returns An object including the server and its utilities.
+ */
+export default function createServer<T extends unknown[], OutputContext extends BaseContext>(
+  config: CreateServer<T, BaseContext, OutputContext> = {}
+) {
+  const { port = 9001, composer, queryClients, logLevel = 'info' } = config;
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
     // Start log
@@ -113,8 +121,10 @@ export default function createServer<T extends unknown[], OutputContext extends 
 
   return {
     server,
+    /** Shut down all query clients and the server. */
     close,
-    listen: async (listener?: (port: number) => void) => {
+    /** Start all query clients and the server in order. */
+    listen: async (callback?: (port: number) => void) => {
       process.on('SIGINT', kill);
       process.on('SIGQUIT', kill);
       process.on('SIGTERM', kill);
@@ -123,9 +133,9 @@ export default function createServer<T extends unknown[], OutputContext extends 
         await Promise.all(queryClients.map(async (client) => client.connect()));
       }
 
-      if (listener) {
+      if (callback) {
         server.on('listening', () => {
-          listener(port);
+          callback(port);
         });
       }
 
@@ -142,6 +152,7 @@ export { default as Router } from './router/index.js';
 export * from './router/index.js';
 export { default as compose } from './compose.js';
 export * from './middleware.js';
+export { default as koaAdapter } from './adapter/koa.js';
 export { RequestMethod } from '@withtyped/shared';
 
 export { default as Model } from './model/index.js';

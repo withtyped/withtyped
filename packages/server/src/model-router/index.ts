@@ -1,13 +1,9 @@
-import compose from '../compose.js';
 import RequestError from '../errors/RequestError.js';
-import type { MiddlewareFunction } from '../middleware.js';
-import type { RequestContext } from '../middleware/with-request.js';
 import type ModelClient from '../model-client/index.js';
-import { ModelClientError } from '../model-client/index.js';
+import ModelParser from '../model-parser/index.js';
 import type { IdKeys } from '../model/types.js';
 import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
-import { createParser } from '../utils.js';
 
 // Using `as` in this class since TypeScript has no support on returning generic `this` type
 // See https://github.com/microsoft/TypeScript/issues/6223
@@ -46,27 +42,12 @@ export default class ModelRouter<
     return this.client.model;
   }
 
-  public routes(): MiddlewareFunction<RequestContext, RequestContext> {
-    // This will also catch all ModelClientError in the middleware chain?
-    // Consider some better approach
-    return compose<RequestContext, RequestContext>(async (context, next) => {
-      try {
-        await next(context);
-      } catch (error: unknown) {
-        if (error instanceof ModelClientError && error.code === 'entity_not_found') {
-          throw new RequestError('Entity not found', 404);
-        }
-
-        throw error;
-      }
-    }).and(super.routes());
-  }
-
   withCreate() {
     const newThis = this.post<'/', unknown, CreateType, ModelType>(
       '/',
       {
-        body: createParser((data) => this.model.parse(data, 'create')),
+        body: new ModelParser(this.client.model, 'create'),
+        response: new ModelParser(this.client.model),
       },
       async (context, next) => {
         return next({ ...context, json: await this.client.create(context.request.body) });
@@ -86,15 +67,21 @@ export default class ModelRouter<
   withRead() {
     const newThis = this.get<'/', unknown, unknown, { rows: ModelType[]; rowCount: number }>(
       '/',
-      {},
+      {
+        // TODO: Consider refactor parser to support array to make response guard available
+      },
       async (context, next) => {
         return next({ ...context, json: await this.client.readAll() });
       }
-    ).get<'/:id', unknown, unknown, ModelType>('/:id', {}, async (context, next) => {
-      const { id } = context.request.params;
+    ).get<'/:id', unknown, unknown, ModelType>(
+      '/:id',
+      { response: new ModelParser(this.client.model) },
+      async (context, next) => {
+        const { id } = context.request.params;
 
-      return next({ ...context, json: await this.client.read(this.idKey, id) });
-    });
+        return next({ ...context, json: await this.client.read(this.idKey, id) });
+      }
+    );
 
     // eslint-disable-next-line no-restricted-syntax
     return newThis as ModelRouter<
@@ -109,7 +96,10 @@ export default class ModelRouter<
   withUpdate() {
     const newThis = this.patch<'/:id', unknown, Partial<CreateType>, ModelType>(
       '/:id',
-      { body: createParser((data) => this.model.parse(data, 'patch')) },
+      {
+        body: new ModelParser(this.client.model, 'patch'),
+        response: new ModelParser(this.client.model),
+      },
       async (context, next) => {
         const {
           params: { id },
@@ -124,7 +114,10 @@ export default class ModelRouter<
       }
     ).put<'/:id', unknown, CreateType, ModelType>(
       '/:id',
-      { body: createParser((data) => this.model.parse(data, 'create')) },
+      {
+        body: new ModelParser(this.client.model, 'create'),
+        response: new ModelParser(this.client.model),
+      },
       async (context, next) => {
         const {
           params: { id },
