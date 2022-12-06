@@ -53,9 +53,8 @@ Use `createServer()` to create a withtyped server and `compose()` to create the 
 
 **Call signature** `createServer(config?: CreateServer): ServerObject`
 
-#### Parameters
 ```ts
-config: CreateServer {
+type CreateServer = {
   /** Port to listen, default to 9001. */
   port?: number;
   /** The middleware composer to execute. */
@@ -65,18 +64,14 @@ config: CreateServer {
   /** Use 'none' to turn off the log. */
   logLevel?: 'none' | 'info';
 };
-```
 
-#### Returns
-
-```ts
-{
+type ServerObject = {
   /** Shut down all query clients and the server. */
   close: (() => Promise<void>);
   /** Start all query clients and the server in order. */
   listen: ((listener?: ((port: number) => void)) => Promise<void>);
   server: Server;
-}
+};
 ```
 
 ### `createRouter()`
@@ -106,22 +101,6 @@ Create a chainable composer with the given middleware function. Call `.and()` of
 E.g.: `compose(fn1).and(fn2).and(fn3)`
 
 Each composer itself is a middleware function object, i.e. it has the same call signature as a normal middleware function.
-
-#### Parameters
-
-```ts
-middleware: MiddlewareFunction<InputContext, OutputContext>
-```
-
-#### Returns
-
-```ts
-Composer<[MiddlewareFunction<InputContext, OutputContext>], InputContext, OutputContext>
-```
-
-#### Related
-
-MiddlewareFunction, Composer, BaseContext, RequestContext
 
 ## Types
 
@@ -212,7 +191,7 @@ You can use `withRequest()` and `withBody()` to obtain request info.
 
 #### Context output
 
-After executing the last middleware function, withtyped will read status, json, and headers from the context and send the response properly.
+After executing the last middleware function, withtyped will read `status`, `json`, and `headers` from the last output context and send the response properly.
 
 ### `Composer`
 
