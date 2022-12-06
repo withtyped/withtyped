@@ -40,10 +40,10 @@ npm i @withtyped/client
 Just write the native SQL in a TypeScript file and create a database query client:
 
 ```ts
-import { Model } from '@withtyped/server';
+import { createModel } from '@withtyped/server';
 import { createQueryClient } from '@withtyped/postgres';
 
-const Book = Model.create(`
+const Book = createModel(`
   create table books (
     id varchar(128) not null,
     name varchar(128) not null,
@@ -108,15 +108,38 @@ client.get('/books/:id', { params: { id: 'book-1' } }); // Promise<Book>
 client.post('/books', { body: { id: 'book-1', name: 'Pale Fire', ... } }); // Promise<Book>
 ```
 
-### An OpenAPI endpoint[^openapi]
+### An OpenAPI endpoint
 
 ```ts
 // Server
-modelRouter.withOpenApi(parserToParameters, parserToSchema); // Given a parser, output OpenAPI Parameters or Schema
+modelRouter.withOpenApi();
 
 // Client
 client.get('/openapi.json'); // Promise<OpenAPIV3.Document>
 ```
+
+## Extend routes
+
+Besides the normal CRUD, you can freely extend any routes:
+
+```ts
+modelRouter
+  .withCrud()
+  .get('/another', {}, (context, next) => {})
+  .put('/:id/secret', {}, (context, next) => {});
+```
+
+Or merge multiple routes:
+
+```ts
+const router = createRouter()
+  .pack(modelRouter1)
+  .pack(modelRouter2)
+  .pack(modelRouter3)
+  .withOpenApi();
+```
+
+See [Router docs](./docs/server.md#router) for details.
 
 ## What if I just want to use...
 
@@ -199,6 +222,9 @@ import { koaAdapter } from '@withtyped/server';
 app.use(koaAdapter(router.routes()));
 ```
 
+> **Note**
+> In this case, the typed client is still available to use.
+
 I believe ExpressJS can have an adapter with the same pattern. Let me know if you need it.
 
 #### Client
@@ -219,6 +245,11 @@ client.get('/books/:id', { params: { id: 'book-1' } }); // Promise<Book>
 
 See [/docs](./docs) folder for reference.
 
+## Possible future plans
+
+- Database schema alteration
+- Integrated auth with [Logto](https://github.com/logto-io/logto)
+
 ## Credit
 
 Heavily inspired by [trpc](https://github.com/trpc/trpc) and [KoaJS](https://github.com/koajs/koa). They are great projects:
@@ -230,5 +261,3 @@ But still have some pain points:
 
 - Existing services and components are mainly based on RESTful, hard to gradually migrate to a new framework
 - KoaJS is written in JavaScript and its ecosystem lacks of maintenance
-
-[^openapi]: Needs a simple transformer function that parses your type guard to OpenAPI schema. See [sample project](./packages/sample/src) for details.

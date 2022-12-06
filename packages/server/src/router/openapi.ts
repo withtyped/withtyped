@@ -1,5 +1,6 @@
 import { contentTypes } from '@withtyped/shared';
 
+import ModelParser from '../model-parser/index.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
 import type { MethodRoutesMap } from './index.js';
@@ -24,12 +25,20 @@ const parseParameters = (path: string): OpenAPIV3.ParameterObject[] =>
 
 export const buildOpenApiJson = (
   routesMap: MethodRoutesMap,
-  parseSearch: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
-  parse: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
+  parseSearch?: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
+  parse?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
   info?: Partial<OpenAPIV3.InfoObject>
 ): OpenAPIV3.Document => {
   type MethodMap = {
     [key in OpenAPIV3.HttpMethods]?: OpenAPIV3.OperationObject;
+  };
+
+  const tryParse = (guard: Parser<unknown>) => {
+    if (guard instanceof ModelParser) {
+      return guard.toOpenApiSchemaObject(parse);
+    }
+
+    return parse?.(guard);
   };
 
   const pathMap = new Map<string, MethodMap>();
@@ -37,16 +46,16 @@ export const buildOpenApiJson = (
   for (const [method, routes] of Object.entries(routesMap)) {
     for (const { fullPath, path, guard } of routes) {
       const operationObject: OpenAPIV3.OperationObject = {
-        parameters: [...parseParameters(path), ...parseSearch(guard.search)],
+        parameters: [...parseParameters(path), ...(parseSearch?.(guard.search) ?? [])],
         requestBody: guard.body && {
           required: true,
-          content: { [contentTypes.json]: { schema: parse(guard.body) } },
+          content: { [contentTypes.json]: { schema: tryParse(guard.body) } },
         },
         responses: guard.response
           ? {
               '200': {
                 description: 'OK',
-                content: { [contentTypes.json]: { schema: parse(guard.response) } },
+                content: { [contentTypes.json]: { schema: tryParse(guard.response) } },
               },
             }
           : defaultResponses,

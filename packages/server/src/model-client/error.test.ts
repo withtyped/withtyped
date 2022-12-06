@@ -7,7 +7,7 @@ describe('ModelClientError', () => {
   it('should not explode', () => {
     assert.strictEqual(
       new ModelClientError('entity_not_found').message,
-      'ModelClient error occurred'
+      'ModelClientError occurred'
     );
   });
 });

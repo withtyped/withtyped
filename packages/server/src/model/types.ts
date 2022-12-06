@@ -5,9 +5,9 @@ export type PrimitiveType = 'string' | 'number' | 'boolean' | 'json' | 'date';
 export type PrimitiveTypeMap = {
   string: string;
   number: number;
-  date: Date;
   boolean: boolean;
   json: JsonObject | JsonArray;
+  date: Date;
 };
 // Should work in TS 4.9, wait for VSCode support: satisfies Record<PrimitiveType, unknown>
 
@@ -126,3 +126,10 @@ export type KeyOfType<T, V> = keyof {
 export type IdKeys<T> = KeyOfType<T, string | number>;
 
 export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;
+
+export type ModelParseType = 'model' | 'create' | 'patch';
+export type ModelParseReturnType<CreateType, ModelType> = {
+  model: ModelType;
+  create: CreateType;
+  patch: Partial<CreateType>;
+};

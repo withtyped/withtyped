@@ -1,3 +1,4 @@
+import RequestError from '../../errors/RequestError.js';
 import type { HttpContext, MiddlewareFunction, NextFunction } from '../../middleware.js';
 import type { RequestContext } from '../../middleware/with-request.js';
 import type { GuardedContext, RequestGuard } from '../types.js';
@@ -45,23 +46,33 @@ export default class Route<
     http: HttpContext
   ) => Promise<void> {
     return async (context, next, http) => {
-      return this.run(
-        {
-          ...context,
-          request: {
-            ...context.request,
-            ...guardInput(
-              this.prefix,
-              this.path,
-              context.request.url,
-              context.request.body,
-              this.guard
-            ),
+      try {
+        // We don't want to catch errors during running, this try-catch is for `guardInput()`
+        // eslint-disable-next-line @typescript-eslint/return-await
+        return this.run(
+          {
+            ...context,
+            request: {
+              ...context.request,
+              ...guardInput(
+                this.prefix,
+                this.path,
+                context.request.url,
+                context.request.body,
+                this.guard
+              ),
+            },
           },
-        },
-        next,
-        http
-      );
+          next,
+          http
+        );
+      } catch (error: unknown) {
+        if (error instanceof TypeError) {
+          throw new RequestError(error.message, 400, error);
+        }
+
+        throw error;
+      }
     };
   }
 

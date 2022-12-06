@@ -10,7 +10,7 @@ import RequestError from '../errors/RequestError.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
 import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
 import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
-import Router from './index.js';
+import Router, { createRouter } from './index.js';
 
 describe('Router', () => {
   it('should provide a middleware function to call the provided middleware function with request context', async () => {
@@ -101,7 +101,7 @@ describe('Router', () => {
   });
 
   it('should throws error', async () => {
-    const run = new Router()
+    const run = createRouter()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
         throw new RequestError('Message 1');
       })
@@ -122,7 +122,7 @@ describe('Router', () => {
   });
 
   it('should pack the given router to the original router when calling `.pack()`', () => {
-    const router1 = new Router('/books').get(
+    const router1 = createRouter('/books').get(
       '/books',
       {
         response: z.object({ books: bookGuard.array() }),

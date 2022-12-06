@@ -2,6 +2,8 @@ import type { Parser } from '../types.js';
 import type {
   CreateEntity,
   Entity,
+  ModelParseReturnType,
+  ModelParseType,
   NormalizedBody,
   RawParserConfig,
   SplitRawColumns,
@@ -9,12 +11,15 @@ import type {
 } from './types.js';
 import { isObject, parsePrimitiveType, parseRawConfigs, parseTableName } from './utils.js';
 
+export type InferCreateType<M> = M extends Model<string, infer A, infer B, infer C> ? A : never;
+export type InferModelType<M> = M extends Model<string, infer A, infer B, infer C> ? B : never;
+
 export default class Model<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string = '',
   CreateType extends Record<string, unknown> = {},
   ModelType extends CreateType = CreateType,
-  ExtendGuard extends Record<string, Parser<unknown>> = {}
+  ExtendGuard extends Record<string, Parser<unknown>> = Record<string, Parser<unknown>>
   /* eslint-enable @typescript-eslint/ban-types */
 > {
   static create = <Raw extends string>(raw: Raw) => {
@@ -72,11 +77,11 @@ export default class Model<
     );
   }
 
-  parse(data: unknown): ModelType;
-  parse(data: unknown, forType: 'create'): CreateType;
-  parse(data: unknown, forType: 'patch'): Partial<CreateType>;
   // eslint-disable-next-line complexity
-  parse(data: unknown, forType?: 'create' | 'patch'): ModelType | CreateType | Partial<CreateType> {
+  parse<ForType extends ModelParseType = 'model'>(
+    data: unknown,
+    forType?: ForType
+  ): ModelParseReturnType<CreateType, ModelType>[ForType] {
     if (!isObject(data)) {
       throw new TypeError('Data is not an object');
     }
@@ -168,7 +173,7 @@ export default class Model<
     /* eslint-enable @silverhand/fp/no-mutation */
 
     // eslint-disable-next-line no-restricted-syntax
-    return result as ModelType | CreateType | Partial<CreateType>;
+    return result as ModelParseReturnType<CreateType, ModelType>[ForType];
   }
 }
 

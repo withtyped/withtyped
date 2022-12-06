@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { RequestError, Router } from '@withtyped/server';
+import { createRouter, RequestError } from '@withtyped/server';
 import {
   zodTypeToParameters,
   zodTypeToSwagger,
@@ -12,7 +12,7 @@ import { bookGuard, createBook } from '../utils/book.js';
 // eslint-disable-next-line @silverhand/fp/no-let
 let books = Array.from({ length: 10 }).map(() => createBook());
 
-const getRouter = new Router()
+const getRouter = createRouter()
   .get(
     '/books',
     {
@@ -32,7 +32,7 @@ const getRouter = new Router()
     return next({ ...context, json: book });
   });
 
-export const router = new Router()
+export const router = createRouter()
   .pack(getRouter)
   .post(
     '/books',

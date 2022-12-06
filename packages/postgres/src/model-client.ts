@@ -61,6 +61,7 @@ export default class PostgresModelClient<
       throw new ModelClientError('entity_not_found');
     }
 
+    // TODO: Consider remove this since the response has guarded in route?
     return this.model.parse(rows[0]);
   }
 

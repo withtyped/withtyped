@@ -6,10 +6,15 @@ import type { NextFunction } from '../middleware.js';
 import type { RequestContext } from './with-request.js';
 
 export type WithCorsConfig<T extends string> = {
+  /** Default to 'adaptive' */
   allowedOrigin?: (T extends 'adaptive' | '*' ? never : T) | RegExp | 'adaptive';
+  /** Default to '*' */
   allowedHeaders?: string[] | RegExp | '*';
+  /** Default to '*' */
   allowedMethods?: Array<string | RequestMethod> | '*';
+  /** Default to `false` */
   allowCredentials?: boolean;
+  /** Default to 600 */
   maxAge?: number;
 };
 
