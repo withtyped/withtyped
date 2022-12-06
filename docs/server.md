@@ -425,7 +425,7 @@ router.post(
 );
 ```
 
-> **Caution**
+> **Warning**
 > Router does NOT read the request body. Make sure a `withBody()` middleware function has been put in front of the router.
 
 #### Response guard
