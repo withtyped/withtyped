@@ -1,21 +1,21 @@
-import type { Model } from '@withtyped/server';
+import type { Model, QueryClient } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
 
-import type PostgresQueryClient from './query-client.js';
 import type { PostgresJson, PostgreSql } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';
 
 type NonUndefinedValueTuple<Value> = [string, Value extends undefined ? never : Value];
 
-type ValidKey = string | number | symbol;
+type ValidKey = string;
 export default class PostgresModelClient<
   Table extends string,
-  CreateType extends Record<string, PostgresJson | undefined>,
-  ModelType extends CreateType
-> extends ModelClient<Table, CreateType, ModelType> {
+  ModelType extends Record<string, PostgresJson | undefined>,
+  DefaultKeys extends string = never,
+  ReadonlyKeys extends string = never
+> extends ModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys> {
   constructor(
-    public readonly model: Model<Table, CreateType, ModelType>,
-    public readonly queryClient: PostgresQueryClient
+    public readonly model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>,
+    public readonly queryClient: QueryClient<PostgreSql>
   ) {
     super();
   }
@@ -28,7 +28,7 @@ export default class PostgresModelClient<
     return this.queryClient.end();
   }
 
-  async create(data: CreateType): Promise<ModelType> {
+  async create(data: Record<string, PostgresJson | undefined>): Promise<ModelType> {
     const entries = this.convertToEntries(data);
 
     const { rows } = await this.queryClient.query(sql`
@@ -65,7 +65,11 @@ export default class PostgresModelClient<
     return this.model.parse(rows[0]);
   }
 
-  async update(whereKey: ValidKey, value: string, data: Partial<CreateType>): Promise<ModelType> {
+  async update(
+    whereKey: ValidKey,
+    value: string,
+    data: Record<string, PostgresJson | undefined>
+  ): Promise<ModelType> {
     const entries = this.convertToEntries(data);
 
     const { rows } = await this.queryClient.query(sql`
@@ -107,7 +111,7 @@ export default class PostgresModelClient<
     }`;
   }
 
-  protected convertToEntries(data: Partial<CreateType>) {
+  protected convertToEntries(data: Record<string, PostgresJson | undefined>) {
     return Object.entries<PostgresJson | undefined>(data)
       .filter(
         (element): element is NonUndefinedValueTuple<PostgresJson> => element[1] !== undefined
@@ -123,8 +127,11 @@ export default class PostgresModelClient<
 export const createModelClient = <
   Table extends string,
   // eslint-disable-next-line @typescript-eslint/ban-types
-  CreateType extends Record<string, PostgresJson | undefined> = {},
-  ModelType extends CreateType = CreateType
+  ModelType extends Record<string, PostgresJson | undefined> = {},
+  DefaultKeys extends string = never,
+  ReadonlyKeys extends string = never
 >(
-  ...args: ConstructorParameters<typeof PostgresModelClient<Table, CreateType, ModelType>>
-) => new PostgresModelClient<Table, CreateType, ModelType>(...args);
+  ...args: ConstructorParameters<
+    typeof PostgresModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys>
+  >
+) => new PostgresModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys>(...args);

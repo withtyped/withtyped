@@ -20,7 +20,9 @@ describe('Model class', () => {
     );`
   )
     .extend('data', z.object({ foo: z.string(), bar: z.number() }))
-    .extend('data2', z.number().gt(10).nullable());
+    .extend('data2', z.number().gt(10).nullable())
+    .extend('num', { default: () => [1, 2, 3], readonly: true })
+    .extend('test', { default: [2, 3, 4] });
 
   it('should construct proper class', () => {
     const baseData = {
@@ -42,11 +44,12 @@ describe('Model class', () => {
     ]);
 
     assert.deepStrictEqual(
-      forms.parse({ id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 } }, 'patch'),
+      forms.parse({ id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 }, test: [] }, 'patch'),
       {
         id: 'foo',
         headers: {},
         data: { foo: 'foo', bar: 1 },
+        test: [],
       }
     );
 
@@ -57,17 +60,15 @@ describe('Model class', () => {
       data2: null,
     });
 
-    assert.deepStrictEqual(
-      forms.parse({ ...baseData, remoteAddress: null, num: [321_321_321] }, 'create'),
-      {
-        id: 'foo',
-        remoteAddress: null,
-        headers: {},
-        data: { foo: 'foo', bar: 1 },
-        data2: null,
-        num: [321_321_321],
-      }
-    );
+    assert.deepStrictEqual(forms.parse({ ...baseData, remoteAddress: null }, 'create'), {
+      id: 'foo',
+      remoteAddress: null,
+      headers: {},
+      data: { foo: 'foo', bar: 1 },
+      data2: null,
+      num: [1, 2, 3],
+      test: [2, 3, 4],
+    });
 
     assert.deepStrictEqual(
       forms.parse({
@@ -90,6 +91,10 @@ describe('Model class', () => {
     );
     assert.throws(() => forms.parse({ ...baseData, remote_address: 123 }), TypeError);
     assert.throws(() => forms.parse({ ...baseData, headers: undefined }), TypeError);
+    assert.throws(
+      () => forms.parse({ ...baseData, remoteAddress: null, num: [321_321_321] }, 'create'),
+      (error) => error instanceof TypeError && error.message.includes('readonly')
+    );
   });
 
   it('should throw error when table name is missing in query', () => {
@@ -107,6 +112,8 @@ describe('Model class', () => {
   it('should only allow string or number key to be an ID key', () => {
     assert.ok(forms.isIdKey('id'));
     assert.ok(!forms.isIdKey('headers'));
+    // @ts-expect-error for testing
+    assert.ok(!forms.isIdKey());
   });
 
   it('should throw error when needed', () => {
@@ -122,7 +129,6 @@ describe('Model class', () => {
             id: 'foo',
             headers: {},
             remoteAddress: null,
-            num: null,
             data2: 100,
             data: { foo: 'foo', bar: 1 },
             test: [false],

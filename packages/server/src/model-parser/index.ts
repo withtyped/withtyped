@@ -4,21 +4,22 @@ import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
 
 export default class ModelParser<
-  CreateType extends Record<string, unknown>,
-  ModelType extends CreateType = CreateType,
+  ModelType extends Record<string, unknown>,
+  DefaultKeys extends string = never,
+  ReadonlyKeys extends string = never,
   ParseType extends ModelParseType = 'model'
 > {
   constructor(
-    public readonly model: Model<string, CreateType, ModelType>,
+    public readonly model: Model<string, ModelType, DefaultKeys, ReadonlyKeys>,
     public readonly parseType?: ParseType
   ) {}
 
-  parse(data: unknown): ModelParseReturnType<CreateType, ModelType>[ParseType] {
+  parse(data: unknown): ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ParseType] {
     return this.model.parse(data, this.parseType);
   }
 
   toOpenApiSchemaObject(
-    fallback?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject
+    fallback?: <T>(guard: Parser<T>) => OpenAPIV3.SchemaObject
   ): OpenAPIV3.SchemaObject {
     const rawEntries = Object.entries(this.model.rawConfigs);
     const properties: Record<string, OpenAPIV3.SchemaObject> = {};
@@ -51,9 +52,18 @@ export default class ModelParser<
     }
 
     if (fallback) {
-      for (const [key, value] of Object.entries(this.model.extendedConfigs)) {
+      for (const [key, { parser, default: defaultValue, readonly }] of Object.entries(
+        this.model.extendedConfigs
+      )) {
         // eslint-disable-next-line @silverhand/fp/no-mutation
-        properties[key] = fallback(value);
+        properties[key] = {
+          ...(parser && fallback(parser)),
+          ...(defaultValue !== undefined && {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            default: typeof defaultValue === 'function' ? defaultValue() : defaultValue,
+          }),
+          ...(readonly !== undefined && { readOnly: readonly }),
+        };
       }
     }
 

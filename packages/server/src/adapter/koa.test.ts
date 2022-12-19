@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { contentTypes, RequestMethod } from '@withtyped/shared';
+import { RequestMethod } from '@withtyped/shared';
 import type { ParameterizedContext } from 'koa';
 import sinon from 'sinon';
 
-import { createHttpContext, stubResponseWrite } from '../test-utils/http.test.js';
+import { createHttpContext } from '../test-utils/http.test.js';
 import koaAdapter from './koa.js';
 
 describe('koaAdapter()', () => {
@@ -20,6 +20,10 @@ describe('koaAdapter()', () => {
     request.url = '/foo/bar';
     /* eslint-enable @silverhand/fp/no-mutation */
 
+    const fakeSet = sinon.fake();
+    // @ts-expect-error for testing
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const ctx = { req: request, res: response, request: {}, set: fakeSet } as ParameterizedContext;
     await koaAdapter(async (context, next) => {
       assert.deepStrictEqual(context.request, {
         method: RequestMethod.GET,
@@ -35,13 +39,13 @@ describe('koaAdapter()', () => {
         status: 204,
         headers: { 'transformed-by': 'withtyped Koa adapter', header2: 'ok' },
       });
-    })({ req: request, res: response } as ParameterizedContext, koaNext);
+    })(ctx, koaNext);
 
     assert.ok(koaNext.calledOnceWithExactly());
-    assert.ok(!response.headersSent);
-    assert.strictEqual(response.statusCode, 204);
-    assert.deepStrictEqual(response.getHeader('transformed-by'), 'withtyped Koa adapter');
-    assert.deepStrictEqual(response.getHeader('header2'), 'ok');
+    assert.ok(!ctx.headersSent);
+    assert.strictEqual(ctx.status, 204);
+    assert.ok(fakeSet.calledWithExactly('transformed-by', 'withtyped Koa adapter'));
+    assert.ok(fakeSet.calledWithExactly('header2', 'ok'));
   });
 
   it('should write body to the response object', async () => {
@@ -54,24 +58,31 @@ describe('koaAdapter()', () => {
     request.url = '/';
     /* eslint-enable @silverhand/fp/no-mutation */
 
-    const stub = stubResponseWrite(response);
-
+    const fakeSet = sinon.fake();
+    // @ts-expect-error for testing
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const ctx = {
+      req: request,
+      res: response,
+      request: { body: { ok: 'okk' } },
+      set: fakeSet,
+    } as ParameterizedContext;
     await koaAdapter(async (context, next) => {
+      assert.deepStrictEqual(context.request.body, { ok: 'okk' });
+
       return next({
         ...context,
         status: 200,
-        headers: { test: 'foo/bar' },
+        headers: { test: 'foo/bar', foo: 2 },
         json: { host: context.request.headers.host, foo: ['bar'] },
       });
-    })({ req: request, res: response } as ParameterizedContext, koaNext);
+    })(ctx, koaNext);
 
     assert.ok(koaNext.calledOnceWithExactly());
-    assert.ok(!response.headersSent);
-    assert.strictEqual(response.statusCode, 200);
-    assert.strictEqual(response.getHeader('Content-Type'), contentTypes.json);
-    assert.strictEqual(response.getHeader('Test'), 'foo/bar');
-    assert.ok(
-      stub.calledOnceWith(JSON.stringify({ host: 'localtest:3000', foo: ['bar'] }), 'utf8')
-    );
+    assert.ok(!ctx.headersSent);
+    assert.strictEqual(ctx.status, 200);
+    assert.ok(fakeSet.calledWithExactly('test', 'foo/bar'));
+    assert.ok(fakeSet.calledWithExactly('foo', '2'));
+    assert.deepStrictEqual(ctx.body, { host: 'localtest:3000', foo: ['bar'] });
   });
 });

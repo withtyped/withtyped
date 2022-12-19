@@ -9,7 +9,7 @@ export default class PostgresInitializer extends DatabaseInitializer<PostgresQue
   public readonly database: string;
 
   constructor(
-    public readonly models: Array<Model<string, Record<string, unknown>, Record<string, unknown>>>,
+    public readonly models: Array<Model<string, Record<string, unknown>>>,
     public readonly queryClient: PostgresQueryClient,
     public readonly maintenanceDatabase = 'postgres'
   ) {

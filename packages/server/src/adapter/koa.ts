@@ -1,14 +1,15 @@
 import type { Middleware } from 'koa';
 
 import compose from '../compose.js';
-import type { MiddlewareFunction } from '../middleware.js';
+import type { MiddlewareFunction, NextFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import withRequest from '../middleware/with-request.js';
-import { writeContextToResponse } from '../response.js';
 
 /**
  * Transform a withtyped middleware function to KoaJS middleware function.
  * The withtyped middleware function can assume the context is a `RequestContext` based on the IncomingMessage.
+ *
+ * Request body should be parsed and stored into `ctx.request.body` if needed.
  *
  * @param middleware The withtyped middleware function to transform.
  * @returns A KoaJS middleware function that chains `withRequest()` and `middleware` under the hood.
@@ -16,10 +17,35 @@ import { writeContextToResponse } from '../response.js';
 export default function koaAdapter<OutputContext extends RequestContext>(
   middleware: MiddlewareFunction<RequestContext, OutputContext>
 ): Middleware {
-  return async ({ req: request, res: response }, next) => {
-    await compose(withRequest()).and(middleware)(
+  return async (ctx, next) => {
+    const { req: request, res: response } = ctx;
+
+    await compose(withRequest())
+      .and(async (context, next: NextFunction<RequestContext>) =>
+        next({
+          ...context,
+          request: {
+            ...context.request,
+            ...('body' in ctx.request && { body: ctx.request.body }),
+          },
+        })
+      )
+      .and(middleware)(
       {},
-      async (context) => writeContextToResponse(response, context),
+      async (context) => {
+        if (context.status) {
+          ctx.status = context.status;
+        }
+
+        if (context.headers) {
+          for (const [key, value] of Object.entries(context.headers)) {
+            if (value !== undefined) {
+              ctx.set(key, typeof value === 'number' ? String(value) : value);
+            }
+          }
+        }
+        ctx.body = context.json;
+      },
       { request, response }
     );
 

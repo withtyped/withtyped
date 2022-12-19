@@ -3,7 +3,7 @@ import createServer, { createModel } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 import { z } from 'zod';
 
-const Book = createModel(/* Sql */ `
+const Book = createModel(/* sql */ `
   create table books (
     id varchar(128) not null,
     name varchar(128) not null,

@@ -1,6 +1,6 @@
 {
   "name": "@withtyped/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Gao Sun",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,7 @@
     "prepack": "pnpm build",
     "build": "rm -rf lib/ && tsc",
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
-    "dev:test": "pnpm build && pnpm test",
+    "dev:test": "pnpm build --sourcemap && pnpm test",
     "lint": "eslint src/",
     "test": "c8 node --test | tap-arc",
     "test:only": "node --test | tap-arc"
@@ -51,7 +51,11 @@
   "eslintConfig": {
     "extends": "@silverhand",
     "rules": {
-      "unicorn/prevent-abbreviations": "off"
+      "unicorn/prevent-abbreviations": "off",
+      "complexity": [
+        "error",
+        11
+      ]
     },
     "ignorePatterns": [
       "src/openapi/openapi-types.ts"
