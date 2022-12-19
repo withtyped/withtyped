@@ -4,7 +4,6 @@ import compose from '../compose.js';
 import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import withRequest from '../middleware/with-request.js';
-import { writeContextToResponse } from '../response.js';
 
 /**
  * Transform a withtyped middleware function to KoaJS middleware function.
@@ -16,10 +15,24 @@ import { writeContextToResponse } from '../response.js';
 export default function koaAdapter<OutputContext extends RequestContext>(
   middleware: MiddlewareFunction<RequestContext, OutputContext>
 ): Middleware {
-  return async ({ req: request, res: response }, next) => {
+  return async (ctx, next) => {
+    const { req: request, res: response } = ctx;
     await compose(withRequest()).and(middleware)(
       {},
-      async (context) => writeContextToResponse(response, context),
+      async (context) => {
+        if (context.status) {
+          ctx.status = context.status;
+        }
+
+        if (context.headers) {
+          for (const [key, value] of Object.entries(context.headers)) {
+            if (value !== undefined) {
+              ctx.set(key, typeof value === 'number' ? String(value) : value);
+            }
+          }
+        }
+        ctx.body = context.json;
+      },
       { request, response }
     );
 
