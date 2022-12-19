@@ -17,7 +17,7 @@ export default class TestModelClient<
     // eslint-disable-next-line @typescript-eslint/ban-types
     .stub<[], Promise<{ rows: ModelType[]; rowCount: number }>>()
     // @ts-expect-error for testing
-    .returns(Promise.resolve({ action: 'readAll' }));
+    .returns(Promise.resolve({ rows: { action: 'readAll' } }));
 
   read = sinon
     .stub<[keyof ModelType, string], Promise<ModelType>>()

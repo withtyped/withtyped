@@ -1,9 +1,8 @@
-import type { Model, NormalizedPrefix, IdKeys } from '@withtyped/server';
+import type { Model, NormalizedPrefix, IdKeys, QueryClient } from '@withtyped/server';
 import { ModelRouter } from '@withtyped/server';
 
 import PostgresModelClient from './model-client.js';
-import type PostgresQueryClient from './query-client.js';
-import type { PostgresJson } from './sql.js';
+import type { PostgresJson, PostgreSql } from './sql.js';
 
 const getNormalizedPrefix = <T extends string>(table: string): NormalizedPrefix<`/${T}`> => {
   if ([':', '/', ' '].some((value) => table.includes(value))) {
@@ -19,7 +18,7 @@ export const createModelRouter = <
   ModelType extends Record<string, PostgresJson | undefined>,
   DefaultKeys extends string,
   ReadonlyKeys extends string,
-  Q extends PostgresQueryClient
+  Q extends QueryClient<PostgreSql>
 >(
   model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>,
   queryClient: Q,

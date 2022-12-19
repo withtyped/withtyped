@@ -72,13 +72,15 @@ export default class ModelRouter<
   }
 
   withRead() {
-    const newThis = this.get<'/', unknown, unknown, { rows: ModelType[]; rowCount: number }>(
+    const newThis = this.get<'/', unknown, unknown, ModelType[]>(
       '/',
       {
         // TODO: Consider refactor parser to support array to make response guard available
       },
       async (context, next) => {
-        return next({ ...context, json: await this.client.readAll() });
+        const { rows } = await this.client.readAll();
+
+        return next({ ...context, json: rows });
       }
     ).get<'/:id', unknown, unknown, ModelType>(
       '/:id',

@@ -1,7 +1,6 @@
-import type { Model } from '@withtyped/server';
+import type { Model, QueryClient } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
 
-import type PostgresQueryClient from './query-client.js';
 import type { PostgresJson, PostgreSql } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';
 
@@ -16,7 +15,7 @@ export default class PostgresModelClient<
 > extends ModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys> {
   constructor(
     public readonly model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>,
-    public readonly queryClient: PostgresQueryClient
+    public readonly queryClient: QueryClient<PostgreSql>
   ) {
     super();
   }

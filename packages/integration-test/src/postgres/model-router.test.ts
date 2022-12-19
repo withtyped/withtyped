@@ -74,7 +74,7 @@ describe('ModelRouter', () => {
       body: { ...body, year: 2, createdAt: new Date() },
     });
 
-    const { rows: newBooks } = await client.get('/books');
+    const newBooks = await client.get('/books');
     assert.strictEqual(newBooks.length, 1);
     assert.strictEqual(newBooks[0]?.id, id);
 
@@ -82,7 +82,7 @@ describe('ModelRouter', () => {
     assert.strictEqual(getBook.id, id);
 
     await client.delete('/books/:id', { params: { id } });
-    const { rows: books } = await client.get('/books');
+    const books = await client.get('/books');
     assert.strictEqual(books.length, 0);
   });
 

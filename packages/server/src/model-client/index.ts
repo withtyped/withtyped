@@ -16,6 +16,7 @@ export default abstract class ModelClient<
 > {
   abstract readonly model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>;
 
+  // TODO: Consider provide an option to skip return value validation since API is doing so
   abstract create(data: Record<string, unknown>): Promise<ModelType>;
 
   abstract readAll(): Promise<{ rows: ModelType[]; rowCount: number }>;

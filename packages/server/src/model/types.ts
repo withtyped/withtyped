@@ -159,6 +159,7 @@ export type ModelExtendConfig<Type> = {
   readonly?: boolean;
 };
 
+// TODO: Allow readonly with database default
 export type ModelExtendConfigWithDefault<
   Type,
   RO extends boolean = false
