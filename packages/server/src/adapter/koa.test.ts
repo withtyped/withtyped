@@ -61,8 +61,15 @@ describe('koaAdapter()', () => {
     const fakeSet = sinon.fake();
     // @ts-expect-error for testing
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const ctx = { req: request, res: response, request: {}, set: fakeSet } as ParameterizedContext;
+    const ctx = {
+      req: request,
+      res: response,
+      request: { body: { ok: 'okk' } },
+      set: fakeSet,
+    } as ParameterizedContext;
     await koaAdapter(async (context, next) => {
+      assert.deepStrictEqual(context.request.body, { ok: 'okk' });
+
       return next({
         ...context,
         status: 200,
