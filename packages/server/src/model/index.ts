@@ -1,7 +1,9 @@
 import type { Parser } from '../types.js';
 import type {
-  CreateEntity,
   Entity,
+  EntityHasDefaultKeys,
+  ModelExtendConfig,
+  ModelExtendConfigWithDefault,
   ModelParseReturnType,
   ModelParseType,
   NormalizedBody,
@@ -15,28 +17,30 @@ export type InferCreateType<M> = M extends Model<string, infer A, infer B, infer
 export type InferModelType<M> = M extends Model<string, infer A, infer B, infer C> ? B : never;
 
 export default class Model<
-  /* eslint-disable @typescript-eslint/ban-types */
   Table extends string = '',
-  CreateType extends Record<string, unknown> = {},
-  ModelType extends CreateType = CreateType,
-  ExtendGuard extends Record<string, Parser<unknown>> = Record<string, Parser<unknown>>
-  /* eslint-enable @typescript-eslint/ban-types */
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  ModelType extends Record<string, unknown> = {},
+  DefaultKeys extends string = never,
+  ReadonlyKeys extends string = never
 > {
   static create = <Raw extends string>(raw: Raw) => {
     type Normalized = NormalizedBody<Raw>;
 
     type Columns = SplitRawColumns<Normalized>;
 
-    return new Model<TableName<Raw>, CreateEntity<Columns>, Entity<Columns>>(
+    return new Model<TableName<Raw>, Entity<Columns>, EntityHasDefaultKeys<Columns>, never>(
       raw,
       Object.freeze({})
     );
   };
 
   public readonly tableName: Table;
-  public readonly rawConfigs: Record<string | number | symbol, RawParserConfig>;
+  public readonly rawConfigs: Record<string, RawParserConfig>;
 
-  constructor(public readonly raw: string, public readonly extendedConfigs: ExtendGuard) {
+  constructor(
+    public readonly raw: string,
+    public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>
+  ) {
     const tableName = parseTableName(raw);
 
     if (!tableName) {
@@ -53,27 +57,39 @@ export default class Model<
   }
 
   // Indicates if `key` is `IdKeys<ModelType>`.
-  // Cannot define as a type guard since it will affects generic array for `DatabaseInitializer`.
-  isIdKey(key: keyof ModelType): boolean {
+  isIdKey(key: string & keyof ModelType): boolean {
     if (!(key in this.rawConfigs)) {
       return false;
     }
 
-    return ['string', 'number'].includes(this.rawConfigs[key].type);
+    // Just validated
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return ['string', 'number'].includes(this.rawConfigs[key]!.type);
   }
 
-  extend<Key extends keyof ModelType, Type>(key: Key, parser: Parser<Type>) {
-    return new Model<
-      Table,
-      Omit<CreateType, Key> & { [key in Key]: Type },
-      Omit<ModelType, Key> & { [key in Key]: Type },
-      ExtendGuard & { [key in Key]: Parser<Type> }
-    >(
+  // TODO: Make `default` compatible with nullable types
+  extend<Key extends string & keyof ModelType, Type>(
+    key: Key,
+    parser: Parser<Type>
+  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys, ReadonlyKeys>;
+  extend<Key extends string & keyof ModelType, Type>(
+    key: Key,
+    config: ModelExtendConfigWithDefault<Type>
+  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys>;
+  extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
+    key: Key,
+    config: ModelExtendConfigWithDefault<Type, true>
+  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys | Key>;
+  extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
+    key: Key,
+    config: Parser<Type> | ModelExtendConfigWithDefault<Type, RO>
+  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys> {
+    return new Model(
       this.raw,
-      Object.freeze(
-        // eslint-disable-next-line no-restricted-syntax
-        { ...this.extendedConfigs, [key]: parser } as ExtendGuard & { [key in Key]: Parser<Type> }
-      )
+      Object.freeze({
+        ...this.extendedConfigs,
+        [key]: 'parse' in config ? { parser: config } : config,
+      })
     );
   }
 
@@ -81,7 +97,7 @@ export default class Model<
   parse<ForType extends ModelParseType = 'model'>(
     data: unknown,
     forType?: ForType
-  ): ModelParseReturnType<CreateType, ModelType>[ForType] {
+  ): ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType] {
     if (!isObject(data)) {
       throw new TypeError('Data is not an object');
     }
@@ -94,7 +110,25 @@ export default class Model<
       const snakeCaseKey = this.rawConfigs[key]!.rawKey; // Should be ensured during init
       const value = data[key] === undefined ? data[snakeCaseKey] : data[key];
 
+      if (
+        forType &&
+        ['create', 'patch'].includes(forType) &&
+        config.readonly &&
+        value !== undefined
+      ) {
+        throw new TypeError(
+          `Key \`${key}\` is readonly but received ${String(
+            value
+          )}. It should be \`undefined\` for ${forType} usage.`
+        );
+      }
+
       if (value === undefined) {
+        if (forType !== 'patch' && 'default' in config && config.default) {
+          result[key] = typeof config.default === 'function' ? config.default() : config.default;
+          continue;
+        }
+
         if (
           (forType === 'create' && Boolean(this.rawConfigs[key]?.hasDefault)) ||
           forType === 'patch'
@@ -109,13 +143,14 @@ export default class Model<
         );
       }
 
-      result[key] = config.parse(value);
+      result[key] = config.parser?.parse(value);
     }
 
     for (const [key, config] of Object.entries(this.rawConfigs)) {
       const snakeCaseKey = config.rawKey;
 
-      if (key in this.extendedConfigs || snakeCaseKey in this.extendedConfigs) {
+      // Handled by extendConfig
+      if (result[key] !== undefined) {
         continue;
       }
 
@@ -173,7 +208,7 @@ export default class Model<
     /* eslint-enable @silverhand/fp/no-mutation */
 
     // eslint-disable-next-line no-restricted-syntax
-    return result as ModelParseReturnType<CreateType, ModelType>[ForType];
+    return result as ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType];
   }
 }
 

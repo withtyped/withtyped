@@ -5,6 +5,7 @@ import Client, { ResponseError } from '@withtyped/client';
 import { createModelRouter, createQueryClient, PostgresInitializer } from '@withtyped/postgres';
 import createServer, { createRouter, Model } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
+import { nanoid } from 'nanoid';
 import OpenAPISchemaValidator from 'openapi-schema-validator';
 import { z } from 'zod';
 
@@ -28,7 +29,11 @@ describe('ModelRouter', () => {
       primary key (id)
     );
   `
-  ).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
+  )
+    .extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array())
+    .extend('id', { default: () => nanoid(), readonly: true })
+    .extend('year', { default: 2022 });
+
   const database = createDatabaseName();
   const queryClient = createQueryClient({ database });
   const modelRouter = createModelRouter(Book, queryClient).withCrud();
@@ -65,19 +70,18 @@ describe('ModelRouter', () => {
 
   it('should be able to create and query book', async () => {
     const body = createBook();
-    const book = await client.post('/books', {
-      body: { ...body, year: null, createdAt: new Date() },
+    const { id } = await client.post('/books', {
+      body: { ...body, year: 2, createdAt: new Date() },
     });
-    assert.strictEqual(book.id, body.id);
 
     const { rows: newBooks } = await client.get('/books');
     assert.strictEqual(newBooks.length, 1);
-    assert.strictEqual(newBooks[0]?.id, body.id);
+    assert.strictEqual(newBooks[0]?.id, id);
 
-    const getBook = await client.get('/books/:id', { params: { id: body.id } });
-    assert.strictEqual(getBook.id, body.id);
+    const getBook = await client.get('/books/:id', { params: { id } });
+    assert.strictEqual(getBook.id, id);
 
-    await client.delete('/books/:id', { params: { id: body.id } });
+    await client.delete('/books/:id', { params: { id } });
     const { rows: books } = await client.get('/books');
     assert.strictEqual(books.length, 0);
   });
@@ -93,51 +97,67 @@ describe('ModelRouter', () => {
 
   it('should throw 400 error when patch with nothing', async () => {
     const body = createBook();
-    await client.post('/books', {
+    const { id } = await client.post('/books', {
+      // @ts-expect-error pending compatible work of nullable types with defaults
       body: { ...body, year: null, createdAt: undefined },
     });
 
     await assert.rejects(
-      client.patch('/books/:id', { params: { id: body.id }, body: {} }),
+      client.patch('/books/:id', { params: { id }, body: {} }),
       (error: unknown) => {
         return error instanceof ResponseError && error.status === 400;
       }
     );
 
-    await client.delete('/books/:id', { params: { id: body.id } });
+    await client.delete('/books/:id', { params: { id } });
+  });
+
+  it('throws 400 error when patch a readonly field', async () => {
+    const body = createBook();
+    const { id } = await client.post('/books', { body });
+
+    await assert.rejects(
+      // @ts-expect-error for testing
+      client.patch('/books/:id', { params: { id }, body: { id: 'foo' } }),
+      (error: unknown) => {
+        return error instanceof ResponseError && error.status === 400;
+      }
+    );
+
+    await client.delete('/books/:id', { params: { id } });
   });
 
   it('should throw 400 error when put with insufficient info', async () => {
     const body = createBook();
-    await client.post('/books', {
-      body: { ...body, year: null, createdAt: undefined },
+    const { id } = await client.post('/books', {
+      body: { ...body, year: undefined, createdAt: undefined },
     });
 
     await assert.rejects(
       // @ts-expect-error for testing
-      client.put('/books/:id', { params: { id: body.id }, body: { id: '123' } }),
+      client.put('/books/:id', { params: { id }, body: { id: '123' } }),
       (error: unknown) => {
         return error instanceof ResponseError && error.status === 400;
       }
     );
 
-    await client.delete('/books/:id', { params: { id: body.id } });
+    await client.delete('/books/:id', { params: { id } });
   });
 
   it('should throw 400 error when patch with wrong type', async () => {
     const body = createBook();
-    await client.post('/books', {
-      body: { ...body, year: null, createdAt: undefined },
+    const { id } = await client.post('/books', {
+      body: { ...body, year: 2020, createdAt: undefined },
     });
 
     await assert.rejects(
       // @ts-expect-error for testing
-      client.patch('/books/:id', { params: { id: body.id }, body: { id: 123 } }),
+      client.patch('/books/:id', { params: { id }, body: { id: 123 } }),
       (error: unknown) => {
         return error instanceof ResponseError && error.status === 400;
       }
     );
 
-    await client.delete('/books/:id', { params: { id: body.id } });
+    await client.delete('/books/:id', { params: { id } });
   });
 });

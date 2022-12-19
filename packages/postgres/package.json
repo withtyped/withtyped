@@ -23,7 +23,7 @@
     "prepack": "pnpm build",
     "build": "rm -rf lib/ && tsc",
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
-    "dev:test": "pnpm build && pnpm test",
+    "dev:test": "pnpm build --sourcemap && pnpm test",
     "lint": "eslint src/",
     "test": "c8 node --test | tap-arc",
     "test:only": "node --test | tap-arc"

@@ -3,7 +3,6 @@ import { normalizeString } from '@withtyped/shared';
 import type { JsonObject } from '../types.js';
 import type { CamelCase, PrimitiveType, PrimitiveTypeMap, RawParserConfig } from './types.js';
 
-// eslint-disable-next-line complexity
 export const findType = (raw?: string): PrimitiveType | undefined => {
   if (!raw) {
     return;

@@ -4,13 +4,14 @@ import {
   zodTypeToParameters,
   zodTypeToSwagger,
 } from '@withtyped/server/lib/test-utils/openapi.test.js';
+import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
 import type { Book } from '../utils/book.js';
 import { bookGuard, createBook } from '../utils/book.js';
 
 // eslint-disable-next-line @silverhand/fp/no-let
-let books = Array.from({ length: 10 }).map(() => createBook());
+let books = Array.from({ length: 10 }).map(() => ({ ...createBook(), id: nanoid() }));
 
 const getRouter = createRouter()
   .get(

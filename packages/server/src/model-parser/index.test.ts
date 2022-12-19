@@ -19,7 +19,10 @@ describe('ModelParser', () => {
         custom_data jsonb,
         created_at timestamptz not null default(now())
       );
-    `).extend('customData', z.object({ foo: z.string() })),
+    `)
+        .extend('customData', z.object({ foo: z.string() }))
+        .extend('id', { default: 'foo', readonly: true })
+        .extend('authorIds', { default: () => ['foo'] }),
       'create'
     );
 

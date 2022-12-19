@@ -47,7 +47,7 @@ const zodLiteralToSwagger = (zodLiteral: ZodLiteral<unknown>): OpenAPIV3.SchemaO
 };
 
 // Switch-clause
-// eslint-disable-next-line complexity
+
 const zodStringCheckToSwaggerFormatKind = (zodStringCheck: ValuesOf<ZodStringDef['checks']>) => {
   const { kind } = zodStringCheck;
 

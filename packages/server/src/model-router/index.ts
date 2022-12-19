@@ -1,7 +1,7 @@
 import RequestError from '../errors/RequestError.js';
 import type ModelClient from '../model-client/index.js';
 import ModelParser from '../model-parser/index.js';
-import type { IdKeys } from '../model/types.js';
+import type { IdKeys, ModelCreateType, ModelPatchType } from '../model/types.js';
 import type { BaseRoutes, NormalizedPrefix, RouterRoutes } from '../router/index.js';
 import Router from '../router/index.js';
 
@@ -10,8 +10,9 @@ import Router from '../router/index.js';
 export default class ModelRouter<
   /* eslint-disable @typescript-eslint/ban-types */
   Table extends string,
-  CreateType extends Record<string, unknown> = {},
-  ModelType extends CreateType = CreateType,
+  ModelType extends Record<string, unknown> = {},
+  DefaultKeys extends string = never,
+  ReadonlyKeys extends string = never,
   IdKey extends IdKeys<ModelType> = 'id' extends IdKeys<ModelType> ? 'id' : never,
   Routes extends BaseRoutes = BaseRoutes
   /* eslint-enable @typescript-eslint/ban-types */
@@ -19,7 +20,7 @@ export default class ModelRouter<
   public readonly idKey: IdKeys<ModelType>;
 
   constructor(
-    public readonly client: ModelClient<Table, CreateType, ModelType>,
+    public readonly client: ModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys>,
     public readonly prefix: NormalizedPrefix<`/${Table}`>,
     idKey?: IdKey
   ) {
@@ -43,7 +44,12 @@ export default class ModelRouter<
   }
 
   withCreate() {
-    const newThis = this.post<'/', unknown, CreateType, ModelType>(
+    const newThis = this.post<
+      '/',
+      unknown,
+      ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>,
+      ModelType
+    >(
       '/',
       {
         body: new ModelParser(this.client.model, 'create'),
@@ -57,8 +63,9 @@ export default class ModelRouter<
     // eslint-disable-next-line no-restricted-syntax
     return newThis as ModelRouter<
       Table,
-      CreateType,
       ModelType,
+      DefaultKeys,
+      ReadonlyKeys,
       IdKey,
       RouterRoutes<typeof newThis>
     >;
@@ -86,15 +93,16 @@ export default class ModelRouter<
     // eslint-disable-next-line no-restricted-syntax
     return newThis as ModelRouter<
       Table,
-      CreateType,
       ModelType,
+      DefaultKeys,
+      ReadonlyKeys,
       IdKey,
       RouterRoutes<typeof newThis>
     >;
   }
 
   withUpdate() {
-    const newThis = this.patch<'/:id', unknown, Partial<CreateType>, ModelType>(
+    const newThis = this.patch<'/:id', unknown, ModelPatchType<ModelType, ReadonlyKeys>, ModelType>(
       '/:id',
       {
         body: new ModelParser(this.client.model, 'patch'),
@@ -112,7 +120,7 @@ export default class ModelRouter<
 
         return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }
-    ).put<'/:id', unknown, CreateType, ModelType>(
+    ).put<'/:id', unknown, ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>, ModelType>(
       '/:id',
       {
         body: new ModelParser(this.client.model, 'create'),
@@ -131,8 +139,9 @@ export default class ModelRouter<
     // eslint-disable-next-line no-restricted-syntax
     return newThis as ModelRouter<
       Table,
-      CreateType,
       ModelType,
+      DefaultKeys,
+      ReadonlyKeys,
       IdKey,
       RouterRoutes<typeof newThis>
     >;
@@ -156,8 +165,9 @@ export default class ModelRouter<
     // eslint-disable-next-line no-restricted-syntax
     return newThis as ModelRouter<
       Table,
-      CreateType,
       ModelType,
+      DefaultKeys,
+      ReadonlyKeys,
       IdKey,
       RouterRoutes<typeof newThis>
     >;

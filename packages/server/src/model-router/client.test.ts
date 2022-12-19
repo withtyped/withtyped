@@ -5,11 +5,11 @@ import type Model from '../model/index.js';
 
 export default class TestModelClient<
   Table extends string,
-  CreateType extends Record<string, unknown>,
-  ModelType extends CreateType = CreateType
-> extends ModelClient<Table, CreateType, ModelType> {
+  ModelType extends Record<string, unknown>,
+  DefaultKeys extends string = never
+> extends ModelClient<Table, ModelType, DefaultKeys> {
   create = sinon
-    .stub<[CreateType], Promise<ModelType>>()
+    .stub<[unknown], Promise<ModelType>>()
     // @ts-expect-error for testing
     .returns(Promise.resolve({ action: 'create' }));
 
@@ -25,13 +25,13 @@ export default class TestModelClient<
     .returns(Promise.resolve({ action: 'read' }));
 
   update = sinon
-    .stub<[keyof ModelType, string, Partial<CreateType>], Promise<ModelType>>()
+    .stub<[keyof ModelType, string, unknown], Promise<ModelType>>()
     // @ts-expect-error for testing
     .returns(Promise.resolve({ action: 'update' }));
 
   delete = sinon.stub<[keyof ModelType, string], Promise<boolean>>().resolves(true);
 
-  constructor(public readonly model: Model<Table, CreateType, ModelType>) {
+  constructor(public readonly model: Model<Table, ModelType, DefaultKeys>) {
     super();
   }
 }

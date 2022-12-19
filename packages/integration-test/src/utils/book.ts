@@ -20,8 +20,8 @@ export const bookGuard = z.object({
   price: z.number(),
 });
 
-export const createBook = (): Book => ({
-  id: faker.datatype.uuid(),
+export const createBook = (): Omit<Book, 'id'> & { id: undefined } => ({
+  id: undefined,
   name: faker.commerce.productName(),
   authors: [
     { name: faker.name.fullName(), email: faker.internet.email() },

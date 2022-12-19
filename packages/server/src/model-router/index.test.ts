@@ -47,24 +47,27 @@ describe('ModelRouter', () => {
 
   it('should be able to create after calling `.withCreate()`', async () => {
     const httpContext = createHttpContext();
-    const sql = `create table tests (id int16 not null);`;
-    const client = new TestModelClient(Model.create(sql));
+    const sql = `create table tests (id int16 not null, name varchar(128) not null);`;
+    const client = new TestModelClient(
+      Model.create(sql).extend('id', { default: () => 123, readonly: true })
+    );
     const router = new ModelRouter(client, '/tests');
     const run = router.withCreate().routes();
-    const body = { id: 123 };
+    const body = { id: 123, name: '123' };
 
     client.create.resolves(body);
+    assert.strictEqual(router.model, client.model);
     await run(
       {
         request: {
           method: RequestMethod.POST,
           url: buildUrl('/tests'),
           headers: {},
-          body: { id: 123 },
+          body: { id: undefined, name: '123' },
         },
       },
       async (context) => {
-        assert.ok(client.create.calledOnceWithExactly(body));
+        assert.ok(client.create.calledOnceWithExactly({ id: 123, name: '123' }));
         assert.deepStrictEqual(context.json, body);
       },
       httpContext

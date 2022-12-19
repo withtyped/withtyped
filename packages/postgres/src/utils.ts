@@ -1,4 +1,4 @@
-import type { Model, NormalizedPrefix, IdKeys, Parser } from '@withtyped/server';
+import type { Model, NormalizedPrefix, IdKeys } from '@withtyped/server';
 import { ModelRouter } from '@withtyped/server';
 
 import PostgresModelClient from './model-client.js';
@@ -16,12 +16,12 @@ const getNormalizedPrefix = <T extends string>(table: string): NormalizedPrefix<
 
 export const createModelRouter = <
   Table extends string,
-  CreateType extends Record<string, PostgresJson | undefined>,
-  ModelType extends CreateType,
-  ExtendGuard extends Record<string, Parser<unknown>>,
+  ModelType extends Record<string, PostgresJson | undefined>,
+  DefaultKeys extends string,
+  ReadonlyKeys extends string,
   Q extends PostgresQueryClient
 >(
-  model: Model<Table, CreateType, ModelType, ExtendGuard>,
+  model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>,
   queryClient: Q,
   idKey?: IdKeys<ModelType>
 ) => {

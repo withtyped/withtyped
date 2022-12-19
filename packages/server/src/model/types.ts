@@ -1,4 +1,4 @@
-import type { JsonArray, JsonObject } from '../types.js';
+import type { JsonArray, JsonObject, Parser } from '../types.js';
 
 export type PrimitiveType = 'string' | 'number' | 'boolean' | 'json' | 'date';
 
@@ -107,7 +107,9 @@ export type TableName<Raw extends string> =
 
 export type NormalizedBody<Raw extends string> = Normalize<CreateTableBody<Raw>>;
 export type Entity<Columns extends Array<ColumnLiteral<string>>> = RawModel<Columns>;
-export type CreateEntity<Columns extends Array<ColumnLiteral<string>>> = RawCreateModel<Columns>;
+export type EntityHasDefaultKeys<Columns extends Array<ColumnLiteral<string>>> = CamelCase<
+  Extract<Columns[number], [string, unknown, boolean, true, boolean]>[0]
+>;
 
 // TODO: Support multiple keys
 export type ColumnPrimaryKey<Column extends string> =
@@ -121,15 +123,46 @@ export type PrimaryKey<NormalizedBody extends string> =
 
 export type KeyOfType<T, V> = keyof {
   [P in keyof T as T[P] extends V ? P : never]: unknown;
-};
+} &
+  string;
 
 export type IdKeys<T> = KeyOfType<T, string | number>;
 
 export type DefaultIdKey<T> = 'id' extends keyof T ? 'id' : never;
 
+export type ModelPatchType<ModelType, ReadonlyKeys extends keyof ModelType = never> = Partial<
+  Omit<ModelType, ReadonlyKeys>
+>;
+
+export type ModelCreateType<
+  ModelType,
+  DefaultKeys extends keyof ModelType,
+  ReadonlyKeys extends keyof ModelType = never
+> = Omit<ModelType, ReadonlyKeys | DefaultKeys> & {
+  [key in DefaultKeys]?: ModelType[key];
+} & Record<ReadonlyKeys, undefined>;
+
 export type ModelParseType = 'model' | 'create' | 'patch';
-export type ModelParseReturnType<CreateType, ModelType> = {
+export type ModelParseReturnType<
+  ModelType,
+  DefaultKeys extends keyof ModelType,
+  ReadonlyKeys extends keyof ModelType = never
+> = {
   model: ModelType;
-  create: CreateType;
-  patch: Partial<CreateType>;
+  create: ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>;
+  patch: ModelPatchType<ModelType, ReadonlyKeys>;
+};
+
+export type ModelExtendConfig<Type> = {
+  parser?: Parser<Type>;
+  default?: Type | (() => Type);
+  readonly?: boolean;
+};
+
+export type ModelExtendConfigWithDefault<
+  Type,
+  RO extends boolean = false
+> = ModelExtendConfig<Type> & {
+  default: Type | (() => Type);
+  readonly?: RO;
 };
