@@ -13,8 +13,7 @@ import type {
 } from './types.js';
 import { isObject, parsePrimitiveType, parseRawConfigs, parseTableName } from './utils.js';
 
-export type InferCreateType<M> = M extends Model<string, infer A, infer B, infer C> ? A : never;
-export type InferModelType<M> = M extends Model<string, infer A, infer B, infer C> ? B : never;
+export type InferModelType<M> = M extends Model<string, infer A> ? A : never;
 
 export default class Model<
   Table extends string = '',
