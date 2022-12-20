@@ -85,4 +85,34 @@ describe('koaAdapter()', () => {
     assert.ok(fakeSet.calledWithExactly('foo', '2'));
     assert.deepStrictEqual(ctx.body, { host: 'localtest:3000', foo: ['bar'] });
   });
+
+  it('should not set body if no json in context', async () => {
+    const koaNext = sinon.fake();
+    const { request, response } = createHttpContext();
+
+    /* eslint-disable @silverhand/fp/no-mutation */
+    request.method = RequestMethod.GET;
+    request.headers.host = 'localtest:3000';
+    request.url = '/';
+    /* eslint-enable @silverhand/fp/no-mutation */
+
+    const fakeSet = sinon.fake();
+    // @ts-expect-error for testing
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const ctx = {
+      req: request,
+      res: response,
+      status: 404,
+      request: {},
+      set: fakeSet,
+    } as ParameterizedContext;
+    await koaAdapter(async (context, next) => {
+      return next(context);
+    })(ctx, koaNext);
+
+    assert.ok(koaNext.calledOnceWithExactly());
+    assert.ok(!ctx.headersSent);
+    assert.ok(!ctx.body);
+    assert.strictEqual(ctx.status, 404);
+  });
 });

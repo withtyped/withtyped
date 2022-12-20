@@ -44,7 +44,10 @@ export default function koaAdapter<OutputContext extends RequestContext>(
             }
           }
         }
-        ctx.body = context.json;
+
+        if (context.json !== undefined) {
+          ctx.body = context.json;
+        }
       },
       { request, response }
     );
