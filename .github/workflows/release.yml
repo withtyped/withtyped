@@ -44,3 +44,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Login via Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to containerapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: logto-survey
+          images: ghcr.io/withtyped/sample:edge
