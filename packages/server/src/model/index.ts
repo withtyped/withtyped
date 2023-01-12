@@ -34,7 +34,7 @@ export default class Model<
   };
 
   public readonly tableName: Table;
-  public readonly rawConfigs: Record<string, RawParserConfig>;
+  public readonly rawConfigs: Record<string & keyof ModelType, RawParserConfig>;
 
   constructor(
     public readonly raw: string,
@@ -51,8 +51,11 @@ export default class Model<
     this.rawConfigs = parseRawConfigs(raw);
   }
 
-  get rawKeys() {
-    return Object.values(this.rawConfigs).map(({ rawKey }) => rawKey);
+  get rawKeys(): Record<keyof ModelType, string> {
+    // eslint-disable-next-line no-restricted-syntax
+    return Object.fromEntries(
+      Object.entries(this.rawConfigs).map(([key, { rawKey }]) => [key, rawKey])
+    ) as Record<keyof ModelType, string>;
   }
 
   // Indicates if `key` is `IdKeys<ModelType>`.

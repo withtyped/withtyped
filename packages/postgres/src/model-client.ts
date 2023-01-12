@@ -13,11 +13,14 @@ export default class PostgresModelClient<
   DefaultKeys extends string = never,
   ReadonlyKeys extends string = never
 > extends ModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys> {
+  protected rawKeys: string[];
+
   constructor(
     public readonly model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>,
     public readonly queryClient: QueryClient<PostgreSql>
   ) {
     super();
+    this.rawKeys = Object.values(this.model.rawConfigs).map(({ rawKey }) => rawKey);
   }
 
   async connect() {
@@ -35,7 +38,7 @@ export default class PostgresModelClient<
       insert into ${identifier(this.model.tableName)}
         (${entries.map(([key]) => identifier(key))})
       values (${entries.map(([, value]) => jsonIfNeeded(value))})
-      returning ${this.model.rawKeys.map((key) => identifier(key))}
+      returning ${this.rawKeys.map((key) => identifier(key))}
     `);
 
     return this.model.parse(rows[0]);
@@ -43,7 +46,7 @@ export default class PostgresModelClient<
 
   async readAll(): Promise<{ rows: ModelType[]; rowCount: number }> {
     const { rows, rowCount } = await this.queryClient.query(sql`
-      select ${this.model.rawKeys.map((key) => identifier(key))}
+      select ${this.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
     `);
 
@@ -52,7 +55,7 @@ export default class PostgresModelClient<
 
   async read(whereKey: ValidKey, value: string): Promise<ModelType> {
     const { rows } = await this.queryClient.query(sql`
-      select ${this.model.rawKeys.map((key) => identifier(key))}
+      select ${this.rawKeys.map((key) => identifier(key))}
       from ${identifier(this.model.tableName)}
       ${this.whereClause(whereKey, value)}
     `);
@@ -76,7 +79,7 @@ export default class PostgresModelClient<
       update ${identifier(this.model.tableName)}
       set ${entries.map(([key, value]) => sql`${identifier(key)}=${jsonIfNeeded(value)}`)}
       ${this.whereClause(whereKey, value)}
-      returning ${this.model.rawKeys.map((key) => identifier(key))}
+      returning ${this.rawKeys.map((key) => identifier(key))}
     `);
 
     if (!rows[0]) {
