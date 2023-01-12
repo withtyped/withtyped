@@ -32,16 +32,16 @@ describe('Model class', () => {
       data2: null,
     };
 
-    assert.deepStrictEqual(forms.rawKeys, [
-      'id',
-      'remote_address',
-      'headers',
-      'data',
-      'data_2',
-      'num',
-      'test',
-      'created_at',
-    ]);
+    assert.deepStrictEqual(forms.rawKeys, {
+      id: 'id',
+      remoteAddress: 'remote_address',
+      headers: 'headers',
+      data: 'data',
+      data2: 'data_2',
+      num: 'num',
+      test: 'test',
+      createdAt: 'created_at',
+    });
 
     assert.deepStrictEqual(
       forms.parse({ id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 }, test: [] }, 'patch'),
