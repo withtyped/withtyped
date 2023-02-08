@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import { z, ZodError } from 'zod';
 
+import type { InferModelType } from './index.js';
 import Model from './index.js';
 
 describe('Model class', () => {
@@ -24,13 +25,15 @@ describe('Model class', () => {
     .extend('num', { default: () => [1, 2, 3], readonly: true })
     .extend('test', { default: [2, 3, 4] });
 
+  type Forms = InferModelType<typeof forms>;
+
   it('should construct proper class', () => {
     const baseData = {
       id: 'foo',
       headers: {},
       data: { foo: 'foo', bar: 1 },
       data2: null,
-    };
+    } satisfies Partial<Forms>;
 
     assert.deepStrictEqual(forms.rawKeys, {
       id: 'id',

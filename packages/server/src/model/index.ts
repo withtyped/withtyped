@@ -73,19 +73,39 @@ export default class Model<
   extend<Key extends string & keyof ModelType, Type>(
     key: Key,
     parser: Parser<Type>
-  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys, ReadonlyKeys>;
+  ): Model<
+    Table,
+    { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
+    DefaultKeys,
+    ReadonlyKeys
+  >;
   extend<Key extends string & keyof ModelType, Type>(
     key: Key,
     config: ModelExtendConfigWithDefault<Type>
-  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys>;
+  ): Model<
+    Table,
+    { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
+    DefaultKeys | Key,
+    ReadonlyKeys
+  >;
   extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
     key: Key,
     config: ModelExtendConfigWithDefault<Type, true>
-  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys | Key>;
+  ): Model<
+    Table,
+    { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
+    DefaultKeys | Key,
+    ReadonlyKeys | Key
+  >;
   extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
     key: Key,
     config: Parser<Type> | ModelExtendConfigWithDefault<Type, RO>
-  ): Model<Table, ModelType & { [key in Key]: Type }, DefaultKeys | Key, ReadonlyKeys> {
+  ): Model<
+    Table,
+    { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
+    DefaultKeys | Key,
+    ReadonlyKeys
+  > {
     return new Model(
       this.raw,
       Object.freeze({
