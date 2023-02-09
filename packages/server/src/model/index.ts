@@ -29,7 +29,8 @@ export default class Model<
 
     return new Model<TableName<Raw>, Entity<Columns>, EntityHasDefaultKeys<Columns>, never>(
       raw,
-      Object.freeze({})
+      Object.freeze({}),
+      []
     );
   };
 
@@ -40,7 +41,7 @@ export default class Model<
   constructor(
     public readonly raw: string,
     public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>,
-    public readonly excludedKeys: string[] = []
+    public readonly excludedKeys: string[]
   ) {
     const tableName = parseTableName(raw);
 
@@ -57,13 +58,15 @@ export default class Model<
   get rawKeys(): Record<keyof ModelType, string> {
     // eslint-disable-next-line no-restricted-syntax
     return Object.fromEntries(
-      Object.entries(this.rawConfigs).map(([key, { rawKey }]) => [key, rawKey])
+      Object.entries(this.rawConfigs)
+        .filter(([key]) => !this.excludedKeySet.has(key))
+        .map(([key, { rawKey }]) => [key, rawKey])
     ) as Record<keyof ModelType, string>;
   }
 
   // Indicates if `key` is `IdKeys<ModelType>`.
   isIdKey(key: string & keyof ModelType): boolean {
-    if (!(key in this.rawConfigs)) {
+    if (!(key in this.rawConfigs) || this.excludedKeySet.has(key)) {
       return false;
     }
 
@@ -114,7 +117,8 @@ export default class Model<
       Object.freeze({
         ...this.extendedConfigs,
         [key]: 'parse' in config ? { parser: config } : config,
-      })
+      }),
+      this.excludedKeys
     );
   }
 
