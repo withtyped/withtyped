@@ -15,6 +15,7 @@ describe('Model class', () => {
       headers jsonb not null,
       data jsonb,
       data_2 bigint,
+      to_exclude varchar(12) not null,
       num bigint array,
       test decimal not null array default([]),
       created_at timestamptz not null default(now())
@@ -23,7 +24,9 @@ describe('Model class', () => {
     .extend('data', z.object({ foo: z.string(), bar: z.number() }))
     .extend('data2', z.number().gt(10).nullable())
     .extend('num', { default: () => [1, 2, 3], readonly: true })
-    .extend('test', { default: [2, 3, 4] });
+    .extend('test', { default: [2, 3, 4] })
+    .extend('toExclude', z.string().optional())
+    .exclude('toExclude');
 
   type Forms = InferModelType<typeof forms>;
 
@@ -36,6 +39,7 @@ describe('Model class', () => {
     } satisfies Partial<Forms>;
 
     assert.deepStrictEqual(forms.rawKeys, {
+      toExclude: 'to_exclude',
       id: 'id',
       remoteAddress: 'remote_address',
       headers: 'headers',
@@ -47,7 +51,10 @@ describe('Model class', () => {
     });
 
     assert.deepStrictEqual(
-      forms.parse({ id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 }, test: [] }, 'patch'),
+      forms.parse(
+        { id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 }, test: [], toExclude: 'ok' },
+        'patch'
+      ),
       {
         id: 'foo',
         headers: {},
