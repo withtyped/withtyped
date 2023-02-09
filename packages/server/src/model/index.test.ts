@@ -21,12 +21,12 @@ describe('Model class', () => {
       created_at timestamptz not null default(now())
     );`
   )
+    .extend('toExclude', z.string().optional())
+    .exclude('toExclude')
     .extend('data', z.object({ foo: z.string(), bar: z.number() }))
     .extend('data2', z.number().gt(10).nullable())
     .extend('num', { default: () => [1, 2, 3], readonly: true })
-    .extend('test', { default: [2, 3, 4] })
-    .extend('toExclude', z.string().optional())
-    .exclude('toExclude');
+    .extend('test', { default: [2, 3, 4] });
 
   type Forms = InferModelType<typeof forms>;
 
@@ -39,7 +39,6 @@ describe('Model class', () => {
     } satisfies Partial<Forms>;
 
     assert.deepStrictEqual(forms.rawKeys, {
-      toExclude: 'to_exclude',
       id: 'id',
       remoteAddress: 'remote_address',
       headers: 'headers',
@@ -121,6 +120,8 @@ describe('Model class', () => {
 
   it('should only allow string or number key to be an ID key', () => {
     assert.ok(forms.isIdKey('id'));
+    // @ts-expect-error for testing
+    assert.ok(!forms.isIdKey('toExclude'));
     assert.ok(!forms.isIdKey('headers'));
     // @ts-expect-error for testing
     assert.ok(!forms.isIdKey());
