@@ -35,10 +35,12 @@ export default class Model<
 
   public readonly tableName: Table;
   public readonly rawConfigs: Record<string & keyof ModelType, RawParserConfig>;
+  protected readonly excludedKeySet: Set<string>;
 
   constructor(
     public readonly raw: string,
-    public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>
+    public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>,
+    public readonly excludedKeys: string[] = []
   ) {
     const tableName = parseTableName(raw);
 
@@ -49,6 +51,7 @@ export default class Model<
     // eslint-disable-next-line no-restricted-syntax
     this.tableName = tableName as Table;
     this.rawConfigs = parseRawConfigs(raw);
+    this.excludedKeySet = new Set(this.excludedKeys);
   }
 
   get rawKeys(): Record<keyof ModelType, string> {
@@ -115,6 +118,17 @@ export default class Model<
     );
   }
 
+  exclude<Key extends string & keyof ModelType>(
+    key: Key
+  ): Model<
+    Table,
+    { [key in keyof ModelType as key extends Key ? never : key]: ModelType[key] },
+    DefaultKeys,
+    ReadonlyKeys
+  > {
+    return new Model(this.raw, this.extendedConfigs, this.excludedKeys.concat(key));
+  }
+
   // eslint-disable-next-line complexity
   parse<ForType extends ModelParseType = 'model'>(
     data: unknown,
@@ -128,6 +142,10 @@ export default class Model<
 
     /* eslint-disable @silverhand/fp/no-mutation */
     for (const [key, config] of Object.entries(this.extendedConfigs)) {
+      if (this.excludedKeySet.has(key)) {
+        continue;
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const snakeCaseKey = this.rawConfigs[key]!.rawKey; // Should be ensured during init
       const value = data[key] === undefined ? data[snakeCaseKey] : data[key];
@@ -169,6 +187,10 @@ export default class Model<
     }
 
     for (const [key, config] of Object.entries(this.rawConfigs)) {
+      if (this.excludedKeySet.has(key)) {
+        continue;
+      }
+
       const snakeCaseKey = config.rawKey;
 
       // Handled by extendConfig
