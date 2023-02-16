@@ -32,6 +32,8 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
     this.#status = 'ended';
   }
 
+  async query<T extends Record<string, unknown>>(sql: PostgreSql): Promise<QueryResult<T>>;
+  async query(sql: PostgreSql): Promise<QueryResult<Record<string, unknown>>>;
   async query(sql: PostgreSql): Promise<QueryResult<Record<string, unknown>>> {
     const { raw, args } = sql.composed;
     log.debug('query', raw, args);
