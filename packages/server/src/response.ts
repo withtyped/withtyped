@@ -1,9 +1,12 @@
 import type { ServerResponse } from 'http';
 import { promisify } from 'node:util';
+import stream from 'stream';
 
 import { contentTypes } from '@withtyped/shared';
 
 import type { BaseContext } from './middleware.js';
+
+const pipeline = promisify(stream.pipeline);
 
 // Need `null` to make callback be compatible with `promisify()`
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -24,14 +27,17 @@ export const getWriteResponse = (response: ServerResponse) =>
 
 export const writeContextToResponse = async (
   response: ServerResponse,
-  { status, headers, json }: BaseContext
+  { status, headers, json, stream }: BaseContext
 ) => {
   // Send status along with headers
-  // eslint-disable-next-line @silverhand/fp/no-mutation
-  response.statusCode = status ?? 404;
+
+  if (status !== 'ignore') {
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    response.statusCode = status ?? 404;
+  }
 
   if (json) {
-    response.setHeader('content-type', contentTypes.json);
+    response.setHeader('Content-Type', contentTypes.json);
   }
 
   if (headers) {
@@ -45,5 +51,10 @@ export const writeContextToResponse = async (
   // Send JSON body
   if (json) {
     await getWriteResponse(response)(json);
+  }
+
+  // Pipe stream
+  if (stream) {
+    await pipeline(stream, response);
   }
 };

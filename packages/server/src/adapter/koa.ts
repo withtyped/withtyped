@@ -33,7 +33,7 @@ export default function koaAdapter<OutputContext extends RequestContext>(
       .and(middleware)(
       {},
       async (context) => {
-        if (context.status) {
+        if (context.status && context.status !== 'ignore') {
           ctx.status = context.status;
         }
 
