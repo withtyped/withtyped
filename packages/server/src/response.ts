@@ -1,4 +1,5 @@
-import type { ServerResponse } from 'http';
+import type { ServerResponse } from 'node:http';
+import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
 
 import { contentTypes } from '@withtyped/shared';
@@ -24,14 +25,17 @@ export const getWriteResponse = (response: ServerResponse) =>
 
 export const writeContextToResponse = async (
   response: ServerResponse,
-  { status, headers, json }: BaseContext
+  { status, headers, json, stream }: BaseContext
 ) => {
   // Send status along with headers
-  // eslint-disable-next-line @silverhand/fp/no-mutation
-  response.statusCode = status ?? 404;
+
+  if (status !== 'ignore') {
+    // eslint-disable-next-line @silverhand/fp/no-mutation
+    response.statusCode = status ?? 404;
+  }
 
   if (json) {
-    response.setHeader('content-type', contentTypes.json);
+    response.setHeader('Content-Type', contentTypes.json);
   }
 
   if (headers) {
@@ -45,5 +49,10 @@ export const writeContextToResponse = async (
   // Send JSON body
   if (json) {
     await getWriteResponse(response)(json);
+  }
+
+  // Pipe stream
+  if (stream) {
+    await pipeline(stream, response);
   }
 };

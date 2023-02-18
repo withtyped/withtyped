@@ -26,7 +26,7 @@ export type CreateServer<
 };
 
 export const handleError = async (response: http.ServerResponse, error: unknown) => {
-  log.debug(error);
+  log.warn(error);
 
   const requestError = error instanceof RequestError ? error : undefined;
 
@@ -36,9 +36,11 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
     response.setHeader('content-type', contentTypes.json);
   }
 
-  await getWriteResponse(response)({
-    message: requestError?.message ?? 'Internal server error.',
-  });
+  if (!response.writableEnded) {
+    await getWriteResponse(response)({
+      message: requestError?.message ?? 'Internal server error.',
+    });
+  }
 };
 
 /**
@@ -71,8 +73,10 @@ export default function createServer<T extends unknown[], OutputContext extends 
     }
 
     // End
-    const end = promisify((callback: ErrorCallback) => response.end(callback));
-    await end();
+    if (!response.writableEnded) {
+      const end = promisify((callback: ErrorCallback) => response.end(callback));
+      await end();
+    }
 
     // End log
     if (logLevel !== 'none') {
