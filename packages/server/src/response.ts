@@ -1,12 +1,10 @@
-import type { ServerResponse } from 'http';
+import type { ServerResponse } from 'node:http';
+import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
-import stream from 'stream';
 
 import { contentTypes } from '@withtyped/shared';
 
 import type { BaseContext } from './middleware.js';
-
-const pipeline = promisify(stream.pipeline);
 
 // Need `null` to make callback be compatible with `promisify()`
 // eslint-disable-next-line @typescript-eslint/ban-types

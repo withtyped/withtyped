@@ -1,4 +1,3 @@
-import type { ReadStream } from 'node:fs';
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'node:http';
 
 export type BaseContext = {
@@ -8,8 +7,8 @@ export type BaseContext = {
   status?: number | 'ignore';
   /** The response json object. */
   json?: unknown;
-  /** The response stream. */
-  stream?: ReadStream;
+  /** The stream to write to the response. */
+  stream?: NodeJS.ReadableStream;
   /** The response (outgoing) headers */
   headers?: OutgoingHttpHeaders;
 };

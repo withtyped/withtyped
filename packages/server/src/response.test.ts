@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { Readable } from 'node:stream';
 import { describe, it } from 'node:test';
 
 import { contentTypes } from '@withtyped/shared';
@@ -13,6 +14,13 @@ describe('writeContextToResponse()', () => {
     await writeContextToResponse(response, { status: 302, headers: { 'content-type': 'foo' } });
     assert.strictEqual(response.statusCode, 302);
     assert.strictEqual(response.getHeader('content-type'), 'foo');
+  });
+
+  it('should not set status code when `code` is explicitly ignored by user', async () => {
+    const { response } = createHttpContext();
+
+    await writeContextToResponse(response, { status: 'ignore' });
+    assert.strictEqual(response.statusCode, 200);
   });
 
   it('should automatically set content-type header when json is not null', async () => {
@@ -37,6 +45,20 @@ describe('writeContextToResponse()', () => {
     assert.strictEqual(response.statusCode, 200);
     assert.strictEqual(response.getHeader('content-type'), 'bar');
     assert.ok(stub.calledOnceWith(JSON.stringify({ foo: 123 }), 'utf8'));
+  });
+
+  it('should be ok when `stream` is set', async () => {
+    const { response } = createHttpContext();
+
+    // It is hard to test ServerResponse output with an empty IncomingMessage. Just do the sanity check here.
+    assert.ok(writeContextToResponse(response, { stream: Readable.from('foo') }));
+  });
+
+  it('should be ok when nothing is set', async () => {
+    const { response } = createHttpContext();
+
+    await writeContextToResponse(response, {});
+    assert.strictEqual(response.statusCode, 404);
   });
 });
 
