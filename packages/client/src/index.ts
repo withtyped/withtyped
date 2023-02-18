@@ -1,4 +1,4 @@
-import type { Router, BaseRoutes, GuardedPayload } from '@withtyped/server';
+import type { Router, BaseRoutes, GuardedPayload, RequestContext } from '@withtyped/server';
 import { RequestMethod, contentTypes, log, normalizePathname } from '@withtyped/shared';
 
 import type {
@@ -22,7 +22,7 @@ export class ResponseError extends Error {
 }
 
 export default class Client<
-  R extends Router<BaseRoutes, string>,
+  R extends Router<RequestContext, BaseRoutes, string>,
   Routes extends BaseRoutes = RouterRoutes<R>
 > implements RouterClient<Routes>
 {

@@ -24,10 +24,10 @@ const getRouter = createRouter()
     }
   )
   .get('/books/:id', { response: bookGuard }, async (context, next) => {
-    const book = books.find(({ id }) => id === context.request.params.id);
+    const book = books.find(({ id }) => id === context.guarded.params.id);
 
     if (!book) {
-      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+      throw new RequestError(`No book with ID ${context.guarded.params.id} found`, 404);
     }
 
     return next({ ...context, json: book });
@@ -39,7 +39,7 @@ export const router = createRouter()
     '/books',
     { body: bookGuard.omit({ id: true }), response: bookGuard },
     async (context, next) => {
-      const book: Book = { id: faker.datatype.uuid(), ...context.request.body };
+      const book: Book = { id: faker.datatype.uuid(), ...context.guarded.body };
       // eslint-disable-next-line @silverhand/fp/no-mutating-methods
       books.push(book);
 
@@ -50,23 +50,23 @@ export const router = createRouter()
     '/books/:id',
     { body: bookGuard.omit({ id: true }).partial(), response: bookGuard },
     async (context, next) => {
-      const bookIndex = books.findIndex(({ id }) => id === context.request.params.id);
+      const bookIndex = books.findIndex(({ id }) => id === context.guarded.params.id);
 
       if (bookIndex < 0) {
-        throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+        throw new RequestError(`No book with ID ${context.guarded.params.id} found`, 404);
       }
 
       // eslint-disable-next-line @silverhand/fp/no-mutation, @typescript-eslint/no-non-null-assertion
-      books[bookIndex] = { ...books[bookIndex]!, ...context.request.body };
+      books[bookIndex] = { ...books[bookIndex]!, ...context.guarded.body };
 
       return next({ ...context, json: books[bookIndex] });
     }
   )
   .delete('/books/:id', {}, async (context, next) => {
-    const newBooks = books.filter(({ id }) => id !== context.request.params.id);
+    const newBooks = books.filter(({ id }) => id !== context.guarded.params.id);
 
     if (newBooks.length === books.length) {
-      throw new RequestError(`No book with ID ${context.request.params.id} found`, 404);
+      throw new RequestError(`No book with ID ${context.guarded.params.id} found`, 404);
     }
 
     // eslint-disable-next-line @silverhand/fp/no-mutation
@@ -80,7 +80,7 @@ export const router = createRouter()
     async (context, next) => {
       return next({
         ...context,
-        json: { books: books.filter(({ name }) => name.includes(context.request.search.name)) },
+        json: { books: books.filter(({ name }) => name.includes(context.guarded.search.name)) },
       });
     }
   )

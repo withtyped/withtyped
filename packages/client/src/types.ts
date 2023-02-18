@@ -8,6 +8,7 @@ export type ClientPayload = {
 };
 
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
+  infer _,
   infer Routes,
   string
 >

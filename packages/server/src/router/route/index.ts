@@ -5,44 +5,45 @@ import type { GuardedContext, RequestGuard } from '../types.js';
 import { guardInput } from './utils.js';
 
 export abstract class RouteLike<
+  InputContext extends RequestContext,
   Path extends string = string,
   Search = unknown,
   Body = unknown,
-  OutputContext extends RequestContext = RequestContext
+  JsonResponse = unknown
 > {
   abstract prefix: string;
   abstract path: Path;
   abstract readonly fullPath: string;
-  abstract runnable: MiddlewareFunction<RequestContext, OutputContext>;
-  abstract guard: RequestGuard<Search, Body, unknown>;
-  abstract clone(newPrefix?: string): RouteLike<Path, Search, Body, OutputContext>;
+  abstract runnable: MiddlewareFunction<InputContext, InputContext & { json?: JsonResponse }>;
+  abstract guard: RequestGuard<Search, Body, JsonResponse>;
+  abstract clone(newPrefix?: string): RouteLike<InputContext, Path, Search, Body, JsonResponse>;
 }
 
 export default class Route<
+  InputContext extends RequestContext,
   Path extends string = string,
   Search = unknown,
   Body = unknown,
-  OutputContext extends RequestContext = RequestContext
-> extends RouteLike {
+  JsonResponse = unknown
+> implements RouteLike<InputContext, Path, Search, Body, JsonResponse>
+{
   constructor(
     public readonly prefix: string,
     public readonly path: Path,
-    public readonly guard: RequestGuard<Search, Body, unknown>,
+    public readonly guard: RequestGuard<Search, Body, JsonResponse>,
     protected run: MiddlewareFunction<
-      GuardedContext<RequestContext, Path, Search, Body>,
-      OutputContext
+      GuardedContext<InputContext, Path, Search, Body>,
+      InputContext & { json?: JsonResponse }
     >
-  ) {
-    super();
-  }
+  ) {}
 
   public get fullPath(): `${string}${Path}` {
     return `${this.prefix}${this.path}`;
   }
 
-  public get runnable(): <InputContext extends RequestContext>(
+  public get runnable(): (
     context: InputContext,
-    next: NextFunction<OutputContext>,
+    next: NextFunction<InputContext & { json?: JsonResponse }>,
     http: HttpContext
   ) => Promise<void> {
     return async (context, next, http) => {
@@ -52,16 +53,13 @@ export default class Route<
         return this.run(
           {
             ...context,
-            request: {
-              ...context.request,
-              ...guardInput(
-                this.prefix,
-                this.path,
-                context.request.url,
-                context.request.body,
-                this.guard
-              ),
-            },
+            guarded: guardInput(
+              this.prefix,
+              this.path,
+              context.request.url,
+              context.request.body,
+              this.guard
+            ),
           },
           next,
           http
