@@ -1,4 +1,5 @@
 import RequestError from '../errors/RequestError.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type ModelClient from '../model-client/index.js';
 import ModelParser from '../model-parser/index.js';
 import type { IdKeys, ModelCreateType, ModelPatchType } from '../model/types.js';
@@ -16,7 +17,7 @@ export default class ModelRouter<
   IdKey extends IdKeys<ModelType> = 'id' extends IdKeys<ModelType> ? 'id' : never,
   Routes extends BaseRoutes = BaseRoutes
   /* eslint-enable @typescript-eslint/ban-types */
-> extends Router<Routes, `/${Table}`> {
+> extends Router<RequestContext, Routes, `/${Table}`> {
   public readonly idKey: IdKeys<ModelType>;
 
   constructor(
@@ -56,7 +57,7 @@ export default class ModelRouter<
         response: new ModelParser(this.client.model),
       },
       async (context, next) => {
-        return next({ ...context, json: await this.client.create(context.request.body) });
+        return next({ ...context, json: await this.client.create(context.guarded.body) });
       }
     );
 
@@ -86,7 +87,7 @@ export default class ModelRouter<
       '/:id',
       { response: new ModelParser(this.client.model) },
       async (context, next) => {
-        const { id } = context.request.params;
+        const { id } = context.guarded.params;
 
         return next({ ...context, json: await this.client.read(this.idKey, id) });
       }
@@ -114,7 +115,7 @@ export default class ModelRouter<
         const {
           params: { id },
           body,
-        } = context.request;
+        } = context.guarded;
 
         if (Object.keys(body).length === 0) {
           throw new RequestError('Nothing to update', 400);
@@ -132,7 +133,7 @@ export default class ModelRouter<
         const {
           params: { id },
           body,
-        } = context.request;
+        } = context.guarded;
 
         return next({ ...context, json: await this.client.update(this.idKey, id, body) });
       }
@@ -154,7 +155,7 @@ export default class ModelRouter<
       '/:id',
       {},
       async (context, next) => {
-        const { id } = context.request.params;
+        const { id } = context.guarded.params;
 
         if (!(await this.client.delete(this.idKey, id))) {
           throw new RequestError(`Resource with ID ${id} does not exist.`, 404);

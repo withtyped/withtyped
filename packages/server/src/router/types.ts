@@ -1,6 +1,6 @@
 import type { RequestMethod } from '@withtyped/shared';
 
-import type { MergeRequestContext, RequestContext } from '../middleware/with-request.js';
+import type { RequestContext } from '../middleware/with-request.js';
 import type { Parser } from '../types.js';
 
 export type MergeRoutes<A, B> = {
@@ -100,6 +100,6 @@ export type GuardedContext<
   Path extends string,
   Search,
   Body
-> = MergeRequestContext<InputContext, Guarded<Path, Search, Body>>;
+> = InputContext & { guarded: Guarded<Path, Search, Body> };
 
 export type StringLiteral<T> = T extends string ? (string extends T ? never : T) : never;

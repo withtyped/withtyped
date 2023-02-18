@@ -47,9 +47,7 @@ describe('Router', () => {
     assert.strictEqual(mid2.calledOnceWith(sinon.match(context2)), true);
     assert.strictEqual(mid3.callCount, 1);
     assert.strictEqual(
-      mid3.calledOnceWith(
-        sinon.match({ ...context3, request: { ...context3.request, params: {} } })
-      ),
+      mid3.calledOnceWith(sinon.match({ ...context3, guarded: { params: {} } })),
       true
     );
   });

@@ -1,5 +1,6 @@
 import { contentTypes } from '@withtyped/shared';
 
+import type { RequestContext } from '../middleware/with-request.js';
 import ModelParser from '../model-parser/index.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
@@ -23,8 +24,8 @@ const parseParameters = (path: string): OpenAPIV3.ParameterObject[] =>
       schema: { type: 'string' },
     }));
 
-export const buildOpenApiJson = (
-  routesMap: MethodRoutesMap,
+export const buildOpenApiJson = <InputContext extends RequestContext>(
+  routesMap: MethodRoutesMap<InputContext>,
   parseSearch?: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
   parse?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
   info?: Partial<OpenAPIV3.InfoObject>

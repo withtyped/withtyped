@@ -24,21 +24,31 @@ import { matchRoute } from './utils.js';
 
 export * from './types.js';
 
-export type MethodRoutesMap = Record<string, RouteLike[]>;
+export type MethodRoutesMap<InputContext extends RequestContext> = Record<
+  string,
+  Array<RouteLike<InputContext>>
+>;
 
 export type RouterWithRoute<
+  InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string,
   Method extends Lowercase<RequestMethod>,
   Path extends string,
   Search,
   Body,
-  Response
+  JsonResponse
 > = Router<
+  InputContext,
   {
     [method in Lowercase<RequestMethod>]: method extends Method
       ? Routes[method] & {
-          [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<Path, Search, Body, Response>;
+          [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<
+            Path,
+            Search,
+            Body,
+            JsonResponse
+          >;
         }
       : Routes[method];
   },
@@ -46,32 +56,50 @@ export type RouterWithRoute<
 >;
 
 export type BuildRoute<
+  InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string,
   Method extends Lowercase<RequestMethod>
-> = <Path extends string, Search, Body, Response>(
-  path: Normalized<Path>,
-  guard: RequestGuard<Search, Body, Response>,
+> = <Path extends string, Search, Body, JsonResponse>(
+  path: Path extends Normalized<Path> ? Path : never,
+  guard: RequestGuard<Search, Body, JsonResponse>,
   run: MiddlewareFunction<
-    GuardedContext<RequestContext, Normalized<Path>, Search, Body>,
-    GuardedContext<RequestContext, Normalized<Path>, Search, Body> & {
-      json?: Response;
+    GuardedContext<InputContext, Path extends Normalized<Path> ? Path : never, Search, Body>,
+    InputContext & {
+      json?: JsonResponse;
     }
   >
-) => RouterWithRoute<Routes, Prefix, Method, Normalized<Path>, Search, Body, Response>;
+) => RouterWithRoute<
+  InputContext,
+  Routes,
+  Prefix,
+  Method,
+  Normalized<Path>,
+  Search,
+  Body,
+  JsonResponse
+>;
 
-type BaseRouter<Routes extends BaseRoutes, Prefix extends string> = {
-  [key in Lowercase<RequestMethod>]: BuildRoute<Routes, Prefix, key>;
+type BaseRouter<
+  InputContext extends RequestContext,
+  Routes extends BaseRoutes,
+  Prefix extends string
+> = {
+  [key in Lowercase<RequestMethod>]: BuildRoute<InputContext, Routes, Prefix, key>;
 };
 
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
+  infer _,
   infer Routes
 >
   ? Routes
   : never;
 
-export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix extends string = ''>
-  implements BaseRouter<Routes, Prefix>
+export default class Router<
+  InputContext extends RequestContext = RequestContext,
+  Routes extends BaseRoutes = BaseRoutes,
+  Prefix extends string = ''
+> implements BaseRouter<InputContext, Routes, Prefix>
 {
   // Use the dumb way to init since it's easier to make the compiler happy
   get = this.buildRoute('get');
@@ -84,7 +112,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
   options = this.buildRoute('options');
 
   public readonly prefix: string;
-  protected readonly routesMap: MethodRoutesMap = {};
+  protected readonly routesMap: MethodRoutesMap<InputContext> = {};
 
   /**
    * Create a router instance.
@@ -107,7 +135,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
     this.prefix = prefix ?? '';
   }
 
-  public routes(): MiddlewareFunction<RequestContext> {
+  public routes(): MiddlewareFunction<InputContext> {
     return async (originalContext, next, http) => {
       const { request } = originalContext;
 
@@ -165,8 +193,8 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
   }
 
   public pack<AnotherRoutes extends BaseRoutes>(
-    another: Router<AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
-  ): Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix> {
+    another: Router<InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+  ): Router<InputContext, MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix> {
     for (const [method, routes] of Object.entries(another.routesMap)) {
       this.routesMap[method] = (this.routesMap[method] ?? []).concat(
         routes.map((instance) => instance.clone(this.prefix + instance.prefix))
@@ -175,7 +203,11 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
     // Intended
     // eslint-disable-next-line no-restricted-syntax
-    return this as Router<MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix>;
+    return this as Router<
+      InputContext,
+      MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>,
+      Prefix
+    >;
   }
 
   public findRoute<Method extends Lowercase<RequestMethod>>(
@@ -189,7 +221,7 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 
   private buildRoute<Method extends Lowercase<RequestMethod>>(
     method: Method
-  ): BuildRoute<Routes, Prefix, Method> {
+  ): BuildRoute<InputContext, Routes, Prefix, Method> {
     return (path, guard, run) => {
       this.routesMap[method] = (this.routesMap[method] ?? []).concat(
         new Route(this.prefix, path, guard, run)
@@ -202,11 +234,10 @@ export default class Router<Routes extends BaseRoutes = BaseRoutes, Prefix exten
 }
 
 export type CreateRouter = {
-  (): Router;
-  <Prefix extends string>(prefix: NormalizedPrefix<Prefix>): Router<
-    BaseRoutes,
-    NormalizedPrefix<Prefix>
-  >;
+  <InputContext extends RequestContext>(): Router<InputContext>;
+  <InputContext extends RequestContext, Prefix extends string>(
+    prefix: NormalizedPrefix<Prefix>
+  ): Router<InputContext, BaseRoutes, NormalizedPrefix<Prefix>>;
 };
 
 export const createRouter: CreateRouter = <Prefix extends string>(
