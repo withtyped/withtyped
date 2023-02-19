@@ -9,6 +9,45 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_PAT }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.BOT_GPG_KEY }}
+          passphrase: ${{ secrets.BOT_GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Setup Node and pnpm
+        uses: silverhand-io/actions-node-pnpm-run-steps@v2
+
+      - name: Configure Git user
+        run: |
+          git config --global user.email bot@silverhand.io
+          git config --global user.name silverhand-bot
+      
+      - name: Create release PR or publish to npm
+        uses: changesets/action@v1
+        with:
+          setupGitUser: false
+          createGithubReleases: false
+          commit: 'release: version packages'
+          title: 'release: version packages'
+          version: .scripts/version.sh
+          publish: pnpm changeset tag && pnpm -r publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_PAT }}
+
   dockerize:
     runs-on: ubuntu-latest
 
