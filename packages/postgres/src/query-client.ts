@@ -1,5 +1,4 @@
-import type { QueryClient, QueryResult } from '@withtyped/server';
-import type { Transaction } from '@withtyped/server/lib/query/client.js';
+import type { QueryClient, QueryResult, Transaction } from '@withtyped/server';
 import { log } from '@withtyped/shared';
 import type { PoolConfig, PoolClient } from 'pg';
 import pg from 'pg';
