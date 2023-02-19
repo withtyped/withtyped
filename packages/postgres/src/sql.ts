@@ -1,6 +1,26 @@
 import type { Json, JsonArray, JsonObject } from '@withtyped/server';
-import { createIdentifierSqlFunction, createSqlTag, Sql } from '@withtyped/server';
+import {
+  createDangerousRawSqlFunction,
+  createIdentifierSqlFunction,
+  createSqlTag,
+  Sql,
+} from '@withtyped/server';
 import { log } from '@withtyped/shared';
+
+export class DangerousRawPostgreSql extends Sql {
+  public compose(rawArray: string[], _: unknown[], indexInit = 0) {
+    // eslint-disable-next-line @silverhand/fp/no-mutating-methods
+    rawArray.push(this.strings[0] ?? '');
+
+    return { lastIndex: indexInit };
+  }
+
+  get composed(): { raw: string; args: unknown[] } {
+    throw new Error('Method not implemented.');
+  }
+}
+
+export const dangerousRaw = createDangerousRawSqlFunction(DangerousRawPostgreSql);
 
 export class IdentifierPostgreSql extends Sql {
   public compose(rawArray: string[], _: unknown[], indexInit = 0) {

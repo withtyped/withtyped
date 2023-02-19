@@ -9,6 +9,13 @@ export abstract class Sql<OutputArg = unknown, InputArg = OutputArg> {
   abstract get composed(): { raw: string; args: OutputArg[] };
 }
 
+export const createDangerousRawSqlFunction =
+  <SqlClass extends Sql>(
+    Factory: new (strings: TemplateStringsArray, args: unknown[]) => SqlClass
+  ) =>
+  (raw: string) =>
+    new Factory(Object.assign([raw], { raw: [raw] }), []);
+
 export const createIdentifierSqlFunction =
   <SqlClass extends Sql>(
     Factory: new (strings: TemplateStringsArray, args: unknown[]) => SqlClass
