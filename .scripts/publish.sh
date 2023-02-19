@@ -1,1 +1,3 @@
-pnpm changeset tag && pnpm -r publish
+pnpm changeset tag
+pnpm -r prepack
+pnpm -r publish
