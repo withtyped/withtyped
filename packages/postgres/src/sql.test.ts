@@ -4,7 +4,16 @@ import { describe, it } from 'node:test';
 import { normalizeString } from '@withtyped/shared';
 
 import type { PostgresJson } from './sql.js';
-import { IdentifierPostgreSql, jsonIfNeeded, id, json, JsonPostgreSql, sql } from './sql.js';
+import {
+  DangerousRawPostgreSql,
+  dangerousRaw,
+  IdentifierPostgreSql,
+  jsonIfNeeded,
+  id,
+  json,
+  JsonPostgreSql,
+  sql,
+} from './sql.js';
 
 describe('IdentifierPostgreSql', () => {
   it('should compose raw strings only', () => {
@@ -30,6 +39,14 @@ describe('JsonPostgreSql', () => {
   });
 });
 
+describe('DangerousRawPostgreSql', () => {
+  it('should not explode', () => {
+    const instance = new DangerousRawPostgreSql(Object.assign([], { raw: [] }), []);
+    assert.deepStrictEqual(instance.compose([], []), { lastIndex: 0 });
+    assert.throws(() => instance.composed, new Error('Method not implemented.'));
+  });
+});
+
 describe('sql tag', () => {
   it('should convert query to a safe string with args', () => {
     const { raw, args } = sql`
@@ -41,12 +58,12 @@ describe('sql tag', () => {
           [id('col3'), null],
           [id('col4'), { foo: 'bar' }],
         ] as const
-      ).map(([key, value]) => sql`${key}=${value}`)}
+      ).map(([key, value]) => sql`${key}=${value}`)}    ${dangerousRaw('and "something";')}
     `.composed;
 
     assert.strictEqual(
       normalizeString(raw),
-      'update "foo" set "col1"=$1, "col2"=$2, "col3"=$3, "col4"=$4'
+      'update "foo" set "col1"=$1, "col2"=$2, "col3"=$3, "col4"=$4 and "something";'
     );
     assert.deepStrictEqual(args, [123, true, null, { foo: 'bar' }]);
   });
