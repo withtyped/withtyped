@@ -44,7 +44,7 @@ jobs:
           commit: 'release: version packages'
           title: 'release: version packages'
           version: .scripts/version.sh
-          publish: pnpm changeset tag && pnpm -r publish
+          publish: .scripts/publish.sh
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_PAT }}
 
