@@ -5,6 +5,8 @@ import { normalizeString } from '@withtyped/shared';
 
 import type { PostgresJson } from './sql.js';
 import {
+  jsonb,
+  jsonbIfNeeded,
   DangerousRawPostgreSql,
   dangerousRaw,
   IdentifierPostgreSql,
@@ -69,7 +71,7 @@ describe('sql tag', () => {
   });
 });
 
-describe('json util', () => {
+describe('json utils', () => {
   it('should be able to compose with the first argument', () => {
     const instance = json({ foo: 'bar' });
     assert.ok(instance instanceof JsonPostgreSql);
@@ -96,5 +98,33 @@ describe('json util', () => {
 
     const json3 = sql`select * from somewhere;`;
     assert.strictEqual(jsonIfNeeded(json3), json3);
+  });
+
+  it('should be able to compose with the first argument (jsonb)', () => {
+    const instance = jsonb({ foo: 'bar' });
+    assert.ok(instance instanceof JsonPostgreSql);
+
+    const rawArray: string[] = ['first'];
+    const args: PostgresJson[] = [];
+
+    assert.deepStrictEqual(instance.compose(rawArray, args), { lastIndex: 1 });
+    assert.deepStrictEqual(rawArray, ['first', '$1::jsonb']);
+    assert.deepStrictEqual(args, [JSON.stringify({ foo: 'bar' })]);
+  });
+
+  it('should be able to convert to JSON class when needed (jsonb)', () => {
+    assert.ok(jsonbIfNeeded(null) === null);
+    assert.ok(jsonbIfNeeded('foo') === 'foo');
+
+    const json1 = jsonbIfNeeded([null]);
+    assert.ok(json1 instanceof JsonPostgreSql);
+    assert.deepStrictEqual(json1.args, [[null]]);
+
+    const json2 = jsonbIfNeeded({ foo: 'bar' });
+    assert.ok(json2 instanceof JsonPostgreSql);
+    assert.deepStrictEqual(json2.args, [{ foo: 'bar' }]);
+
+    const json3 = sql`select * from somewhere;`;
+    assert.strictEqual(jsonbIfNeeded(json3), json3);
   });
 });

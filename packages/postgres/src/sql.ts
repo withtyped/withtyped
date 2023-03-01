@@ -105,6 +105,14 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
 }
 
 export class JsonPostgreSql extends Sql<string, PostgresJson> {
+  constructor(
+    strings: TemplateStringsArray,
+    args: PostgresJson[],
+    public readonly mode: 'json' | 'jsonb' = 'json'
+  ) {
+    super(strings, args);
+  }
+
   public compose(rawArray: string[], args: PostgresJson[], indexInit = 0) {
     const value = this.args[0];
 
@@ -113,7 +121,7 @@ export class JsonPostgreSql extends Sql<string, PostgresJson> {
     }
 
     /* eslint-disable @silverhand/fp/no-mutating-methods */
-    rawArray.push(`$${indexInit + 1}::json`);
+    rawArray.push(`$${indexInit + 1}::${this.mode}`);
     args.push(JSON.stringify(value));
     /* eslint-enable @silverhand/fp/no-mutating-methods */
 
@@ -130,10 +138,19 @@ export const sql = createSqlTag(PostgreSql);
 export const json = (data: PostgresJson) =>
   new JsonPostgreSql(Object.assign([], { raw: [] }), [data]);
 
+export const jsonb = (data: PostgresJson) =>
+  new JsonPostgreSql(Object.assign([], { raw: [] }), [data], 'jsonb');
+
+export const shouldUseJson = (data: PostgresJson | PostgreSql): data is PostgresJson =>
+  Array.isArray(data) ||
+  (typeof data === 'object' && data !== null && !(data instanceof Sql || data instanceof Date));
+
 export const jsonIfNeeded = (
   data: PostgresJson | PostgreSql
 ): PostgreSql | Exclude<PostgresJson, JsonArray | JsonObject> =>
-  Array.isArray(data) ||
-  (typeof data === 'object' && data !== null && !(data instanceof Sql || data instanceof Date))
-    ? json(data)
-    : data;
+  shouldUseJson(data) ? json(data) : data;
+
+export const jsonbIfNeeded = (
+  data: PostgresJson | PostgreSql
+): PostgreSql | Exclude<PostgresJson, JsonArray | JsonObject> =>
+  shouldUseJson(data) ? jsonb(data) : data;
