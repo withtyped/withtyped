@@ -1,5 +1,11 @@
 # @withtyped/postgres
 
+## 0.8.1
+
+### Patch Changes
+
+- 79bc2cb: add jsonb utils
+
 ## 0.8.0
 
 ### Minor Changes
