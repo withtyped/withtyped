@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import EventEmitter from 'node:events';
 import { describe, it } from 'node:test';
 
+import { trySafe } from '@silverhand/essentials';
 import sinon from 'sinon';
 import request from 'supertest';
 
@@ -35,16 +36,37 @@ describe('createServer()', () => {
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 
+  it('should be able to keep running even if a request is aborted', async () => {
+    const composer = sinon.spy(compose());
+    // @ts-expect-error for testing
+    const { server } = createServer({ composer, logLevel: 'none' });
+
+    // eslint-disable-next-line @silverhand/fp/no-let, @silverhand/fp/no-mutation
+    for (let i = 1; i <= 100; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await trySafe(
+        request(server)
+          .get('/')
+          .timeout(Math.random() * 10)
+      );
+    }
+
+    await request(server).get('/');
+
+    assert.ok(composer.callCount <= 101);
+    assert.ok(composer.calledWith({}));
+  });
+
   it('should be able to parse RequestError', async () => {
     const composer = sinon.spy(
       compose(() => {
-        throw new RequestError('composer error', 400);
+        throw new RequestError('composer request error', 400);
       })
     );
     // @ts-expect-error for testing
     const { server } = createServer({ composer, logLevel: 'none' });
 
-    await request(server).get('/').expect(400, { message: 'composer error' });
+    await request(server).get('/').expect(400, { message: 'composer request error' });
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 

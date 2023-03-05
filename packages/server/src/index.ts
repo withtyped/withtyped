@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { promisify } from 'node:util';
 
+import { trySafe } from '@silverhand/essentials';
 import { color, contentTypes, log } from '@withtyped/shared';
 
 import type { Composer } from './compose.js';
@@ -25,6 +26,9 @@ export type CreateServer<
   logLevel?: 'none' | 'info';
 };
 
+const promisifyEnd = (response: http.ServerResponse) =>
+  promisify((callback: ErrorCallback) => response.end(callback));
+
 export const handleError = async (response: http.ServerResponse, error: unknown) => {
   log.warn(error);
 
@@ -36,11 +40,11 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
     response.setHeader('content-type', contentTypes.json);
   }
 
-  if (!response.writableEnded) {
-    await getWriteResponse(response)({
-      message: requestError?.message ?? 'Internal server error.',
-    });
-  }
+  await getWriteResponse(response)({
+    message: requestError?.message ?? 'Internal server error.',
+  });
+
+  await promisifyEnd(response)();
 };
 
 /**
@@ -67,15 +71,15 @@ export default function createServer<T extends unknown[], OutputContext extends 
         request,
         response,
       });
+
+      // End
+      if (!(response.writableEnded || response.destroyed)) {
+        await promisifyEnd(response)();
+      }
     } catch (error: unknown) {
       // Global error handling
-      await handleError(response, error);
-    }
-
-    // End
-    if (!response.writableEnded) {
-      const end = promisify((callback: ErrorCallback) => response.end(callback));
-      await end();
+      // Safely handle it in case it's ended or destroyed
+      await trySafe(handleError(response, error));
     }
 
     // End log

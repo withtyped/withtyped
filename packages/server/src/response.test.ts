@@ -3,6 +3,7 @@ import { Readable } from 'node:stream';
 import { describe, it } from 'node:test';
 
 import { contentTypes } from '@withtyped/shared';
+import Sinon from 'sinon';
 
 import { getWriteResponse, writeContextToResponse } from './response.js';
 import { createHttpContext, stubResponseWrite } from './test-utils/http.test.js';
@@ -88,5 +89,18 @@ describe('getWriteResponse()', () => {
 
     await write(object);
     assert.ok(stub.calledOnceWith(JSON.stringify(object), 'utf8'));
+  });
+
+  it('should throw an error if response has been destroyed', async () => {
+    const { response } = createHttpContext();
+    stubResponseWrite(response);
+    const write = getWriteResponse(response);
+
+    // Only stub `.destroyed` here since `.writableEnded` is not writable nor configurable
+    Sinon.stub(response, 'destroyed').value(true);
+    await assert.rejects(
+      write({}),
+      new Error("Unable to write response since it's already ended or destroyed.")
+    );
   });
 });

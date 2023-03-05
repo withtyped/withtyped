@@ -12,6 +12,12 @@ type ErrorCallback = (error?: Error | null) => void;
 
 export const getWriteResponse = (response: ServerResponse) =>
   promisify((chunk: unknown, callback: ErrorCallback) => {
+    if (response.writableEnded || response.destroyed) {
+      callback(new Error("Unable to write response since it's already ended or destroyed."));
+
+      return;
+    }
+
     if (chunk instanceof Buffer || chunk instanceof Uint8Array) {
       return response.write(chunk, callback);
     }
