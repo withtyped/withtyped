@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.8.1
+
+### Patch Changes
+
+- 24a4b3b: improve error handling to keep server running when request aborts
+
 ## 0.8.0
 
 ### Minor Changes
