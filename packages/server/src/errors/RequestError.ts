@@ -5,5 +5,7 @@ export default class RequestError extends Error {
     public readonly original?: unknown
   ) {
     super(message);
+    this.name = 'RequestError';
+    this.cause = original;
   }
 }
