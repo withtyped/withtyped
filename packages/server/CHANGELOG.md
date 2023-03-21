@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.8.2
+
+### Patch Changes
+
+- 82a15a5: improve RequestError and add essentials to dependency
+
 ## 0.8.1
 
 ### Patch Changes
