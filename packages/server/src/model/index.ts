@@ -262,3 +262,4 @@ export default class Model<
 
 export const createModel = Model.create;
 export * from './types.js';
+export * from './utils.js';

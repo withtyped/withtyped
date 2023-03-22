@@ -46,6 +46,23 @@ describe('PostgresQueryClient', () => {
     assert.ok(fakePg.query.calledThrice);
   });
 
+  it('should be able to transform query result', async () => {
+    const queryClient = createQueryClient(undefined, { transform: { result: 'camelCase' } });
+    const fakePg = new FakePg();
+    // @ts-expect-error for testing
+    sinon.replace(queryClient, 'pool', fakePg);
+    fakePg.query.resolves({
+      rows: [{ 'foo-bar': 'a', 'foo_bar-baz': 'b' }, { foo: 'c' }],
+      rowCount: 2,
+    });
+
+    const query = sql`select * from ${'foo'}`;
+    const { rows, rowCount } = await queryClient.query(query);
+
+    assert.deepStrictEqual(rows, [{ fooBar: 'a', fooBarBaz: 'b' }, { foo: 'c' }]);
+    assert.strictEqual(rowCount, 2);
+  });
+
   it("should not call pool's `.end()` twice", async () => {
     const queryClient = createQueryClient();
     const fakePg = new FakePg();
@@ -70,7 +87,7 @@ describe('PostgresQueryClient', () => {
   });
 });
 
-describe('PostgresQueryClient', () => {
+describe('PostgresTransaction', () => {
   it('should be able to execute queries', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing
