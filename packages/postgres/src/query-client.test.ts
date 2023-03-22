@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { NoResultError } from '@withtyped/server';
 import sinon from 'sinon';
 
 import { createQueryClient, PostgresTransaction } from './query-client.js';
@@ -13,7 +14,7 @@ class FakePoolClient {
 class FakePg {
   connect = sinon.stub().resolves(new FakePoolClient());
   end = sinon.stub();
-  query = sinon.stub();
+  query = sinon.stub().resolves({ rows: [], rowCount: 0 });
 }
 
 describe('PostgresQueryClient', () => {
@@ -37,6 +38,12 @@ describe('PostgresQueryClient', () => {
     const query = sql`select * from ${'foo'}`;
     await queryClient.query(query);
     assert.ok(fakePg.query.calledOnceWithExactly('select * from $1', ['foo']));
+
+    await queryClient.any(query);
+    assert.ok(fakePg.query.calledTwice);
+
+    await assert.rejects(queryClient.many(query), NoResultError);
+    assert.ok(fakePg.query.calledThrice);
   });
 
   it("should not call pool's `.end()` twice", async () => {

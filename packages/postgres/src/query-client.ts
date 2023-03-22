@@ -1,12 +1,15 @@
-import type { QueryClient, QueryResult, Transaction } from '@withtyped/server';
+import { Transaction, QueryClient } from '@withtyped/server';
+import type { QueryResult } from '@withtyped/server';
 import { log } from '@withtyped/shared';
 import type { PoolConfig, PoolClient } from 'pg';
 import pg from 'pg';
 
 import type { PostgreSql } from './sql.js';
 
-export class PostgresTransaction implements Transaction<PostgreSql> {
-  constructor(protected readonly client: PoolClient) {}
+export class PostgresTransaction extends Transaction<PostgreSql> {
+  constructor(protected readonly client: PoolClient) {
+    super();
+  }
 
   async start(): Promise<void> {
     await this.tryQuery('begin');
@@ -41,11 +44,12 @@ export class PostgresTransaction implements Transaction<PostgreSql> {
   }
 }
 
-export default class PostgresQueryClient implements QueryClient<PostgreSql> {
+export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   #status: 'active' | 'ended' = 'active';
   public pool: pg.Pool;
 
   constructor(public readonly config?: PoolConfig) {
+    super();
     this.pool = new pg.Pool(config);
   }
 
