@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { NoResultError } from '@withtyped/server';
 import sinon from 'sinon';
 
 import { createQueryClient, PostgresTransaction } from './query-client.js';
@@ -13,7 +14,7 @@ class FakePoolClient {
 class FakePg {
   connect = sinon.stub().resolves(new FakePoolClient());
   end = sinon.stub();
-  query = sinon.stub();
+  query = sinon.stub().resolves({ rows: [], rowCount: 0 });
 }
 
 describe('PostgresQueryClient', () => {
@@ -37,6 +38,29 @@ describe('PostgresQueryClient', () => {
     const query = sql`select * from ${'foo'}`;
     await queryClient.query(query);
     assert.ok(fakePg.query.calledOnceWithExactly('select * from $1', ['foo']));
+
+    await queryClient.any(query);
+    assert.ok(fakePg.query.calledTwice);
+
+    await assert.rejects(queryClient.many(query), NoResultError);
+    assert.ok(fakePg.query.calledThrice);
+  });
+
+  it('should be able to transform query result', async () => {
+    const queryClient = createQueryClient(undefined, { transform: { result: 'camelCase' } });
+    const fakePg = new FakePg();
+    // @ts-expect-error for testing
+    sinon.replace(queryClient, 'pool', fakePg);
+    fakePg.query.resolves({
+      rows: [{ 'foo-bar': 'a', 'foo_bar-baz': 'b' }, { foo: 'c' }],
+      rowCount: 2,
+    });
+
+    const query = sql`select * from ${'foo'}`;
+    const { rows, rowCount } = await queryClient.query(query);
+
+    assert.deepStrictEqual(rows, [{ fooBar: 'a', fooBarBaz: 'b' }, { foo: 'c' }]);
+    assert.strictEqual(rowCount, 2);
   });
 
   it("should not call pool's `.end()` twice", async () => {
@@ -63,7 +87,7 @@ describe('PostgresQueryClient', () => {
   });
 });
 
-describe('PostgresQueryClient', () => {
+describe('PostgresTransaction', () => {
   it('should be able to execute queries', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing

@@ -1,12 +1,15 @@
-import type { QueryClient, QueryResult, Transaction } from '@withtyped/server';
+import { Transaction, QueryClient, camelCase } from '@withtyped/server';
+import type { QueryResult } from '@withtyped/server';
 import { log } from '@withtyped/shared';
 import type { PoolConfig, PoolClient } from 'pg';
 import pg from 'pg';
 
 import type { PostgreSql } from './sql.js';
 
-export class PostgresTransaction implements Transaction<PostgreSql> {
-  constructor(protected readonly client: PoolClient) {}
+export class PostgresTransaction extends Transaction<PostgreSql> {
+  constructor(protected readonly client: PoolClient) {
+    super();
+  }
 
   async start(): Promise<void> {
     await this.tryQuery('begin');
@@ -41,11 +44,21 @@ export class PostgresTransaction implements Transaction<PostgreSql> {
   }
 }
 
-export default class PostgresQueryClient implements QueryClient<PostgreSql> {
+export type ClientConfig = {
+  transform?: { result: 'camelCase' };
+};
+
+export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   #status: 'active' | 'ended' = 'active';
   public pool: pg.Pool;
 
-  constructor(public readonly config?: PoolConfig) {
+  constructor(
+    /** The config for inner `pg.Pool`. */
+    public readonly config?: PoolConfig,
+    /** The config for this client. */
+    public readonly clientConfig?: ClientConfig
+  ) {
+    super();
     this.pool = new pg.Pool(config);
   }
 
@@ -72,7 +85,22 @@ export default class PostgresQueryClient implements QueryClient<PostgreSql> {
     const { raw, args } = sql.composed;
     log.debug('query', raw, args);
 
-    return this.pool.query(raw, args);
+    const result = await this.pool.query(raw, args);
+
+    if (this.clientConfig?.transform?.result === 'camelCase') {
+      return {
+        ...result,
+        rows: result.rows.map(
+          (data) =>
+            // eslint-disable-next-line no-restricted-syntax
+            Object.fromEntries(
+              Object.entries(data).map(([key, value]) => [camelCase(key), value])
+            ) as T
+        ),
+      };
+    }
+
+    return result;
   }
 
   async transaction(): Promise<Transaction<PostgreSql>> {

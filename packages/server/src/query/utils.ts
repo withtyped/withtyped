@@ -6,6 +6,7 @@ export abstract class Sql<OutputArg = unknown, InputArg = OutputArg> {
     args: OutputArg[],
     indexInit?: number
   ): { lastIndex: number };
+
   abstract get composed(): { raw: string; args: OutputArg[] };
 }
 
