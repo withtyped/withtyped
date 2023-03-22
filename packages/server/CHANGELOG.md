@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.9.0
+
+### Minor Changes
+
+- e4748e0: add common query methods with default implementation
+
 ## 0.8.2
 
 ### Patch Changes

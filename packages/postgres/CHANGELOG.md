@@ -1,5 +1,16 @@
 # @withtyped/postgres
 
+## 0.9.0
+
+### Minor Changes
+
+- e4748e0: support result key transform to camelCase
+
+### Patch Changes
+
+- Updated dependencies [e4748e0]
+  - @withtyped/server@0.9.0
+
 ## 0.8.1
 
 ### Patch Changes
