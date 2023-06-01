@@ -129,7 +129,11 @@ export const parsePrimitiveType = (
 };
 
 export const isObject = (value: unknown): value is JsonObject =>
-  typeof value === 'object' && value !== null;
+  typeof value === 'object' &&
+  value !== null &&
+  !(value instanceof RegExp) &&
+  !(value instanceof Error) &&
+  !(value instanceof Date);
 
 export const camelCase = <T extends string>(value: T): CamelCase<T> => {
   // Convert to PascalCase first to prevent unexpected prefix or suffix
@@ -140,4 +144,13 @@ export const camelCase = <T extends string>(value: T): CamelCase<T> => {
 
   // eslint-disable-next-line no-restricted-syntax
   return ((pascalCase[0] ?? '').toLowerCase() + pascalCase.slice(1)) as CamelCase<T>;
+};
+
+/** Make the top-level keys camelCase if the value is a plain object. */
+export const camelCaseKeys = (value: unknown) => {
+  if (!isObject(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(Object.entries(value).map(([key, value]) => [camelCase(key), value]));
 };

@@ -164,6 +164,5 @@ export type ModelExtendConfigWithDefault<
   Type,
   RO extends boolean = false
 > = ModelExtendConfig<Type> & {
-  default: Type | (() => Type);
   readonly?: RO;
 };

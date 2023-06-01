@@ -1,61 +1,9 @@
-import { createModelRouter, createQueryClient } from '@withtyped/postgres';
-import { createRouter } from '@withtyped/server';
-
-import {
-  Book1,
-  Book2,
-  Book3,
-  Book4,
-  Book5,
-  Book6,
-  Book7,
-  Book8,
-  Book9,
-  Book10,
-  Book11,
-  Book12,
-  Book13,
-  Book14,
-  Book15,
-  Book16,
-  Book17,
-  Book18,
-  Book19,
-  Book20,
-  Book21,
-  Book22,
-  Book23,
-  Book24,
-  Book25,
-  Book26,
-  Book27,
-  Book28,
-  Book29,
-  Book30,
-  Book31,
-  Book32,
-  Book33,
-  Book34,
-  Book35,
-  Book36,
-  Book37,
-  Book38,
-  Book39,
-  Book40,
-  Book41,
-  Book42,
-  Book43,
-  Book44,
-  Book45,
-  Book46,
-  Book47,
-  Book48,
-  Book49,
-  Book50,
-} from './models.js';
+import { createQueryClient } from '@withtyped/postgres';
 
 const queryClient = createQueryClient();
+// TODO: `createModelRouter` has been removed, the IDE stress test should be performed in another way
 
+/*
 const router1 = createModelRouter(Book1, queryClient).withCrud();
 
 const router2 = createModelRouter(Book2, queryClient).withCrud();
@@ -155,7 +103,9 @@ const router48 = createModelRouter(Book48, queryClient).withCrud();
 const router49 = createModelRouter(Book49, queryClient).withCrud();
 
 const router50 = createModelRouter(Book50, queryClient).withCrud();
+*/
 
+/*
 export const router = createRouter()
   .pack(router1)
   .pack(router2)
@@ -207,3 +157,4 @@ export const router = createRouter()
 // .pack(router48)
 // .pack(router49)
 // .pack(router50);
+*/

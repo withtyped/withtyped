@@ -43,8 +43,8 @@ describe('PostgresModelClient', () => {
       created_at timestamptz not null default(now())
     );`
   )
-    .extend('data', z.object({ foo: z.string(), bar: z.number().optional() }))
-    .extend('data2', z.number().gt(10).nullable());
+    .extend('data', { parser: z.object({ foo: z.string(), bar: z.number().optional() }) })
+    .extend('data2', { parser: z.number().gt(10).nullable() });
 
   it('should call query client methods accordingly', () => {
     const fakeQueryClient = new FakeQueryClient();

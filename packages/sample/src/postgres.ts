@@ -1,9 +1,7 @@
-import { createModelRouter, createQueryClient } from '@withtyped/postgres';
-import createServer, { createModel } from '@withtyped/server';
-import { createComposer } from '@withtyped/server/lib/preset.js';
+import { createModel } from '@withtyped/server';
 import { z } from 'zod';
 
-const Book = createModel(/* sql */ `
+export const Book = createModel(/* sql */ `
   create table books (
     id varchar(128) not null,
     name varchar(128) not null,
@@ -13,16 +11,6 @@ const Book = createModel(/* sql */ `
     created_at timestamptz not null default(now()),
     constraint primary key id
   );
-`).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
-
-const queryClient = createQueryClient({ database: 'withtyped' });
-const modelRouter = createModelRouter(Book, queryClient).withCrud();
-
-const server = createServer({
-  queryClients: [queryClient],
-  composer: createComposer().and(modelRouter.routes()),
-});
-
-await server.listen(() => {
-  console.log('Listening', 9001);
+`).extend('authors', {
+  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
 });

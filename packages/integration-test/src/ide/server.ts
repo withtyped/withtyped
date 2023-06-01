@@ -1,13 +1,11 @@
 import { createQueryClient } from '@withtyped/postgres';
 import createServer from '@withtyped/server';
-import { createComposer } from '@withtyped/server/lib/preset.js';
-
-import { router } from './routers.js';
 
 const queryClient = createQueryClient();
 
 export const server = createServer({
   queryClients: [queryClient],
-  composer: createComposer().and(router.routes()),
+  // TODO: `createModelRouter` has been removed, the IDE stress test should be performed in another way
+  // composer: createComposer().and(router.routes()),
   port: 9002,
 });

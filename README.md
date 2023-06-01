@@ -164,7 +164,7 @@ const fn1: MiddlewareFunction = async (context, next) => {
 
 ### A typed RESTful router
 
-Guard input and output with your favorite validation library (Zod, Yup, Joi, whatsoever):
+Guard input and output with Zod:
 
 #### Router with server
 
@@ -173,7 +173,7 @@ import createServer, { Router, RequestError } from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js'; // Essential middleware functions preset
 import { z } from 'zod';
 
-export const bookGuard = z.object({ // Use Zod as data parser, can replace with Yup, Joi, whatsoever
+export const bookGuard = z.object({
   id: z.string(),
   name: z.string(),
   // ...

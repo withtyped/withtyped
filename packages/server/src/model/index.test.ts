@@ -21,10 +21,10 @@ describe('Model class', () => {
       created_at timestamptz not null default(now())
     );`
   )
-    .extend('toExclude', z.string().optional())
+    .extend('toExclude', { parser: z.string().optional() })
     .exclude('toExclude')
-    .extend('data', z.object({ foo: z.string(), bar: z.number() }))
-    .extend('data2', z.number().gt(10).nullable())
+    .extend('data', { parser: z.object({ foo: z.string(), bar: z.number() }) })
+    .extend('data2', { parser: z.number().gt(10).nullable() })
     .extend('num', { default: () => [1, 2, 3], readonly: true })
     .extend('test', { default: [2, 3, 4] });
 
@@ -98,11 +98,11 @@ describe('Model class', () => {
         createdAt: new Date(123_123_123),
       }
     );
-    assert.throws(() => forms.parse({ ...baseData, remote_address: 123 }), TypeError);
-    assert.throws(() => forms.parse({ ...baseData, headers: undefined }), TypeError);
+    assert.throws(() => forms.parse({ ...baseData, remote_address: 123 }), ZodError);
+    assert.throws(() => forms.parse({ ...baseData, headers: undefined }), ZodError);
     assert.throws(
       () => forms.parse({ ...baseData, remoteAddress: null, num: [321_321_321] }, 'create'),
-      (error) => error instanceof TypeError && error.message.includes('readonly')
+      ZodError
     );
   });
 
@@ -128,10 +128,10 @@ describe('Model class', () => {
   });
 
   it('should throw error when needed', () => {
-    assert.throws(() => forms.parse(null), new TypeError('Data is not an object'));
+    assert.throws(() => forms.parse(null), ZodError);
     assert.throws(
       () => forms.parse({ id: null, data: { foo: 'foo', bar: 1 }, data2: null }, 'create'),
-      new TypeError('Key `id` is not nullable but received null')
+      ZodError
     );
     assert.throws(
       () =>
@@ -146,7 +146,7 @@ describe('Model class', () => {
           },
           'create'
         ),
-      new TypeError('Unexpected type for key `test`, expected an array of number')
+      ZodError
     );
     assert.throws(
       () =>
@@ -160,9 +160,7 @@ describe('Model class', () => {
           },
           'create'
         ),
-      new TypeError(
-        'Key `data2` received unexpected undefined. If you are trying to provide an explicit empty value, use null instead.'
-      )
+      ZodError
     );
   });
 

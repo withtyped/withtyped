@@ -1,7 +1,6 @@
 import { contentTypes } from '@withtyped/shared';
 
 import type { RequestContext } from '../middleware/with-request.js';
-import ModelParser from '../model-parser/index.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
 import type { MethodRoutesMap } from './index.js';
@@ -35,10 +34,6 @@ export const buildOpenApiJson = <InputContext extends RequestContext>(
   };
 
   const tryParse = (guard: Parser<unknown>) => {
-    if (guard instanceof ModelParser) {
-      return guard.toOpenApiSchemaObject(parse);
-    }
-
     return parse?.(guard);
   };
 

@@ -30,7 +30,6 @@ NPM package: `@withtyped/server`
   - [Create a model](#create-a-model)
   - [`.extend()`](#extend)
   - [`.parse()`](#parse)
-- [Model router](#model-router)
 - [Abstract classes](#abstract-classes)
 
 ## Summary
@@ -577,14 +576,6 @@ Parse the unknown object to the desired model type. Throw an error if parse fail
 `CreateType` represents the minimal data to provide for creating a new row, i.e. columns with default value in database can be `undefined`.
 
 In withtyped data model, all explicit empty will be and should be `null`, while `undefined` means "to ignore".
-
-## Model router
-
-```ts
-class ModelRouter extends Router {}
-```
-
-WIP
 
 ## Abstract classes
 
