@@ -146,7 +146,10 @@ export const camelCase = <T extends string>(value: T): CamelCase<T> => {
   return ((pascalCase[0] ?? '').toLowerCase() + pascalCase.slice(1)) as CamelCase<T>;
 };
 
-/** Make the top-level keys camelCase if the value is a plain object. */
+/**
+ * Convert the top-level keys to camelCase if the value is a plain object.
+ * If there are multiple keys with the same camelCase result, the value of that key will NOT be ensured.
+ */
 export const camelCaseKeys = (value: unknown) => {
   if (!isObject(value)) {
     return value;
