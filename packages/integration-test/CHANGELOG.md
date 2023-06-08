@@ -1,5 +1,38 @@
 # @withtyped/integration-test
 
+## 0.7.0
+
+### Minor Changes
+
+- 8851348: Use Zod
+
+  ## Breaking changes
+
+  ### Remove `ModelRouter`
+
+  Remove `ModelRouter` class and use Zod as the opinionated validation
+  library.
+
+  - The `ModelRouter` was a fantasy. In practice, it brought more troubles than benefits and it is anti-pattern somehow.
+  - Use an opinionated validation library could help us greatly reduce the compatibility work.
+
+  ### Remove `isIdKey()` from model class
+
+  Not in use once `ModelRouter` has been removed.
+
+  ## Update
+
+  - Rewrite and simplify model's `.parse()` using Zod.
+  - Add `.getGuard()` to get the Zod guard for a specific use ('model', 'create', or 'patch').
+  - Add type helpers and inline comments.
+
+### Patch Changes
+
+- Updated dependencies [8851348]
+  - @withtyped/postgres@1.0.0
+  - @withtyped/server@0.10.0
+  - @withtyped/client@0.7.5
+
 ## 0.6.5
 
 ### Patch Changes
