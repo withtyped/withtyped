@@ -11,6 +11,4 @@ export const Book = createModel(/* sql */ `
     created_at timestamptz not null default(now()),
     constraint primary key id
   );
-`).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+`).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());

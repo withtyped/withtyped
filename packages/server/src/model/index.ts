@@ -3,10 +3,12 @@ import { z } from 'zod';
 import type {
   Entity,
   EntityHasDefaultKeys,
+  ModelCreateType,
   ModelExtendConfig,
   ModelExtendConfigWithDefault,
   ModelParseReturnType,
   ModelParseType,
+  ModelPatchType,
   NormalizedBody,
   RawParserConfig,
   SplitRawColumns,
@@ -15,10 +17,9 @@ import type {
 import { camelCaseKeys, parseRawConfigs, parseTableName } from './utils.js';
 import { convertConfigToZod } from './utils.zod.js';
 
-export type InferModelType<M> = M extends Model<string, infer A> ? A : never;
-export type ModelZodObject<M> = {
+export type ModelZodObject<M> = z.ZodObject<{
   [Key in keyof M]: z.ZodType<M[Key]>;
-};
+}>;
 
 export default class Model<
   Table extends string = '',
@@ -69,18 +70,31 @@ export default class Model<
     ) as Record<keyof ModelType, string>;
   }
 
-  // Indicates if `key` is `IdKeys<ModelType>`.
-  isIdKey(key: string & keyof ModelType): boolean {
-    if (!(key in this.rawConfigs) || this.excludedKeySet.has(key)) {
-      return false;
-    }
-
-    // Just validated
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return ['string', 'number'].includes(this.rawConfigs[key]!.type);
-  }
-
   // TODO: Make `default` compatible with nullable types
+  /**
+   * Use a customized parser (guard) for the given key. Affects all model parsers.
+   *
+   * NOTE: Has no effect to sql helpers.
+   *
+   * @see {@link convertConfigToZod} For how it affects model guards.
+   */
+  extend<Key extends string & keyof ModelType, Type>(
+    key: Key,
+    parser: z.ZodType<Type>
+  ): Model<
+    Table,
+    { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
+    DefaultKeys,
+    ReadonlyKeys
+  >;
+  /**
+   * Use a programmatic default value for the given key with an optional customized parser (guard).
+   * The customized parser affects all model parsers.
+   *
+   * NOTE: Has no effect to sql helpers.
+   *
+   * @see {@link convertConfigToZod} For how it affects model guards.
+   */
   extend<Key extends string & keyof ModelType, Type>(
     key: Key,
     config: ModelExtendConfigWithDefault<Type>
@@ -90,6 +104,14 @@ export default class Model<
     DefaultKeys | Key,
     ReadonlyKeys
   >;
+  /**
+   * Use a programmatic default value for the given key with an optional customized parser (guard).
+   * The customized parser affects all model parsers.
+   *
+   * NOTE: Has no effect to sql helpers.
+   *
+   * @see {@link convertConfigToZod} For how it affects model guards.
+   */
   extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
     key: Key,
     config: ModelExtendConfigWithDefault<Type, true>
@@ -101,23 +123,24 @@ export default class Model<
   >;
   extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
     key: Key,
-    config: ModelExtendConfigWithDefault<Type, RO>
+    config: z.ZodType<Type> | ModelExtendConfigWithDefault<Type, RO>
   ): Model<
     Table,
     { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
-    DefaultKeys | Key,
-    ReadonlyKeys
+    string,
+    string
   > {
     return new Model(
       this.raw,
       Object.freeze({
         ...this.extendedConfigs,
-        [key]: config,
+        [key]: config instanceof z.ZodType<Type> ? { parser: config } : config,
       }),
       this.excludedKeys
     );
   }
 
+  /** Exclude a key from the model. */
   exclude<Key extends string & keyof ModelType>(
     key: Key
   ): Model<
@@ -129,11 +152,17 @@ export default class Model<
     return new Model(this.raw, this.extendedConfigs, this.excludedKeys.concat(key));
   }
 
+  /**
+   * Get the related zod guard of the current model.
+   *
+   * @param forType One of 'model', 'create', or 'patch'.
+   * @see {@link InferModelCreate} For what will be transformed for a create type guard.
+   * @see {@link InferModelPatch} For what will be transformed for a patch type guard.
+   * @see {@link convertConfigToZod} For details of model guards.
+   */
   getGuard<ForType extends ModelParseType>(
     forType: ForType
-  ): z.ZodObject<
-    ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]>
-  > {
+  ): ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]> {
     // eslint-disable-next-line @silverhand/fp/no-let
     let guard = z.object({});
 
@@ -152,11 +181,21 @@ export default class Model<
     }
 
     // eslint-disable-next-line no-restricted-syntax
-    return guard as z.ZodObject<
-      ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]>
+    return guard as ModelZodObject<
+      ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]
     >;
   }
 
+  /**
+   * Parse the given data using a designated model guard. Kebab-case and snake_case fields will be camelCased.
+   *
+   * @param data The data to parse.
+   * @param forType Use which guard to parse. One of 'model' (default), 'create', or 'patch'.
+   * @see {@link InferModelCreate} For what will be transformed for a create type guard.
+   * @see {@link InferModelPatch} For what will be transformed for a patch type guard.
+   * @see {@link convertConfigToZod} For details of model guards.
+   * @throws `ZodError` when parse failed.
+   */
   parse<ForType extends ModelParseType = 'model'>(
     data: unknown,
     forType?: ForType
@@ -171,5 +210,41 @@ export default class Model<
 }
 
 export const createModel = Model.create;
+
+/** Infers the model type of a given model class. */
+export type InferModel<M> = M extends Model<string, infer A> ? A : never;
+
+/** Alias of {@link InferModel}. */
+export type InferModelType<M> = InferModel<M>;
+
+/**
+ * Infers the model creation type of a given model class.
+ *
+ * The model creation type makes the original model fields with default value optional,
+ * and forces readonly fields to be set as `undefined`.
+ */
+export type InferModelCreate<M> = M extends Model<
+  string,
+  infer ModelType,
+  infer DefaultKeys,
+  infer ReadonlyKeys
+>
+  ? ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>
+  : never;
+
+/**
+ * Infers the model patch type of a given model class.
+ *
+ * The model patch type makes all fields optional, except readonly fields are omitted.
+ */
+export type InferModelPatch<M> = M extends Model<
+  string,
+  infer ModelType,
+  string,
+  infer ReadonlyKeys
+>
+  ? ModelPatchType<ModelType, ReadonlyKeys>
+  : never;
+
 export * from './types.js';
 export * from './utils.js';

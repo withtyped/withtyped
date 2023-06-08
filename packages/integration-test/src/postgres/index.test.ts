@@ -24,8 +24,8 @@ describe('Postgres data model', () => {
       created_at timestamptz not null default(now())
     );`
   )
-    .extend('data', { parser: z.object({ foo: z.string(), bar: z.number() }) })
-    .extend('data2', { parser: z.number().gt(10).nullable() });
+    .extend('data', z.object({ foo: z.string(), bar: z.number() }))
+    .extend('data2', z.number().gt(10).nullable());
 
   before(async () => {
     await initClient.initialize();

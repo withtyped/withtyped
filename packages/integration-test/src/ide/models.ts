@@ -12,9 +12,7 @@ export const Book1 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book2 = createModel(/* Sql */ `
     create table books_2 (
@@ -26,9 +24,7 @@ export const Book2 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book3 = createModel(/* Sql */ `
     create table books_3 (
@@ -40,9 +36,7 @@ export const Book3 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book4 = createModel(/* Sql */ `
     create table books_4 (
@@ -54,9 +48,7 @@ export const Book4 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book5 = createModel(/* Sql */ `
     create table books_5 (
@@ -68,9 +60,7 @@ export const Book5 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book6 = createModel(/* Sql */ `
     create table books_6 (
@@ -82,9 +72,7 @@ export const Book6 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book7 = createModel(/* Sql */ `
     create table books_7 (
@@ -96,9 +84,7 @@ export const Book7 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book8 = createModel(/* Sql */ `
     create table books_8 (
@@ -110,9 +96,7 @@ export const Book8 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book9 = createModel(/* Sql */ `
     create table books_9 (
@@ -124,9 +108,7 @@ export const Book9 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book10 = createModel(/* Sql */ `
     create table books_10 (
@@ -138,9 +120,7 @@ export const Book10 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book11 = createModel(/* Sql */ `
     create table books_11 (
@@ -152,9 +132,7 @@ export const Book11 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book12 = createModel(/* Sql */ `
     create table books_12 (
@@ -166,9 +144,7 @@ export const Book12 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book13 = createModel(/* Sql */ `
     create table books_13 (
@@ -180,9 +156,7 @@ export const Book13 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book14 = createModel(/* Sql */ `
     create table books_14 (
@@ -194,9 +168,7 @@ export const Book14 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book15 = createModel(/* Sql */ `
     create table books_15 (
@@ -208,9 +180,7 @@ export const Book15 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book16 = createModel(/* Sql */ `
     create table books_16 (
@@ -222,9 +192,7 @@ export const Book16 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book17 = createModel(/* Sql */ `
     create table books_17 (
@@ -236,9 +204,7 @@ export const Book17 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book18 = createModel(/* Sql */ `
     create table books_18 (
@@ -250,9 +216,7 @@ export const Book18 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book19 = createModel(/* Sql */ `
     create table books_19 (
@@ -264,9 +228,7 @@ export const Book19 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book20 = createModel(/* Sql */ `
     create table books_20 (
@@ -278,9 +240,7 @@ export const Book20 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book21 = createModel(/* Sql */ `
     create table books_21 (
@@ -292,9 +252,7 @@ export const Book21 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book22 = createModel(/* Sql */ `
     create table books_22 (
@@ -306,9 +264,7 @@ export const Book22 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book23 = createModel(/* Sql */ `
     create table books_23 (
@@ -320,9 +276,7 @@ export const Book23 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book24 = createModel(/* Sql */ `
     create table books_24 (
@@ -334,9 +288,7 @@ export const Book24 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book25 = createModel(/* Sql */ `
     create table books_25 (
@@ -348,9 +300,7 @@ export const Book25 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book26 = createModel(/* Sql */ `
     create table books_26 (
@@ -362,9 +312,7 @@ export const Book26 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book27 = createModel(/* Sql */ `
     create table books_27 (
@@ -376,9 +324,7 @@ export const Book27 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book28 = createModel(/* Sql */ `
     create table books_28 (
@@ -390,9 +336,7 @@ export const Book28 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book29 = createModel(/* Sql */ `
     create table books_29 (
@@ -404,9 +348,7 @@ export const Book29 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book30 = createModel(/* Sql */ `
     create table books_30 (
@@ -418,9 +360,7 @@ export const Book30 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book31 = createModel(/* Sql */ `
     create table books_31 (
@@ -432,9 +372,7 @@ export const Book31 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book32 = createModel(/* Sql */ `
     create table books_32 (
@@ -446,9 +384,7 @@ export const Book32 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book33 = createModel(/* Sql */ `
     create table books_33 (
@@ -460,9 +396,7 @@ export const Book33 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book34 = createModel(/* Sql */ `
     create table books_34 (
@@ -474,9 +408,7 @@ export const Book34 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book35 = createModel(/* Sql */ `
     create table books_35 (
@@ -488,9 +420,7 @@ export const Book35 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book36 = createModel(/* Sql */ `
     create table books_36 (
@@ -502,9 +432,7 @@ export const Book36 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book37 = createModel(/* Sql */ `
     create table books_37 (
@@ -516,9 +444,7 @@ export const Book37 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book38 = createModel(/* Sql */ `
     create table books_38 (
@@ -530,9 +456,7 @@ export const Book38 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book39 = createModel(/* Sql */ `
     create table books_39 (
@@ -544,9 +468,7 @@ export const Book39 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book40 = createModel(/* Sql */ `
     create table books_40 (
@@ -558,9 +480,7 @@ export const Book40 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book41 = createModel(/* Sql */ `
     create table books_41 (
@@ -572,9 +492,7 @@ export const Book41 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book42 = createModel(/* Sql */ `
     create table books_42 (
@@ -586,9 +504,7 @@ export const Book42 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book43 = createModel(/* Sql */ `
     create table books_43 (
@@ -600,9 +516,7 @@ export const Book43 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book44 = createModel(/* Sql */ `
     create table books_44 (
@@ -614,9 +528,7 @@ export const Book44 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book45 = createModel(/* Sql */ `
     create table books_45 (
@@ -628,9 +540,7 @@ export const Book45 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book46 = createModel(/* Sql */ `
     create table books_46 (
@@ -642,9 +552,7 @@ export const Book46 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book47 = createModel(/* Sql */ `
     create table books_47 (
@@ -656,9 +564,7 @@ export const Book47 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book48 = createModel(/* Sql */ `
     create table books_48 (
@@ -670,9 +576,7 @@ export const Book48 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book49 = createModel(/* Sql */ `
     create table books_49 (
@@ -684,9 +588,7 @@ export const Book49 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 
 export const Book50 = createModel(/* Sql */ `
     create table books_50 (
@@ -698,7 +600,5 @@ export const Book50 = createModel(/* Sql */ `
       created_at timestamptz not null default(now()),
       primary key (id)
     );
-  `).extend('authors', {
-  parser: z.object({ name: z.string(), email: z.string().optional() }).array(),
-});
+  `).extend('authors', z.object({ name: z.string(), email: z.string().optional() }).array());
 /* eslint-enable max-lines */

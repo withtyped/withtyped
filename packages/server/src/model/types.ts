@@ -160,9 +160,23 @@ export type ModelExtendConfig<Type> = {
 };
 
 // TODO: Allow readonly with database default
-export type ModelExtendConfigWithDefault<
-  Type,
-  RO extends boolean = false
-> = ModelExtendConfig<Type> & {
+export type ModelExtendConfigWithDefault<Type, RO extends boolean = false> = Omit<
+  ModelExtendConfig<Type>,
+  'default' | 'readonly'
+> & {
+  /**
+   * The programmatic default value for model creating ('create'). It overrides the customized parser's default value (if exists),
+   * but does not effect other types of model guards (such as 'model' and 'patch').
+   *
+   */
+  default: Type | (() => Type);
+  /**
+   * Indicates whether the model key is programmatically readonly.
+   * This affects the 'create' and 'patch' model guards.
+   *
+   * When set to `true`, the 'create' model guard enforces the model key to be `undefined`.
+   * To set a default value programmatically, use the `default` config;
+   * no action is required if the model key has a database default value.
+   */
   readonly?: RO;
 };
