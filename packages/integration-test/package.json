@@ -1,6 +1,6 @@
 {
   "name": "@withtyped/integration-test",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "author": "Gao Sun",
   "license": "MIT",
   "type": "module",
