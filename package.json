@@ -9,7 +9,7 @@
   },
   "engines": {
     "node": "^18.13.0 || ^19.2.0",
-    "pnpm": "^7"
+    "pnpm": "^8"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.0",

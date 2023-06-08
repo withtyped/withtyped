@@ -67,5 +67,8 @@
   "dependencies": {
     "@silverhand/essentials": "^2.5.0",
     "@withtyped/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^3.19.1"
   }
 }

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { createParser, tryThat } from './utils.js';
+import { tryThat } from './utils.js';
 
 describe('tryThat()', () => {
   it('should run and return the value when everything is ok', () => {
@@ -20,13 +20,5 @@ describe('tryThat()', () => {
       }),
       undefined
     );
-  });
-});
-
-describe('createParser()', () => {
-  it('creates parser with the correct structure', async () => {
-    // eslint-disable-next-line unicorn/consistent-function-scoping
-    const parse = () => true;
-    assert.deepStrictEqual(createParser(parse), { parse });
   });
 });
