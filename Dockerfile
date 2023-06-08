@@ -1,5 +1,5 @@
 # Build stage
-FROM node:16-alpine as builder
+FROM node:18-alpine as builder
 WORKDIR /etc/sample
 ENV CI=true
 COPY . .
@@ -19,7 +19,7 @@ RUN NODE_ENV=production pnpm i
 RUN rm -rf pnpm-*.yaml
 
 # Seal stage
-FROM node:16-alpine as app
+FROM node:18-alpine as app
 WORKDIR /etc/sample
 COPY --from=builder /etc/sample .
 EXPOSE 9001
