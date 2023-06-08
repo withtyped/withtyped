@@ -5,7 +5,7 @@ ENV CI=true
 COPY . .
 
 # Install toolchain
-RUN npm add --location=global pnpm@^7
+RUN npm add --location=global pnpm@^8.6
 
 # Install dependencies and build
 RUN pnpm i
