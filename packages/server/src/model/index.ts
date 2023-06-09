@@ -154,7 +154,7 @@ export default class Model<
         ...this.extendedConfigs,
         [key]: {
           ...this.extendedConfigs[key],
-          ...(config instanceof z.ZodType<Type> ? { parser: config } : config),
+          ...(config instanceof z.ZodType ? { parser: config } : config),
         },
       }),
       this.excludedKeys
@@ -174,6 +174,14 @@ export default class Model<
   }
 
   /**
+   * Get the 'model' zod guard of the current model.
+   *
+   * @see {@link convertConfigToZod} For details of model guards.
+   */
+  getGuard<ForType extends ModelParseType = 'model'>(): ModelZodObject<
+    ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]
+  >;
+  /**
    * Get the related zod guard of the current model.
    *
    * @param forType One of 'model' (default), 'create', or 'patch'.
@@ -181,6 +189,9 @@ export default class Model<
    * @see {@link InferModelPatch} For what will be transformed for a patch type guard.
    * @see {@link convertConfigToZod} For details of model guards.
    */
+  getGuard<ForType extends ModelParseType>(
+    forType: ForType
+  ): ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]>;
   getGuard<ForType extends ModelParseType = 'model'>(
     forType?: ForType
   ): ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]> {
@@ -208,6 +219,14 @@ export default class Model<
   }
 
   /**
+   * Parse the given data using the 'model' guard. Kebab-case and snake_case fields will be camelCased.
+   *
+   * @param data The data to parse.
+   * @see {@link convertConfigToZod} For details of model guards.
+   * @throws `ZodError` when parse failed.
+   */
+  parse(data: unknown): ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>['model'];
+  /**
    * Parse the given data using a designated model guard. Kebab-case and snake_case fields will be camelCased.
    *
    * @param data The data to parse.
@@ -217,6 +236,10 @@ export default class Model<
    * @see {@link convertConfigToZod} For details of model guards.
    * @throws `ZodError` when parse failed.
    */
+  parse<ForType extends ModelParseType>(
+    data: unknown,
+    forType: ForType
+  ): ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType];
   parse<ForType extends ModelParseType = 'model'>(
     data: unknown,
     forType?: ForType
