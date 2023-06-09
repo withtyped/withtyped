@@ -44,7 +44,7 @@
     "zod": "^3.19.1"
   },
   "peerDependencies": {
-    "@withtyped/server": "workspace:^0.10.0"
+    "@withtyped/server": "workspace:^0.10.1"
   },
   "eslintConfig": {
     "extends": "@silverhand"

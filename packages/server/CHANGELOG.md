@@ -1,5 +1,16 @@
 # @withtyped/server
 
+## 0.10.1
+
+### Patch Changes
+
+- 5e4405e: Model improvements
+
+  - Correct guard Zod types.
+  - Supports setting readonly when there is a database default value available.
+  - Use partial override for extend configs instead of replace.
+  - Add `.guard()` alias for `.getGuard()`.
+
 ## 0.10.0
 
 ### Minor Changes
