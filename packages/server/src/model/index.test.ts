@@ -9,7 +9,7 @@ import Model from './index.js';
 describe('Model class', () => {
   const forms = Model.create(
     /* Sql */ `
-    CREATE table forms (
+    cREaTe taBle forms (
       id VARCHAR(32) not null,
       remote_address varchar(128),
       headers jsonb not null,
@@ -111,6 +111,24 @@ describe('Model class', () => {
       () => forms.parse({ ...baseData, remoteAddress: null, num: [321_321_321] }, 'create'),
       ZodError
     );
+  });
+
+  it('should allow fields with database default value to be readonly', () => {
+    const forms = Model.create(
+      /* Sql */ `
+      create table forms (
+        id VARCHAR(32) not null,
+        created_at timestamptz not null default(now())
+      );`
+    ).extend('createdAt', { readonly: true });
+    assert.deepStrictEqual(forms.guard('create').parse({ id: 'foo' }), {
+      id: 'foo',
+    });
+    assert.deepStrictEqual(forms.guard('patch').parse({ id: 'bar', createdAt: undefined }), {
+      id: 'bar',
+      createdAt: undefined,
+    });
+    assert.throws(() => forms.guard('patch').parse({ id: 'baz', createdAt: new Date() }), ZodError);
   });
 
   it('should throw error when table name is missing in query', () => {
