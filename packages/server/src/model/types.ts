@@ -138,9 +138,12 @@ export type ModelCreateType<
   ModelType,
   DefaultKeys extends keyof ModelType,
   ReadonlyKeys extends keyof ModelType = never
-> = Omit<ModelType, ReadonlyKeys | DefaultKeys> & {
-  [key in DefaultKeys]?: ModelType[key];
-} & Record<ReadonlyKeys, undefined>;
+> = Omit<
+  Omit<ModelType, DefaultKeys> & {
+    [key in DefaultKeys]?: ModelType[key];
+  },
+  ReadonlyKeys
+>;
 
 export type ModelParseType = 'model' | 'create' | 'patch';
 export type ModelParseReturnType<

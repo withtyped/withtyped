@@ -9,7 +9,7 @@ import Model from './index.js';
 describe('Model class', () => {
   const forms = Model.create(
     /* Sql */ `
-    CREATE table forms (
+    cREaTe taBle forms (
       id VARCHAR(32) not null,
       remote_address varchar(128),
       headers jsonb not null,
@@ -49,18 +49,21 @@ describe('Model class', () => {
       createdAt: 'created_at',
     });
 
-    assert.deepStrictEqual(
-      forms.parse(
-        { id: 'foo', headers: {}, data: { foo: 'foo', bar: 1 }, test: [], toExclude: 'ok' },
-        'patch'
-      ),
-      {
-        id: 'foo',
-        headers: {},
-        data: { foo: 'foo', bar: 1 },
-        test: [],
-      }
-    );
+    const parse1 = Object.freeze({
+      id: 'foo',
+      headers: {},
+      data: { foo: 'foo', bar: 1 },
+      test: [],
+      toExclude: 'ok',
+    });
+    const expect1 = Object.freeze({
+      id: 'foo',
+      headers: {},
+      data: { foo: 'foo', bar: 1 },
+      test: [],
+    });
+    assert.deepStrictEqual(forms.parse(parse1, 'patch'), expect1);
+    assert.deepStrictEqual(forms.getGuard('patch').parse(parse1), expect1);
 
     assert.deepStrictEqual(forms.parse({ ...baseData, headers: { bar: 'foo' } }, 'patch'), {
       id: 'foo',
@@ -69,7 +72,8 @@ describe('Model class', () => {
       data2: null,
     });
 
-    assert.deepStrictEqual(forms.parse({ ...baseData, remoteAddress: null }, 'create'), {
+    const parse2 = Object.freeze({ ...baseData, remoteAddress: null });
+    const expect2 = Object.freeze({
       id: 'foo',
       remoteAddress: null,
       headers: {},
@@ -78,32 +82,53 @@ describe('Model class', () => {
       num: [1, 2, 3],
       test: [2, 3, 4],
     });
+    assert.deepStrictEqual(forms.parse(parse2, 'create'), expect2);
+    assert.deepStrictEqual(forms.guard('create').parse(parse2), expect2);
 
-    assert.deepStrictEqual(
-      forms.parse({
-        ...baseData,
-        remote_address: null,
-        num: null,
-        test: [456, 789],
-        created_at: new Date(123_123_123),
-      }),
-      {
-        id: 'foo',
-        remoteAddress: null,
-        headers: {},
-        data: { foo: 'foo', bar: 1 },
-        data2: null,
-        num: null,
-        test: [456, 789],
-        createdAt: new Date(123_123_123),
-      }
-    );
+    const parse3 = Object.freeze({
+      ...baseData,
+      remote_address: null,
+      num: null,
+      test: [456, 789],
+      created_at: new Date(123_123_123),
+    });
+    const expect3 = Object.freeze({
+      id: 'foo',
+      remoteAddress: null,
+      headers: {},
+      data: { foo: 'foo', bar: 1 },
+      data2: null,
+      num: null,
+      test: [456, 789],
+      createdAt: new Date(123_123_123),
+    });
+    assert.deepStrictEqual(forms.parse(parse3), expect3);
+    // The raw guard does not transform key cases, only `.parse()` does
+    assert.throws(() => forms.guard().parse(parse3), ZodError);
     assert.throws(() => forms.parse({ ...baseData, remote_address: 123 }), ZodError);
     assert.throws(() => forms.parse({ ...baseData, headers: undefined }), ZodError);
     assert.throws(
       () => forms.parse({ ...baseData, remoteAddress: null, num: [321_321_321] }, 'create'),
       ZodError
     );
+  });
+
+  it('should allow fields with database default value to be readonly', () => {
+    const forms = Model.create(
+      /* Sql */ `
+      create table forms (
+        id VARCHAR(32) not null,
+        created_at timestamptz not null default(now())
+      );`
+    ).extend('createdAt', { readonly: true });
+    assert.deepStrictEqual(forms.guard('create').parse({ id: 'foo' }), {
+      id: 'foo',
+    });
+    assert.deepStrictEqual(forms.guard('patch').parse({ id: 'bar', createdAt: undefined }), {
+      id: 'bar',
+      createdAt: undefined,
+    });
+    assert.throws(() => forms.guard('patch').parse({ id: 'baz', createdAt: new Date() }), ZodError);
   });
 
   it('should throw error when table name is missing in query', () => {
