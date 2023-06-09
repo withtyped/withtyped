@@ -18,7 +18,9 @@ import { camelCaseKeys, parseRawConfigs, parseTableName } from './utils.js';
 import { convertConfigToZod } from './utils.zod.js';
 
 export type ModelZodObject<M> = z.ZodObject<{
-  [Key in keyof M]: z.ZodType<M[Key]>;
+  // Without the `-?` here Zod will infer those optional key types
+  // to `unknown` which is unexpected.
+  [Key in keyof M]-?: z.ZodType<M[Key]>;
 }>;
 
 export default class Model<
@@ -40,6 +42,8 @@ export default class Model<
     );
   };
 
+  /** Alias of {@link getGuard()}. */
+  public readonly guard = this.getGuard;
   public readonly tableName: Table;
   public readonly rawConfigs: Record<string & keyof ModelType, RawParserConfig>;
   protected readonly excludedKeySet: Set<string>;
@@ -105,6 +109,17 @@ export default class Model<
     ReadonlyKeys
   >;
   /**
+   * Mark a key with default value readonly.
+   *
+   * NOTE: Has no effect to sql helpers.
+   *
+   * @see {@link convertConfigToZod} For how it affects model guards.
+   */
+  extend<Key extends string & DefaultKeys>(
+    key: Key,
+    config: Pick<ModelExtendConfigWithDefault<unknown, true>, 'readonly'>
+  ): Model<Table, ModelType, DefaultKeys, ReadonlyKeys | Key>;
+  /**
    * Use a programmatic default value for the given key with an optional customized parser (guard).
    * The customized parser affects all model parsers.
    *
@@ -123,7 +138,10 @@ export default class Model<
   >;
   extend<Key extends string & keyof ModelType, Type, RO extends boolean>(
     key: Key,
-    config: z.ZodType<Type> | ModelExtendConfigWithDefault<Type, RO>
+    config:
+      | z.ZodType<Type>
+      | ModelExtendConfigWithDefault<Type, RO>
+      | Pick<ModelExtendConfigWithDefault<unknown, true>, 'readonly'>
   ): Model<
     Table,
     { [key in keyof ModelType]: key extends Key ? Type : ModelType[key] },
@@ -134,7 +152,10 @@ export default class Model<
       this.raw,
       Object.freeze({
         ...this.extendedConfigs,
-        [key]: config instanceof z.ZodType<Type> ? { parser: config } : config,
+        [key]: {
+          ...this.extendedConfigs[key],
+          ...(config instanceof z.ZodType<Type> ? { parser: config } : config),
+        },
       }),
       this.excludedKeys
     );
@@ -155,13 +176,13 @@ export default class Model<
   /**
    * Get the related zod guard of the current model.
    *
-   * @param forType One of 'model', 'create', or 'patch'.
+   * @param forType One of 'model' (default), 'create', or 'patch'.
    * @see {@link InferModelCreate} For what will be transformed for a create type guard.
    * @see {@link InferModelPatch} For what will be transformed for a patch type guard.
    * @see {@link convertConfigToZod} For details of model guards.
    */
-  getGuard<ForType extends ModelParseType>(
-    forType: ForType
+  getGuard<ForType extends ModelParseType = 'model'>(
+    forType?: ForType
   ): ModelZodObject<ModelParseReturnType<ModelType, DefaultKeys, ReadonlyKeys>[ForType]> {
     // eslint-disable-next-line @silverhand/fp/no-let
     let guard = z.object({});
@@ -172,7 +193,7 @@ export default class Model<
         continue;
       }
 
-      const parser = convertConfigToZod(rawConfig, this.extendedConfigs[key], forType);
+      const parser = convertConfigToZod(rawConfig, this.extendedConfigs[key], forType ?? 'model');
 
       if (parser) {
         // eslint-disable-next-line @silverhand/fp/no-mutation
