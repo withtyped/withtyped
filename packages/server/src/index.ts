@@ -163,8 +163,6 @@ export * from './middleware.js';
 export { default as koaAdapter } from './adapter/koa.js';
 export { RequestMethod } from '@withtyped/shared';
 
-export { default as Model } from './model/index.js';
-export * from './model/index.js';
 export { default as ModelClient } from './model-client/index.js';
 export * from './model-client/index.js';
 export { default as DatabaseInitializer } from './database-initializer/index.js';

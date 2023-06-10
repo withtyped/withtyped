@@ -11,6 +11,9 @@
     },
     "./lib/*": {
       "import": "./lib/*"
+    },
+    "./model": {
+      "import": "./lib/model/index.js"
     }
   },
   "module": "./lib/index.js",
