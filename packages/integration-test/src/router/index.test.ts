@@ -6,6 +6,7 @@ import createServer from '@withtyped/server';
 import { createComposer } from '@withtyped/server/lib/preset.js';
 
 import { createBook } from '../utils/book.js';
+
 import { router } from './router.js';
 
 describe('Router', () => {
@@ -60,7 +61,7 @@ describe('Router', () => {
 
   it('should able to search book by name', async () => {
     const { books } = await client.get('/books');
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const book = books[0]!;
 
     const { books: result } = await client.get('/search', {

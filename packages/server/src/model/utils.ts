@@ -1,6 +1,7 @@
 import { normalizeString } from '@withtyped/shared';
 
 import type { JsonObject } from '../types.js';
+
 import type { CamelCase, PrimitiveType, PrimitiveTypeMap, RawParserConfig } from './types.js';
 
 export const findType = (raw?: string): PrimitiveType | undefined => {
@@ -93,10 +94,11 @@ export const parsePrimitiveType = (
   // Or just wait for VSCode upgrade to TS 4.9 and try `satisfies`
 ): PrimitiveTypeMap[PrimitiveType] | undefined => {
   switch (type) {
-    case 'boolean':
+    case 'boolean': {
       return typeof value === 'boolean' ? value : undefined;
+    }
 
-    case 'number':
+    case 'number': {
       if (typeof value === 'number') {
         return undefinedIfNaN(value);
       }
@@ -106,12 +108,15 @@ export const parsePrimitiveType = (
       }
 
       return;
-    case 'string':
+    }
+    case 'string': {
       return typeof value === 'string' ? value : undefined;
-    case 'json':
-      return isObject(value) || Array.isArray(value) ? value : undefined; // TODO: Perform more strict check (make sure it is a json object)
+    }
+    case 'json': {
+      return isObject(value) || Array.isArray(value) ? value : undefined;
+    } // TODO: Perform more strict check (make sure it is a json object)
 
-    case 'date':
+    case 'date': {
       if (value instanceof Date) {
         return value;
       }
@@ -123,8 +128,10 @@ export const parsePrimitiveType = (
       }
 
       return;
-    default:
+    }
+    default: {
       throw new TypeError(`Unexpected type ${String(type)}`);
+    }
   }
 };
 

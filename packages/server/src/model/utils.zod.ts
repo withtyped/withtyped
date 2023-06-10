@@ -1,8 +1,7 @@
 import type { Optional } from '@silverhand/essentials';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
-import type { ModelExtendConfig, ModelParseType, RawParserConfig } from './types.js';
-import { PrimitiveType } from './types.js';
+import type { ModelExtendConfig, ModelParseType, RawParserConfig, PrimitiveType } from './types.js';
 
 const typeToGuard = Object.freeze({
   boolean: z.boolean(),
@@ -36,12 +35,12 @@ export const convertConfigToZod = (
 ): Optional<z.ZodType> => {
   const parser = extendedConfig?.parser ?? convertRawConfig(config);
 
-  // eslint-disable-next-line default-case
   switch (forType) {
-    case 'model':
+    case 'model': {
       return parser;
+    }
 
-    case 'create':
+    case 'create': {
       if (extendedConfig?.default) {
         const { default: defaultValue, readonly } = extendedConfig;
 
@@ -62,12 +61,14 @@ export const convertConfigToZod = (
       }
 
       return parser;
+    }
 
-    case 'patch':
+    case 'patch': {
       if (extendedConfig?.readonly) {
         return z.undefined();
       }
 
       return parser.optional();
+    }
   }
 };

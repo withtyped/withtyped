@@ -18,6 +18,7 @@ describe('Sql', () => {
     const strings = Object.assign(['a', 'b', 'c'], { raw: ['a', 'b', 'c'] });
     const args = ['foo', 'bar', 123];
     // @ts-expect-error for testing
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     assert.deepStrictEqual(Object.entries(new Sql(strings, args)), [
       ['strings', strings],
       ['args', args],

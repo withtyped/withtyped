@@ -1,9 +1,9 @@
 import type { Middleware } from 'koa';
 
 import compose from '../compose.js';
-import type { MiddlewareFunction, NextFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
 import withRequest from '../middleware/with-request.js';
+import type { MiddlewareFunction, NextFunction } from '../middleware.js';
 
 /**
  * Transform a withtyped middleware function to KoaJS middleware function.

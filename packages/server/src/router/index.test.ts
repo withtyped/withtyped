@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
 import { noop, RequestMethod } from '@withtyped/shared';
-import Validator from 'openapi-schema-validator';
+import OpenAPISchemaValidator from 'openapi-schema-validator';
 import sinon from 'sinon';
 import { z } from 'zod';
 
@@ -10,6 +10,7 @@ import RequestError from '../errors/RequestError.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
 import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
 import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
+
 import Router, { createRouter } from './index.js';
 
 describe('Router', () => {
@@ -216,7 +217,7 @@ describe('Router', () => {
   });
 
   it('should build proper OpenAPI JSON', async () => {
-    // @ts-expect-error have to do this, looks like a module loader issue
+    const { default: Validator } = OpenAPISchemaValidator;
     const validator = new Validator({ version: 3 });
 
     const run = new Router()
@@ -240,6 +241,7 @@ describe('Router', () => {
     await run(
       createRequestContext(RequestMethod.GET, '/openapi.json'),
       async (context) => {
+        // @ts-expect-error for validation
         assert.deepStrictEqual(validator.validate(context.json).errors, []);
       },
       createHttpContext()

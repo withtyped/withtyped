@@ -3,6 +3,7 @@ import { contentTypes, log, RequestMethod } from '@withtyped/shared';
 import RequestError from '../errors/RequestError.js';
 import type { HttpContext, NextFunction } from '../middleware.js';
 import type { Json } from '../types.js';
+
 import type { MergeRequestContext, RequestContext } from './with-request.js';
 
 export type WithBodyContext<InputContext extends RequestContext> = MergeRequestContext<

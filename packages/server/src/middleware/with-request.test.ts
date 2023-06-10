@@ -5,6 +5,7 @@ import { noop, RequestMethod } from '@withtyped/shared';
 
 import { createHttpContext } from '../test-utils/http.test.js';
 import { assertContext } from '../test-utils/middleware.test.js';
+
 import withRequest from './with-request.js';
 
 describe('withRequest()', () => {

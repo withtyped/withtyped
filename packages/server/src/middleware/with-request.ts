@@ -1,5 +1,5 @@
-import type { IncomingHttpHeaders } from 'http';
-import { TLSSocket } from 'tls';
+import type { IncomingHttpHeaders } from 'node:http';
+import { TLSSocket } from 'node:tls';
 
 import type { RequestMethod } from '@withtyped/shared';
 import { requestMethods } from '@withtyped/shared';

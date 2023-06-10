@@ -26,23 +26,27 @@ const zodLiteralToSwagger = (zodLiteral: ZodLiteral<unknown>): OpenAPIV3.SchemaO
   const { value } = zodLiteral;
 
   switch (typeof value) {
-    case 'boolean':
+    case 'boolean': {
       return {
         type: 'boolean',
         format: String(value),
       };
-    case 'number':
+    }
+    case 'number': {
       return {
         type: 'number',
         format: String(value),
       };
-    case 'string':
+    }
+    case 'string': {
       return {
         type: 'string',
         format: value === '' ? 'empty' : `"${value}"`,
       };
-    default:
+    }
+    default: {
       throw new Error('Invalid Zod type to transform');
+    }
   }
 };
 
@@ -56,16 +60,19 @@ const zodStringCheckToSwaggerFormatKind = (zodStringCheck: ValuesOf<ZodStringDef
     case 'url':
     case 'uuid':
     case 'cuid':
-    case 'regex':
+    case 'regex': {
       return kind;
+    }
 
     case 'min':
-    case 'max':
+    case 'max': {
       // Swagger has dedicated fields for min/max
       return;
+    }
 
-    default:
+    default: {
       throw new Error('Invalid Zod type to transform');
+    }
   }
 };
 
@@ -112,6 +119,7 @@ export const zodTypeToSwagger = (config: unknown): OpenAPIV3.SchemaObject => {
   if (config instanceof ZodNativeEnum || config instanceof ZodEnum) {
     return {
       type: 'string',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       enum: Object.values(config.enum),
     };
   }
@@ -133,6 +141,7 @@ export const zodTypeToSwagger = (config: unknown): OpenAPIV3.SchemaObject => {
   }
 
   if (config instanceof ZodObject) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const entries = Object.entries(config.shape);
     const required = entries
       .filter(([, value]) => !(value instanceof ZodOptional))
@@ -190,6 +199,7 @@ export const zodTypeToParameters = (
 
   assert(zodParameters instanceof ZodObject, 'Zod type for parameters must be an object');
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   return Object.entries(zodParameters.shape).map(([key, value]) => ({
     name: key,
     in: inWhere,

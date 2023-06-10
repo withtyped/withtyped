@@ -6,6 +6,7 @@ import type { ParameterizedContext } from 'koa';
 import sinon from 'sinon';
 
 import { createHttpContext } from '../test-utils/http.test.js';
+
 import koaAdapter from './koa.js';
 
 describe('koaAdapter()', () => {

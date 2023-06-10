@@ -50,8 +50,9 @@ export type ClientConfig = {
 };
 
 export default class PostgresQueryClient extends QueryClient<PostgreSql> {
-  #status: 'active' | 'ended' = 'active';
   public pool: pg.Pool;
+
+  #status: 'active' | 'ended' = 'active';
 
   constructor(
     /** The config for inner `pg.Pool`. */
@@ -92,7 +93,7 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
       return {
         ...result,
         rows: result.rows.map(
-          (data) =>
+          (data: Record<string, unknown>) =>
             // eslint-disable-next-line no-restricted-syntax
             Object.fromEntries(
               Object.entries(data).map(([key, value]) => [camelCase(key), value])

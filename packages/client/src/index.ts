@@ -90,7 +90,7 @@ export default class Client<
       ![RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD]
         .map((value) => value.toLowerCase())
         .includes(method) &&
-      typeof body !== 'undefined' &&
+      body !== undefined &&
       body !== null;
 
     return {
@@ -125,7 +125,7 @@ export default class Client<
         method: method.toUpperCase(),
         headers: this.buildHeaders(url, method, body),
         body:
-          typeof body === 'string' || typeof body === 'undefined' || body === null
+          typeof body === 'string' || body === undefined || body === null
             ? body
             : JSON.stringify(body),
       });

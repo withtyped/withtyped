@@ -1,7 +1,8 @@
 import RequestError from '../../errors/RequestError.js';
-import type { HttpContext, MiddlewareFunction, NextFunction } from '../../middleware.js';
 import type { RequestContext } from '../../middleware/with-request.js';
+import type { HttpContext, MiddlewareFunction, NextFunction } from '../../middleware.js';
 import type { GuardedContext, RequestGuard } from '../types.js';
+
 import { guardInput } from './utils.js';
 
 export abstract class RouteLike<
