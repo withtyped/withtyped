@@ -1,5 +1,6 @@
-import { Transaction, QueryClient, camelCase } from '@withtyped/server';
+import { Transaction, QueryClient } from '@withtyped/server';
 import type { QueryResult } from '@withtyped/server';
+import { camelCase } from '@withtyped/server/model';
 import { log } from '@withtyped/shared';
 import type { PoolConfig, PoolClient } from 'pg';
 import pg from 'pg';

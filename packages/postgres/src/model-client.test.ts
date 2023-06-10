@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { Model, ModelClientError } from '@withtyped/server';
+import { ModelClientError } from '@withtyped/server';
+import Model from '@withtyped/server/model';
 import { normalizeString } from '@withtyped/shared';
 import sinon from 'sinon';
 import { z } from 'zod';

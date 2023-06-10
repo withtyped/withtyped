@@ -1,8 +1,8 @@
 import type { Optional } from '@silverhand/essentials';
 import { z, ZodType } from 'zod';
 
-import type { ModelExtendConfig, ModelParseType, RawParserConfig } from './types';
-import { PrimitiveType } from './types';
+import type { ModelExtendConfig, ModelParseType, RawParserConfig } from './types.js';
+import { PrimitiveType } from './types.js';
 
 const typeToGuard = Object.freeze({
   boolean: z.boolean(),

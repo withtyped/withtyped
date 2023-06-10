@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
 import { noop, RequestMethod } from '@withtyped/shared';
-import OpenAPISchemaValidator from 'openapi-schema-validator';
+import Validator from 'openapi-schema-validator';
 import sinon from 'sinon';
 import { z } from 'zod';
 
@@ -158,8 +158,11 @@ describe('Router', () => {
 
     assert.strictEqual(router1, router3);
     assert.ok(router1.findRoute('get', '/books/books'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('post', '/books/books/books'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('get', '/books/books/books/:id'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('get', '/books/books/books/books'));
     // @ts-expect-error for testing
     assert.ok(!router1.findRoute('get', '/books/books/:id'));
@@ -214,7 +217,6 @@ describe('Router', () => {
 
   it('should build proper OpenAPI JSON', async () => {
     // @ts-expect-error have to do this, looks like a module loader issue
-    const Validator = OpenAPISchemaValidator.default as typeof OpenAPISchemaValidator;
     const validator = new Validator({ version: 3 });
 
     const run = new Router()
@@ -238,7 +240,6 @@ describe('Router', () => {
     await run(
       createRequestContext(RequestMethod.GET, '/openapi.json'),
       async (context) => {
-        // @ts-expect-error for testing
         assert.deepStrictEqual(validator.validate(context.json).errors, []);
       },
       createHttpContext()

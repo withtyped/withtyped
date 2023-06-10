@@ -3,8 +3,6 @@
   "compilerOptions": {
     "outDir": "lib",
     "declaration": true,
-    "module": "esnext",
-    "target": "es2022"
   },
   "include": [
     "src"
