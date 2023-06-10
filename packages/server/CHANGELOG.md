@@ -1,5 +1,13 @@
 # @withtyped/server
 
+## 0.11.0
+
+### Minor Changes
+
+- 0017a81: separate model export to make model universally available
+
+  Use `import {} from '@withtyped/server/model';` to import.
+
 ## 0.10.1
 
 ### Patch Changes
