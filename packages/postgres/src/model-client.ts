@@ -1,5 +1,6 @@
-import type { Model, QueryClient } from '@withtyped/server';
+import type { QueryClient } from '@withtyped/server';
 import { ModelClientError, ModelClient } from '@withtyped/server';
+import type Model from '@withtyped/server/model';
 
 import type { PostgresJson, PostgreSql } from './sql.js';
 import { identifier, jsonIfNeeded, sql } from './sql.js';

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
 import { PostgresInitializer, PostgreSql, PostgresQueryClient, sql } from '@withtyped/postgres';
-import { Model } from '@withtyped/server';
+import Model from '@withtyped/server/model';
 import { z } from 'zod';
 
 import { createDatabaseName } from '../utils/database.js';

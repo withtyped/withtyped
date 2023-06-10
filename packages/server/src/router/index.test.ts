@@ -10,6 +10,7 @@ import RequestError from '../errors/RequestError.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
 import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
 import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
+
 import Router, { createRouter } from './index.js';
 
 describe('Router', () => {
@@ -158,8 +159,11 @@ describe('Router', () => {
 
     assert.strictEqual(router1, router3);
     assert.ok(router1.findRoute('get', '/books/books'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('post', '/books/books/books'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('get', '/books/books/books/:id'));
+    // @ts-expect-error for testing
     assert.ok(router1.findRoute('get', '/books/books/books/books'));
     // @ts-expect-error for testing
     assert.ok(!router1.findRoute('get', '/books/books/:id'));
@@ -213,8 +217,7 @@ describe('Router', () => {
   });
 
   it('should build proper OpenAPI JSON', async () => {
-    // @ts-expect-error have to do this, looks like a module loader issue
-    const Validator = OpenAPISchemaValidator.default as typeof OpenAPISchemaValidator;
+    const { default: Validator } = OpenAPISchemaValidator;
     const validator = new Validator({ version: 3 });
 
     const run = new Router()
@@ -238,7 +241,7 @@ describe('Router', () => {
     await run(
       createRequestContext(RequestMethod.GET, '/openapi.json'),
       async (context) => {
-        // @ts-expect-error for testing
+        // @ts-expect-error for validation
         assert.deepStrictEqual(validator.validate(context.json).errors, []);
       },
       createHttpContext()

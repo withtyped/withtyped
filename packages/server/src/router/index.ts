@@ -2,11 +2,12 @@ import type { RequestMethod } from '@withtyped/shared';
 import { log } from '@withtyped/shared';
 
 import RequestError from '../errors/RequestError.js';
-import type { MiddlewareFunction } from '../middleware.js';
 import type { RequestContext } from '../middleware/with-request.js';
+import type { MiddlewareFunction } from '../middleware.js';
 import { ModelClientError } from '../model-client/errors.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
+
 import { buildOpenApiJson } from './openapi.js';
 import type { RouteLike } from './route/index.js';
 import Route from './route/index.js';

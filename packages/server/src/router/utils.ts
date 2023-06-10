@@ -2,6 +2,7 @@ import { normalizePathname } from '@withtyped/shared';
 
 import type { RequestContext } from '../middleware/with-request.js';
 import { tryThat } from '../utils.js';
+
 import type { RouteLike } from './route/index.js';
 
 /**

@@ -1,4 +1,4 @@
-import { createModel } from '@withtyped/server';
+import { createModel } from '@withtyped/server/model';
 import { z } from 'zod';
 
 export const Book = createModel(/* sql */ `

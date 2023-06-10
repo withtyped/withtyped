@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { Model } from '@withtyped/server';
+import Model from '@withtyped/server/model';
 import sinon from 'sinon';
 
 import PostgresInitializer from './database-initializer.js';

@@ -1,8 +1,9 @@
-import type { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 
 import { RequestMethod } from '@withtyped/shared';
 
 import type { NextFunction } from '../middleware.js';
+
 import type { RequestContext } from './with-request.js';
 
 export type WithCorsConfig<T extends string> = {

@@ -1,5 +1,5 @@
-import type { Model } from '@withtyped/server';
 import { DatabaseInitializer } from '@withtyped/server';
+import type Model from '@withtyped/server/model';
 import { log } from '@withtyped/shared';
 
 import PostgresQueryClient from './query-client.js';
