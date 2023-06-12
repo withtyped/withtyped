@@ -104,6 +104,23 @@ describe('Client', () => {
     );
   });
 
+  it('should send with dynamic promise custom headers', async () => {
+    const client = new Client<typeof router>({
+      baseUrl,
+      headers: async (url, method) => ({ foo: url.pathname, bar: method }),
+    });
+
+    await client.get('/books');
+
+    assert.ok(
+      fakeFetch.calledOnceWith(withPath('/books'), {
+        method: RequestMethod.GET,
+        headers: { host: baseUrl.host, accept: contentTypes.json, foo: '/books', bar: 'get' },
+        body: undefined,
+      })
+    );
+  });
+
   it('should throw when path is not string', async () => {
     const client = new Client<typeof router>(baseUrl);
 

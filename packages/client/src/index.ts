@@ -1,15 +1,14 @@
-import type { Router, BaseRoutes, GuardedPayload, RequestContext } from '@withtyped/server';
+import type { BaseRoutes, GuardedPayload, Router, RouterRoutes } from '@withtyped/server';
 import { RequestMethod, contentTypes, log, normalizePathname } from '@withtyped/shared';
 
 import type {
   RouterClient,
-  RouterRoutes,
   ClientRequestHandler,
   ClientPayload,
   ClientConfig,
   ClientConfigInit,
 } from './types.js';
-import { buildSearch, tryJson } from './utils.js';
+import { buildSearch, isPromise, tryJson } from './utils.js';
 
 export class ResponseError extends Error {
   constructor(public readonly response: Response) {
@@ -22,7 +21,9 @@ export class ResponseError extends Error {
 }
 
 export default class Client<
-  R extends Router<RequestContext, BaseRoutes, string>,
+  // Use `any` here to avoid context conflicts. The final type can be correctly inferred.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  R extends Router<any, BaseRoutes, string>,
   Routes extends BaseRoutes = RouterRoutes<R>
 > implements RouterClient<Routes>
 {
@@ -80,11 +81,11 @@ export default class Client<
       .join('/');
   }
 
-  protected buildHeaders(
+  protected async buildHeaders(
     url: URL,
     method: Lowercase<RequestMethod>,
     body: unknown
-  ): Record<string, string> {
+  ): Promise<Record<string, string>> {
     const { headers } = this.config;
     const needsJson =
       ![RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD]
@@ -92,12 +93,13 @@ export default class Client<
         .includes(method) &&
       body !== undefined &&
       body !== null;
+    const unwrappedHeaders = typeof headers === 'function' ? headers(url, method) : headers;
 
     return {
       host: url.host,
       accept: contentTypes.json,
       ...(needsJson && { 'content-type': contentTypes.json }),
-      ...(typeof headers === 'function' ? headers(url, method) : headers),
+      ...(isPromise(unwrappedHeaders) ? await unwrappedHeaders : unwrappedHeaders),
     };
   }
 
@@ -123,7 +125,7 @@ export default class Client<
 
       const response = await fetch(url, {
         method: method.toUpperCase(),
-        headers: this.buildHeaders(url, method, body),
+        headers: await this.buildHeaders(url, method, body),
         body:
           typeof body === 'string' || body === undefined || body === null
             ? body
