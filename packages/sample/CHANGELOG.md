@@ -1,5 +1,12 @@
 # @withtyped/sample
 
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [cf19a18]
+  - @withtyped/client@0.7.10
+
 ## 0.3.4
 
 ### Patch Changes

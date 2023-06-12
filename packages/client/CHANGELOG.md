@@ -1,5 +1,11 @@
 # @withtyped/client
 
+## 0.7.10
+
+### Patch Changes
+
+- cf19a18: loose RouterRoutes generic input to avoid type conflict
+
 ## 0.7.9
 
 ### Patch Changes
