@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.11.1
+
+### Patch Changes
+
+- 8548019: fix `.required()` Zod type
+
 ## 0.11.0
 
 ### Minor Changes
