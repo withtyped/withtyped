@@ -45,7 +45,9 @@ type CanBePromise<T extends (...args: any[]) => any> =
 
 export type HeadersOption =
   | Record<string, string>
-  | CanBePromise<(url: URL, method: Lowercase<RequestMethod>) => Record<string, string>>;
+  | CanBePromise<
+      (url: URL, method: Lowercase<RequestMethod>) => Record<string, string> | undefined
+    >;
 
 export type ClientConfig = {
   baseUrl: URL;
