@@ -1,5 +1,12 @@
 # @withtyped/sample
 
+## 0.3.4
+
+### Patch Changes
+
+- Updated dependencies [b942d71]
+  - @withtyped/client@0.7.9
+
 ## 0.3.3
 
 ### Patch Changes

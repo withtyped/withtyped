@@ -1,5 +1,15 @@
 # @withtyped/client
 
+## 0.7.9
+
+### Patch Changes
+
+- b942d71: fix Client types
+
+  - Use `any` for Client router context inference to avoid context conflict
+    - E.g. a router with `AuthContext` will not be able to use its type in the Client generic
+  - Support Promise build in `headers` config
+
 ## 0.7.8
 
 ### Patch Changes
