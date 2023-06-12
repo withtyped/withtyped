@@ -20,7 +20,10 @@ import { convertConfigToZod } from './utils.zod.js';
 export type ModelZodObject<M> = z.ZodObject<{
   // Without the `-?` here Zod will infer those optional key types
   // to `unknown` which is unexpected.
-  [Key in keyof M]-?: z.ZodType<M[Key]>;
+  [Key in keyof M]-?: undefined extends M[Key]
+    ? // Explicitly use `ZodOptional` since it's needed for `.required()` to recognize optional fields
+      z.ZodOptional<z.ZodType<Exclude<M[Key], undefined>>>
+    : z.ZodType<M[Key]>;
 }>;
 
 export default class Model<
