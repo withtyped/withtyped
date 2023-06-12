@@ -7,6 +7,10 @@ export type ClientPayload = {
   body?: unknown;
 };
 
+/**
+ * Infer the routes type of a router. The result will be `never` if a non-router type is given.
+ * @see {@link Router}
+ */
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
   infer _,
   infer Routes,
@@ -33,20 +37,28 @@ export type RouterClient<Routes extends BaseRoutes> = {
   [key in Lowercase<RequestMethod>]: ClientRequestHandler<Routes[key]>;
 };
 
+// Use `any` here for compatibility. The final type can be correctly inferred.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CanBePromise<T extends (...args: any[]) => any> =
+  | T
+  | ((...args: Parameters<T>) => Promise<ReturnType<T>>);
+
+export type HeadersOption =
+  | Record<string, string>
+  | CanBePromise<
+      (url: URL, method: Lowercase<RequestMethod>) => Record<string, string> | undefined
+    >;
+
 export type ClientConfig = {
   baseUrl: URL;
-  headers?:
-    | Record<string, string>
-    | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
+  headers?: HeadersOption;
 };
 
 export type ClientConfigInit = {
   /** Base URL to prepend for every request. Only origin and pathname will be applied. */
   baseUrl: string | URL;
   /** Additional headers to append for every request, also accepts a function that returns headers. */
-  headers?:
-    | Record<string, string>
-    | ((url: URL, method: Lowercase<RequestMethod>) => Record<string, string>);
+  headers?: HeadersOption;
 };
 
 export { RequestMethod } from '@withtyped/shared';
