@@ -7,13 +7,15 @@
   "source": "./src/index.ts",
   "exports": {
     ".": {
-      "import": "./lib/index.js"
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
     },
     "./lib/*": {
       "import": "./lib/*"
     },
     "./model": {
-      "import": "./lib/model/index.js"
+      "import": "./lib/model/index.js",
+      "types": "./lib/model/index.d.ts"
     }
   },
   "module": "./lib/index.js",
