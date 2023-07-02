@@ -1,5 +1,15 @@
 # @withtyped/postgres
 
+## 0.12.0
+
+### Patch Changes
+
+- 81f1467: add "types" field for node "exports" to explicitly define type files
+- Updated dependencies [81f1467]
+- Updated dependencies [81f1467]
+  - @withtyped/server@0.12.0
+  - @withtyped/shared@0.2.1
+
 ## 0.11.0
 
 ### Patch Changes
