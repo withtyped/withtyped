@@ -212,22 +212,6 @@ server.listen((port) => {
 });
 ```
 
-#### Use router in an existing HTTP framework
-
-One advantage of framework-agonistic is you can progressively adopt a new stuff. E.g., with the KoaJS adapter:
-
-```ts
-import { koaAdapter } from '@withtyped/server';
-
-// `app` is a KoaJS app
-app.use(koaAdapter(router.routes()));
-```
-
-> **Note**
-> In this case, the typed client is still available to use.
-
-I believe ExpressJS can have an adapter with the same pattern. Let me know if you need it.
-
 #### Client
 
 With the router above, in your client project:
