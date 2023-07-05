@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.1
+
+### Patch Changes
+
+- 0ec9abc: Allow multiple items in `content-type` header
+
 ## 0.12.0
 
 ### Minor Changes
