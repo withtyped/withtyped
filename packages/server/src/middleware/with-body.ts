@@ -63,7 +63,11 @@ export default function withBody<InputContext extends RequestContext>() {
       return next(context as WithBodyContext<InputContext>);
     }
 
-    if (context.request.headers['content-type'] !== contentTypes.json) {
+    if (
+      context.request.headers['content-type']
+        ?.split(';')
+        .every((value) => value.trim() !== contentTypes.json)
+    ) {
       throw new RequestError(
         `Unexpected \`content-type\` header, only accept "${contentTypes.json}"`,
         400
