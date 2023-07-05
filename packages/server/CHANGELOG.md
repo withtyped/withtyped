@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.2
+
+### Patch Changes
+
+- 0edf34b: Add `bodyRaw` buffer to context in `withBody()`
+
 ## 0.12.1
 
 ### Patch Changes
