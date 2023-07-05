@@ -8,7 +8,7 @@ import type { MergeRequestContext, RequestContext } from './with-request.js';
 
 export type WithBodyContext<InputContext extends RequestContext> = MergeRequestContext<
   InputContext,
-  { body?: Json }
+  { body?: Json; bodyRaw?: Buffer }
 >;
 
 const tryParse = (body: string): Json | undefined => {
@@ -74,6 +74,9 @@ export default function withBody<InputContext extends RequestContext>() {
       );
     }
 
-    return next({ ...context, request: { ...context.request, body: tryParse(rawString) } });
+    return next({
+      ...context,
+      request: { ...context.request, body: tryParse(rawString), bodyRaw: raw },
+    });
   };
 }

@@ -97,6 +97,7 @@ describe('withBody()', () => {
       mockContext,
       async (context) => {
         assert.deepStrictEqual(context.request.body, JSON.parse(stringArray.join('')));
+        assert.deepStrictEqual(context.request.bodyRaw, Buffer.from(stringArray.join('')));
       },
       httpContext
     );
@@ -118,6 +119,7 @@ describe('withBody()', () => {
       { ...mockContext, headers: { 'content-type': `${contentTypes.json}; charset=utf-8` } },
       async (context) => {
         assert.deepStrictEqual(context.request.body, JSON.parse(stringArray.join('')));
+        assert.deepStrictEqual(context.request.bodyRaw, Buffer.from(stringArray.join('')));
       },
       httpContext
     );
@@ -154,6 +156,7 @@ describe('withBody()', () => {
       async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
         assert.deepStrictEqual(context.request.body, undefined);
+        assert.deepStrictEqual(context.request.bodyRaw, Buffer.from(stringArray.join('')));
       },
       httpContext
     );
