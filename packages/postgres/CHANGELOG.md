@@ -1,5 +1,14 @@
 # @withtyped/postgres
 
+## 0.12.1
+
+### Patch Changes
+
+- c8ba298: Allow multiple middleware functions in routes
+- Updated dependencies [c8ba298]
+  - @withtyped/server@0.12.3
+  - @withtyped/shared@0.2.2
+
 ## 0.12.0
 
 ### Patch Changes

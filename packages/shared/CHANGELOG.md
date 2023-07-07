@@ -1,5 +1,11 @@
 # @withtyped/shared
 
+## 0.2.2
+
+### Patch Changes
+
+- c8ba298: Allow multiple middleware functions in routes
+
 ## 0.2.1
 
 ### Patch Changes

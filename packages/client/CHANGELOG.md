@@ -1,5 +1,14 @@
 # @withtyped/client
 
+## 0.7.14
+
+### Patch Changes
+
+- c8ba298: Allow multiple middleware functions in routes
+- Updated dependencies [c8ba298]
+  - @withtyped/server@0.12.3
+  - @withtyped/shared@0.2.2
+
 ## 0.7.13
 
 ### Patch Changes
