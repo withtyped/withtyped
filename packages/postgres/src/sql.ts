@@ -20,6 +20,18 @@ export class DangerousRawPostgreSql extends Sql {
   }
 }
 
+/**
+ * Create a raw SQL string without escaping.
+ *
+ * **CAUTION**: This is dangerous and should only be used for trusted input.
+ *
+ * @example ```ts
+ * sql`${dangerousRaw(`select ${'foo'}`)}` // select foo
+ * sql`${dangerousRaw(`select ${'foo'} ${'from bar'}`)}` // select foo from bar
+ * // Without `dangerousRaw`, the above would be:
+ * sql`select ${'foo'} ${'from bar'}` // select $1 $2
+ * ```
+ */
 export const dangerousRaw = createDangerousRawSqlFunction(DangerousRawPostgreSql);
 
 export class IdentifierPostgreSql extends Sql {
@@ -35,9 +47,36 @@ export class IdentifierPostgreSql extends Sql {
   }
 }
 
+/**
+ * Create a SQL identifier (e.g. table or column name) from one or more strings.
+ * Each string will be escaped and joined with a period.
+ *
+ * @example ```ts
+ * sql`identifier('foo')` // "foo"
+ * sql`identifier('foo', 'bar')` // "foo"."bar"
+ * ```
+ */
 export const identifier = createIdentifierSqlFunction(IdentifierPostgreSql);
+/**
+ * Alias for {@link identifier()}.
+ *
+ * Create a SQL identifier (e.g. table or column name) from one or more strings.
+ * Each string will be escaped and joined with a period.
+ *
+ * @example ```ts
+ * sql`identifier('foo')` // "foo"
+ * sql`identifier('foo', 'bar')` // "foo"."bar"
+ * ```
+ */
 export const id = identifier;
 
+/**
+ * The acceptable JSON types for Postgres, which is a union of {@link Json}
+ * and {@link Date}.
+ *
+ * `Json` is a union of primitive types (string, number, boolean, null) and
+ * `JsonArray` and `JsonObject`.
+ */
 export type PostgresJson = Json | Date;
 export type InputArgument =
   | PostgresJson
@@ -133,6 +172,27 @@ export class JsonPostgreSql extends Sql<string, PostgresJson> {
   }
 }
 
+/**
+ * A tag function for Postgres queries. Which can be used as a template literal.
+ * It will automatically escape values and convert them to the parameterized form
+ * expected by `pg`.
+ *
+ * Use {@link identifier()} (or {@link id()}) to escape identifiers (e.g. table or column
+ * names).
+ *
+ * @example ```ts
+ * sql`select * from ${id('foo')} where ${id('bar')} = ${'baz'}`
+ * // select * from "foo" where "bar" = $1
+ * ```
+ * Sql tags can be nested:
+ *
+ * @example ```ts
+ * sql`update ${id('foo')} set ${[sql`bar = ${'baz'}`, sql`qux = ${'quux'}`]}`
+ * // update "foo" set bar = $1, qux = $2
+ * ```
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates | MDN: Tagged templates}
+ */
 export const sql = createSqlTag(PostgreSql);
 
 export const json = (data: PostgresJson) =>
