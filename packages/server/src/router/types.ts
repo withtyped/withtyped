@@ -91,8 +91,24 @@ export type GuardedResponse<T> = T extends PathGuard<string, unknown, unknown, i
 
 export type Guarded<Path extends string, Search, Body> = {
   params: Params<Path>;
-  search: Search;
-  body: Body;
+  /**
+   * Fall back to `unknown` if `Search` or `Body` are `never` (i.e. not provided).
+   * This conditional type is necessary because in routes with no search or body,
+   * `Search` and `Body` will be `never` but the TypeScript compiler will infer the
+   * middleware function to have `unknown` for the `search` and `body` properties.
+   *
+   * @see {@link https://stackoverflow.com/a/65492934/12514940 | StackOverflow} for why using `[Search] extends [never]` instead of `Search extends never`.
+   */
+  search: [Search] extends [never] ? unknown : Search;
+  /**
+   * Fall back to `unknown` if `Search` or `Body` are `never` (i.e. not provided).
+   * This conditional type is necessary because in routes with no search or body,
+   * `Search` and `Body` will be `never` but the TypeScript compiler will infer the
+   * middleware function to have `unknown` for the `search` and `body` properties.
+   *
+   * * @see {@link https://stackoverflow.com/a/65492934/12514940 | StackOverflow} for why using `[Body] extends [never]` instead of `Body extends never`.
+   */
+  body: [Body] extends [never] ? unknown : Body;
 };
 
 export type GuardedContext<
