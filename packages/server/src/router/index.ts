@@ -1,9 +1,10 @@
 import type { RequestMethod } from '@withtyped/shared';
 import { log } from '@withtyped/shared';
 
+import { createComposer } from '../compose.js';
 import RequestError from '../errors/RequestError.js';
 import type { RequestContext } from '../middleware/with-request.js';
-import type { MiddlewareFunction } from '../middleware.js';
+import type { BaseContext, MiddlewareFunction } from '../middleware.js';
 import { ModelClientError } from '../model-client/errors.js';
 import type { OpenAPIV3 } from '../openapi/openapi-types.js';
 import type { Parser } from '../types.js';
@@ -11,13 +12,12 @@ import type { Parser } from '../types.js';
 import { buildOpenApiJson } from './openapi.js';
 import type { RouteLike } from './route/index.js';
 import Route from './route/index.js';
+import { type BuildRoute } from './types.build-route.js';
 import type {
   BaseRoutes,
-  GuardedContext,
   MergeRoutes,
   Normalized,
   NormalizedPrefix,
-  PathGuard,
   RequestGuard,
   RoutesWithPrefix,
 } from './types.js';
@@ -28,57 +28,6 @@ export * from './types.js';
 export type MethodRoutesMap<InputContext extends RequestContext> = Record<
   string,
   Array<RouteLike<InputContext>>
->;
-
-export type RouterWithRoute<
-  InputContext extends RequestContext,
-  Routes extends BaseRoutes,
-  Prefix extends string,
-  Method extends Lowercase<RequestMethod>,
-  Path extends string,
-  Search,
-  Body,
-  JsonResponse
-> = Router<
-  InputContext,
-  {
-    [method in Lowercase<RequestMethod>]: method extends Method
-      ? Routes[method] & {
-          [path in Path as Normalized<`${Prefix}${Path}`>]: PathGuard<
-            Path,
-            Search,
-            Body,
-            JsonResponse
-          >;
-        }
-      : Routes[method];
-  },
-  Prefix
->;
-
-export type BuildRoute<
-  InputContext extends RequestContext,
-  Routes extends BaseRoutes,
-  Prefix extends string,
-  Method extends Lowercase<RequestMethod>
-> = <Path extends string, Search, Body, JsonResponse>(
-  path: Path extends Normalized<Path> ? Path : never,
-  guard: RequestGuard<Search, Body, JsonResponse>,
-  run: MiddlewareFunction<
-    GuardedContext<InputContext, Path extends Normalized<Path> ? Path : never, Search, Body>,
-    InputContext & {
-      json?: JsonResponse;
-    }
-  >
-) => RouterWithRoute<
-  InputContext,
-  Routes,
-  Prefix,
-  Method,
-  Normalized<Path>,
-  Search,
-  Body,
-  JsonResponse
 >;
 
 type BaseRouter<
@@ -95,6 +44,20 @@ export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends
 >
   ? Routes
   : never;
+
+/**
+ * WARNING: Don't use this function unless you know what you are doing.
+ *
+ * Compose an array of middleware functions into a single middleware function,
+ * by filtering out all falsy values. This function does NOT check the type of
+ * the input, so you should make sure the input is an array of middleware
+ * functions, and manually specify the input and output context types.
+ */
+const composeArray = <InputContext extends BaseContext, OutputContext extends BaseContext>(
+  ...runs: unknown[]
+) => {
+  return createComposer<unknown[], InputContext, OutputContext>(runs.filter(Boolean));
+};
 
 export default class Router<
   InputContext extends RequestContext = RequestContext,
@@ -223,9 +186,15 @@ export default class Router<
   private buildRoute<Method extends Lowercase<RequestMethod>>(
     method: Method
   ): BuildRoute<InputContext, Routes, Prefix, Method> {
-    return (path, guard, run) => {
+    // @ts-expect-error The function overload it too complex to make TypeScript happy
+    // We'll make it right in the implementation
+    return <Path extends string, Search, Body, JsonResponse>(
+      path: Path extends Normalized<Path> ? Path : never,
+      guard: RequestGuard<Search, Body, JsonResponse>,
+      ...runs: Array<MiddlewareFunction<InputContext>>
+    ) => {
       this.routesMap[method] = (this.routesMap[method] ?? []).concat(
-        new Route(this.prefix, path, guard, run)
+        new Route(this.prefix, path, guard, composeArray<InputContext, InputContext>(...runs))
       );
 
       // eslint-disable-next-line no-restricted-syntax
@@ -244,3 +213,5 @@ export type CreateRouter = {
 export const createRouter: CreateRouter = <Prefix extends string>(
   prefix?: NormalizedPrefix<Prefix>
 ) => (prefix ? new Router(prefix) : new Router()); // To make TypeScript happy
+
+export type { RouterWithRoute, BuildRoute } from './types.build-route.js';

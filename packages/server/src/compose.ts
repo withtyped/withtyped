@@ -65,7 +65,7 @@ const buildNext = (
  * @param functions An array of (supposed to be) middleware functions.
  * @returns A composer with the given functions.
  */
-const createComposer = function <
+export const createComposer = function <
   T extends unknown[],
   InputContext extends BaseContext,
   OutputContext extends BaseContext

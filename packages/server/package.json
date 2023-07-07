@@ -30,7 +30,7 @@
     "dev": "pnpm build --watch --preserveWatchOutput --incremental",
     "dev:test": "pnpm build --sourcemap && pnpm test",
     "lint": "eslint src/",
-    "test": "c8 --all node --test | tap-arc",
+    "test": "c8 --all node --test",
     "test:only": "node --test"
   },
   "devDependencies": {
@@ -47,7 +47,6 @@
     "prettier": "^2.8.4",
     "sinon": "^14.0.2",
     "supertest": "^6.3.2",
-    "tap-arc": "^0.3.5",
     "typescript": "^5.1.0",
     "zod": "^3.19.1"
   },

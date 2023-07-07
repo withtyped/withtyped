@@ -7,6 +7,8 @@ import sinon from 'sinon';
 import { z } from 'zod';
 
 import RequestError from '../errors/RequestError.js';
+import { type RequestContext } from '../index.js';
+import { type NextFunction, type MiddlewareFunction } from '../middleware.js';
 import { bookGuard, createBook, createBookWithoutId } from '../test-utils/entities.test.js';
 import { createHttpContext, createRequestContext } from '../test-utils/http.test.js';
 import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.test.js';
@@ -33,7 +35,7 @@ describe('Router', () => {
 
     await run(context1, noop, httpContext);
     assert.strictEqual(mid1.callCount, 1);
-    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1)), true);
+    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1), sinon.match.func), true);
 
     await Promise.all([
       run(context2, noop, httpContext),
@@ -41,14 +43,74 @@ describe('Router', () => {
       run(context4, noop, httpContext),
     ]);
     assert.strictEqual(mid1.callCount, 1);
-    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1)), true);
+    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1), sinon.match.func), true);
     assert.strictEqual(mid2.callCount, 1);
-    assert.strictEqual(mid2.calledOnceWith(sinon.match(context2)), true);
+    assert.strictEqual(mid2.calledOnceWith(sinon.match(context2), sinon.match.func), true);
     assert.strictEqual(mid3.callCount, 1);
     assert.strictEqual(
-      mid3.calledOnceWith(sinon.match({ ...context3, guarded: { params: {} } })),
+      mid3.calledOnceWith(sinon.match({ ...context3, guarded: { params: {} } }), sinon.match.func),
       true
     );
+  });
+
+  it('should run multiple middleware functions in chain', async () => {
+    const mid1 = sinon.fake((async (context, next) =>
+      next({ ...context, foo: 'bar' })) satisfies MiddlewareFunction<
+      RequestContext,
+      RequestContext & { foo: string }
+    >);
+
+    const mid2 = sinon.fake(async (context, next) =>
+      next({ ...context, bar: 123 })
+    ) satisfies MiddlewareFunction<
+      RequestContext & { foo: string },
+      RequestContext & { foo: string; bar: number }
+    >;
+
+    const mid3 = sinon.fake(async ({ foo, bar, ...rest }, next) =>
+      next(rest)
+    ) satisfies MiddlewareFunction<RequestContext & { foo: string; bar: number }, RequestContext>;
+    const mid4 = sinon.fake(async (context: RequestContext, next: NextFunction<RequestContext>) =>
+      next(context)
+    );
+    const mid5 = sinon.fake(async (context: RequestContext, next: NextFunction<RequestContext>) =>
+      next(context)
+    );
+    const mid6 = sinon.fake();
+    const mid7 = sinon.fake();
+
+    const router1 = new Router().get(
+      '/books',
+      { response: z.object({ books: bookGuard.array() }) },
+      mid1,
+      mid2,
+      mid3,
+      mid4,
+      mid5,
+      // @ts-expect-error test for more middleware functions, they should work in js.
+      mid6,
+      mid7
+    );
+    const context1 = createRequestContext(RequestMethod.GET, '/books');
+
+    const run = router1.routes();
+    const httpContext = createHttpContext();
+
+    await run(context1, noop, httpContext);
+
+    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(
+      mid2.calledOnceWith(sinon.match({ ...context1, foo: 'bar' }), sinon.match.func),
+      true
+    );
+    assert.strictEqual(
+      mid3.calledOnceWith(sinon.match({ ...context1, foo: 'bar', bar: 123 }), sinon.match.func),
+      true
+    );
+    assert.strictEqual(mid4.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(mid5.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(mid6.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(mid7.notCalled, true);
   });
 
   it('should set status to 200 with the proper json when everything is ok', async () => {
