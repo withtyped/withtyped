@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.4
+
+### Patch Changes
+
+- bb96f24: Fix `Guarded` type and add comments
+
 ## 0.12.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@withtyped/sample",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "author": "Gao Sun",
   "license": "MIT",
   "main": "lib/index.js",

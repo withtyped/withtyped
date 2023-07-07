@@ -1,5 +1,13 @@
 # @withtyped/postgres
 
+## 0.12.2
+
+### Patch Changes
+
+- bb96f24: Fix `Guarded` type and add comments
+- Updated dependencies [bb96f24]
+  - @withtyped/server@0.12.4
+
 ## 0.12.1
 
 ### Patch Changes
