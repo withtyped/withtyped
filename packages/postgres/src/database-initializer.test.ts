@@ -5,14 +5,21 @@ import Model from '@withtyped/server/model';
 import sinon from 'sinon';
 
 import PostgresInitializer from './database-initializer.js';
-import PostgresQueryClient from './query-client.js';
+import PostgresQueryClient, { PostgresTransaction } from './query-client.js';
 import { PostgreSql } from './sql.js';
+
+class FakeTransaction extends PostgresTransaction {
+  start = sinon.stub();
+  end = sinon.stub();
+  query = sinon.stub();
+  tryQuery = sinon.stub();
+}
 
 class FakeQueryClient extends PostgresQueryClient {
   config = { database: 'withtyped' };
   connect = sinon.stub();
   end = sinon.stub();
-  query = sinon.stub();
+  transaction = sinon.stub();
 }
 
 describe('PostgresInitializer', () => {
@@ -36,7 +43,11 @@ describe('PostgresInitializer', () => {
   });
 
   it('should be able to create the target database when it does not exist', async () => {
+    // @ts-expect-error Stubbed
+    const transaction = new FakeTransaction();
     const queryClient = new FakeQueryClient();
+    queryClient.transaction.returns(transaction);
+
     const initializer = new PostgresInitializer([], queryClient);
 
     queryClient.connect.onFirstCall().callsFake(() => {
@@ -72,7 +83,11 @@ describe('PostgresInitializer', () => {
   });
 
   it('should be able to initialize tables with the given raw sql and schema', async () => {
+    // @ts-expect-error Stubbed
+    const transaction = new FakeTransaction();
     const queryClient = new FakeQueryClient();
+    queryClient.transaction.returns(transaction);
+
     const model1 = Model.create(`create table model1 ();`);
     const model2 = Model.create(`create table model2 ();`);
     const initializer = new PostgresInitializer([model1, model2], queryClient, 'foo');
@@ -82,7 +97,7 @@ describe('PostgresInitializer', () => {
     await initializer.initialize();
     assert.ok(queryClient.connect.calledOnce);
 
-    const { firstCall, secondCall, args } = queryClient.query;
+    const { firstCall, secondCall, args } = transaction.query;
 
     assert.ok(firstCall.firstArg instanceof PostgreSql);
     assert.deepStrictEqual(firstCall.firstArg.composed.raw, 'create schema if not exists "foo";');
@@ -91,5 +106,7 @@ describe('PostgresInitializer', () => {
     assert.deepStrictEqual(secondCall.firstArg.composed.raw, 'set search_path to "foo";');
 
     assert.ok(args.every((args) => args[0] instanceof PostgreSql));
+
+    sinon.restore();
   });
 });

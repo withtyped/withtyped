@@ -31,19 +31,21 @@ export default class PostgresInitializer extends DatabaseInitializer<PostgresQue
   async initialize(): Promise<void> {
     await this.createDatabaseIfNeeded();
 
+    const transaction = await this.queryClient.transaction();
+    await transaction.start();
+
     if (this.schema) {
-      await this.queryClient.query(sql`create schema if not exists ${identifier(this.schema)};`);
-      await this.queryClient.query(sql`set search_path to ${identifier(this.schema)};`);
+      await transaction.query(sql`create schema if not exists ${identifier(this.schema)};`);
+      await transaction.query(sql`set search_path to ${identifier(this.schema)};`);
     }
 
     for (const model of this.models) {
       log.warn(`Creating table ${model.tableName}`);
       // eslint-disable-next-line no-await-in-loop
-      await this.queryClient.query(
-        new PostgreSql(Object.assign([model.raw], { raw: [model.raw] }), [])
-      );
+      await transaction.query(new PostgreSql(Object.assign([model.raw], { raw: [model.raw] }), []));
     }
 
+    await transaction.end();
     log.warn('Database initialization completed');
   }
 
