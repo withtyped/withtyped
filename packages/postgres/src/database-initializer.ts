@@ -11,6 +11,7 @@ export default class PostgresInitializer extends DatabaseInitializer<PostgresQue
   constructor(
     public readonly models: Array<Model<string, Record<string, unknown>>>,
     public readonly queryClient: PostgresQueryClient,
+    public readonly schema?: string,
     public readonly maintenanceDatabase = 'postgres'
   ) {
     super();
@@ -22,8 +23,18 @@ export default class PostgresInitializer extends DatabaseInitializer<PostgresQue
     this.database = queryClient.config.database;
   }
 
+  /**
+   * Initialize database according to the models.
+   *
+   * CAUTION: If schema is specified, the `search_path` will be set to the schema.
+   */
   async initialize(): Promise<void> {
     await this.createDatabaseIfNeeded();
+
+    if (this.schema) {
+      await this.queryClient.query(sql`create schema if not exists ${identifier(this.schema)};`);
+      await this.queryClient.query(sql`set search_path to ${identifier(this.schema)};`);
+    }
 
     for (const model of this.models) {
       log.warn(`Creating table ${model.tableName}`);

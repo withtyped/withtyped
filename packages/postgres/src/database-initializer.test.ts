@@ -71,17 +71,25 @@ describe('PostgresInitializer', () => {
     assert.ok(queryClient.end.calledOnce);
   });
 
-  it('should be able to initialize tables with the given raw sql', async () => {
+  it('should be able to initialize tables with the given raw sql and schema', async () => {
     const queryClient = new FakeQueryClient();
     const model1 = Model.create(`create table model1 ();`);
     const model2 = Model.create(`create table model2 ();`);
-    const initializer = new PostgresInitializer([model1, model2], queryClient);
+    const initializer = new PostgresInitializer([model1, model2], queryClient, 'foo');
 
     assert.deepStrictEqual(initializer.tableSqlStrings(), [model1.raw, model2.raw]);
 
     await initializer.initialize();
     assert.ok(queryClient.connect.calledOnce);
-    assert.ok(queryClient.query.args[0]?.[0] instanceof PostgreSql);
-    assert.ok(queryClient.query.args[1]?.[0] instanceof PostgreSql);
+
+    const { firstCall, secondCall, args } = queryClient.query;
+
+    assert.ok(firstCall.firstArg instanceof PostgreSql);
+    assert.deepStrictEqual(firstCall.firstArg.composed.raw, 'create schema if not exists "foo";');
+
+    assert.ok(secondCall.firstArg instanceof PostgreSql);
+    assert.deepStrictEqual(secondCall.firstArg.composed.raw, 'set search_path to "foo";');
+
+    assert.ok(args.every((args) => args[0] instanceof PostgreSql));
   });
 });
