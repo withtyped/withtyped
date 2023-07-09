@@ -1,5 +1,12 @@
 # @withtyped/postgres
 
+## 0.12.4
+
+### Patch Changes
+
+- f269a41: Use transaction for initializer
+- 364af05: Use optional chainning for result parsing
+
 ## 0.12.3
 
 ### Patch Changes
