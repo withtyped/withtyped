@@ -55,8 +55,8 @@ describe('sql tag', () => {
       update ${id('foo')}    
       set    ${(
         [
-          [id('col1'), 123],
-          [id('col2'), true],
+          [id('public', 'col1'), 123],
+          [id('"ok"', 'col2'), true],
           [id('col3'), null],
           [id('col4'), { foo: 'bar' }],
         ] as const
@@ -65,7 +65,7 @@ describe('sql tag', () => {
 
     assert.strictEqual(
       normalizeString(raw),
-      'update "foo" set "col1"=$1, "col2"=$2, "col3"=$3, "col4"=$4 and "something";'
+      'update "foo" set "public"."col1"=$1, """ok"""."col2"=$2, "col3"=$3, "col4"=$4 and "something";'
     );
     assert.deepStrictEqual(args, [123, true, null, { foo: 'bar' }]);
   });

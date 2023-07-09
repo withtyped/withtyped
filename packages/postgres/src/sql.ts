@@ -7,6 +7,15 @@ import {
 } from '@withtyped/server';
 import { log } from '@withtyped/shared';
 
+/**
+ * Copied from https://github.com/brianc/node-postgres/blob/970804b6c110fab500da9db71d68d04e0ecea406/packages/pg/lib/utils.js#L165-L168
+ * since `pg` doesn't export this function directly.
+ */
+// Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c
+const escapeIdentifier = function (value: string) {
+  return '"' + value.replace(/"/g, '""') + '"';
+};
+
 export class DangerousRawPostgreSql extends Sql {
   public compose(rawArray: string[], _: unknown[], indexInit = 0) {
     // eslint-disable-next-line @silverhand/fp/no-mutating-methods
@@ -37,7 +46,7 @@ export const dangerousRaw = createDangerousRawSqlFunction(DangerousRawPostgreSql
 export class IdentifierPostgreSql extends Sql {
   public compose(rawArray: string[], _: unknown[], indexInit = 0) {
     // eslint-disable-next-line @silverhand/fp/no-mutating-methods
-    rawArray.push(this.strings.map((value) => `"${value}"`).join('.'));
+    rawArray.push(this.strings.map((value) => escapeIdentifier(value)).join('.'));
 
     return { lastIndex: indexInit };
   }
