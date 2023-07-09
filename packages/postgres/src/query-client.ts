@@ -92,7 +92,9 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
     if (this.clientConfig?.transform?.result === 'camelCase') {
       return {
         ...result,
-        rows: result.rows.map(
+        // It could be `undefined` if it is not a `SELECT` query.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        rows: result.rows?.map(
           (data: Record<string, unknown>) =>
             // eslint-disable-next-line no-restricted-syntax
             Object.fromEntries(
