@@ -1,5 +1,12 @@
 # @withtyped/postgres
 
+## 0.12.3
+
+### Patch Changes
+
+- 5483c1f: Support schema in initializer
+- 42c851a: Escape identifiers
+
 ## 0.12.2
 
 ### Patch Changes
