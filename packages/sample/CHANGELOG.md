@@ -1,5 +1,15 @@
 # @withtyped/sample
 
+## 0.3.13
+
+### Patch Changes
+
+- Updated dependencies [b3b48dc]
+- Updated dependencies [118e63d]
+  - @withtyped/postgres@0.12.5
+  - @withtyped/server@0.12.5
+  - @withtyped/client@0.7.16
+
 ## 0.3.12
 
 ### Patch Changes
