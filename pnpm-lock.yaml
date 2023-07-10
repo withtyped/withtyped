@@ -115,6 +115,9 @@ importers:
 
   packages/postgres:
     dependencies:
+      '@silverhand/essentials':
+        specifier: ^2.7.0
+        version: 2.7.0
       '@types/pg':
         specifier: ^8.6.5
         version: 8.6.5
@@ -700,6 +703,11 @@ packages:
   /@silverhand/essentials@2.5.0:
     resolution: {integrity: sha512-8GgVFAmbo6S0EgsjYXH4aH8a69O7SzEtPFPDpVZmJuGEt8e3ODVx0F2V4rXyC3/SzFbcb2md2gRbA+Z6aTad6g==}
     engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^7}
+    dev: false
+
+  /@silverhand/essentials@2.7.0:
+    resolution: {integrity: sha512-F5Qo5ZNnERUURK/9F1ZIi4FBDM22aeD59Zv0VtkgIhUL9tYK9svA2Jz88NNdYBwqCPrh8ExZlpFNi+pNmXKNlQ==}
+    engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^8.0.0}
     dev: false
 
   /@silverhand/ts-config@3.0.0(typescript@5.1.3):

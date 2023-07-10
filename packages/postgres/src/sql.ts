@@ -1,9 +1,16 @@
-import type { Json, JsonArray, JsonObject } from '@withtyped/server';
+import { conditionalArray } from '@silverhand/essentials';
 import {
+  type IdentifiableUpdateColumn,
+  type IdentifiableColumn,
+  type IdentifiableModel,
+  type Json,
+  type JsonArray,
+  type JsonObject,
   createDangerousRawSqlFunction,
   createIdentifierSqlFunction,
   createSqlTag,
   Sql,
+  idSymbols,
 } from '@withtyped/server';
 import { log } from '@withtyped/shared';
 
@@ -34,9 +41,11 @@ export class DangerousRawPostgreSql extends Sql {
  *
  * **CAUTION**: This is dangerous and should only be used for trusted input.
  *
- * @example ```ts
+ * @example
+ * ```ts
  * sql`${dangerousRaw(`select ${'foo'}`)}` // select foo
  * sql`${dangerousRaw(`select ${'foo'} ${'from bar'}`)}` // select foo from bar
+ *
  * // Without `dangerousRaw`, the above would be:
  * sql`select ${'foo'} ${'from bar'}` // select $1 $2
  * ```
@@ -90,7 +99,10 @@ export type PostgresJson = Json | Date;
 export type InputArgument =
   | PostgresJson
   | Sql
-  | Array<Sql | Exclude<PostgresJson, JsonArray | JsonObject>>;
+  | Array<Sql | Exclude<PostgresJson, JsonArray | JsonObject>>
+  | IdentifiableModel<Record<string, unknown>>
+  | IdentifiableColumn
+  | IdentifiableUpdateColumn;
 
 /** Sql tag class for `pg` (i.e. node-pg) */
 export class PostgreSql extends Sql<PostgresJson, InputArgument> {
@@ -113,7 +125,10 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
 
       if (argument instanceof Sql) {
         combineSql(argument);
-      } else if (Array.isArray(argument)) {
+        return;
+      }
+
+      if (Array.isArray(argument)) {
         const [first, ...rest] = argument;
 
         if (first) {
@@ -124,11 +139,31 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
           rawArray.push(', ');
           handle(sql);
         }
-      } else {
-        globalIndex += 1;
-        rawArray.push(`$${globalIndex}`);
-        args.push(argument);
+        return;
       }
+
+      if (typeof argument === 'object' && argument !== null) {
+        if (idSymbols.model in argument) {
+          const { schema, tableName } = argument[idSymbols.model];
+          combineSql(id(...conditionalArray(schema, tableName)));
+          return;
+        }
+
+        if (idSymbols.column in argument) {
+          const { model, name } = argument;
+          combineSql(id(...conditionalArray(model.schema, model.tableName, name)));
+          return;
+        }
+
+        if (idSymbols.updateColumn in argument) {
+          combineSql(id(argument.name));
+          return;
+        }
+      }
+
+      globalIndex += 1;
+      rawArray.push(`$${globalIndex}`);
+      args.push(argument);
     };
 
     for (const [index, value] of this.strings.entries()) {
@@ -193,6 +228,7 @@ export class JsonPostgreSql extends Sql<string, PostgresJson> {
  * sql`select * from ${id('foo')} where ${id('bar')} = ${'baz'}`
  * // select * from "foo" where "bar" = $1
  * ```
+ *
  * Sql tags can be nested:
  *
  * @example ```ts

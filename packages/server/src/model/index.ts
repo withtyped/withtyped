@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+import {
+  type IdentifiableColumn,
+  type IdentifiableModel,
+  idSymbols,
+  type IdentifiableModelMetadata,
+} from '../identifiable/index.js';
+
 import type {
   Entity,
   EntityHasDefaultKeys,
@@ -33,7 +40,44 @@ export default class Model<
   DefaultKeys extends string = never,
   ReadonlyKeys extends string = never
 > {
-  static create = <Raw extends string>(raw: Raw) => {
+  /**
+   * Create a new model instance according to the raw query of creating a table.
+   *
+   * @param raw Raw query of creating a table. An ending semicolon `;` is required.
+   * @param schema Schema name of the table.
+   *
+   * @example
+   * ```ts
+   * const model = Model.create(`
+   *   create table foo (id varchar(32) primary key not null, bar bigint);
+   * `);
+   *
+   * type Model = InferModelType<typeof model>; // { id: string; bar: number; }
+   * ```
+   *
+   * And it is case-insensitive:
+   *
+   * @example
+   * ```ts
+   * const model = Model.create(`
+   *   cREaTe taBle forms (
+   *     id VARCHAR(32) not null,
+   *     remote_address varchar(128),
+   *     headers jsonb not null,
+   *     data jsonb
+   *   );
+   * `);
+   *
+   * type Model = InferModelType<typeof model>;
+   * // {
+   * //   id: string;
+   * //   remoteAddress: string;
+   * //   headers: JsonObject | JsonArray;
+   * //   data: JsonObject | JsonArray | null;
+   * // }
+   * ```
+   */
+  static create = <Raw extends string>(raw: Raw, schema?: string) => {
     type Normalized = NormalizedBody<Raw>;
 
     type Columns = SplitRawColumns<Normalized>;
@@ -41,20 +85,23 @@ export default class Model<
     return new Model<TableName<Raw>, Entity<Columns>, EntityHasDefaultKeys<Columns>, never>(
       raw,
       Object.freeze({}),
-      []
+      [],
+      schema
     );
   };
 
   /** Alias of {@link getGuard()}. */
   public readonly guard = this.getGuard;
   public readonly tableName: Table;
-  public readonly rawConfigs: Record<string & keyof ModelType, RawParserConfig>;
+  public readonly rawConfigs: Readonly<Record<string & keyof ModelType, RawParserConfig>>;
+  public readonly rawKeys: Readonly<Record<keyof ModelType, string>>;
   protected readonly excludedKeySet: Set<string>;
 
   constructor(
     public readonly raw: string,
     public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>,
-    public readonly excludedKeys: string[]
+    public readonly excludedKeys: string[],
+    public readonly schema?: string
   ) {
     const tableName = parseTableName(raw);
 
@@ -64,17 +111,88 @@ export default class Model<
 
     // eslint-disable-next-line no-restricted-syntax
     this.tableName = tableName as Table;
-    this.rawConfigs = parseRawConfigs(raw);
+    this.rawConfigs = Object.freeze(parseRawConfigs(raw));
     this.excludedKeySet = new Set(this.excludedKeys);
+
+    const entries = Object.entries(this.rawConfigs).filter(
+      ([key]) => !this.excludedKeySet.has(key)
+    );
+    this.rawKeys = Object.freeze(
+      // eslint-disable-next-line no-restricted-syntax
+      Object.fromEntries(entries.map(([key, { rawKey }]) => [key, rawKey])) as Record<
+        keyof ModelType,
+        string
+      >
+    );
   }
 
-  get rawKeys(): Record<keyof ModelType, string> {
-    // eslint-disable-next-line no-restricted-syntax
-    return Object.fromEntries(
-      Object.entries(this.rawConfigs)
-        .filter(([key]) => !this.excludedKeySet.has(key))
-        .map(([key, { rawKey }]) => [key, rawKey])
-    ) as Record<keyof ModelType, string>;
+  /**
+   * Get the identifiable value of the model. It can be used in sql tag to reference the
+   * model and its columns.
+   *
+   * @example
+   * ```ts
+   * const model = Model.create(`
+   *  create table foo (id varchar(32) primary key not null, bar bigint);
+   * `);
+   * const { id, bar } = model.identifiable;
+   *
+   * sql`select ${id}, ${bar} from ${model.identifiable}`;
+   * // select "foo"."id", "foo"."bar" from "foo"
+   * ```
+   *
+   * It also works with a schema:
+   *
+   * @example
+   * ```ts
+   * const model = Model.create(`
+   *   create table foo (id varchar(32) primary key not null, bar bigint);
+   * `, 'baz');
+   * const { id, bar } = model.identifiable;
+   *
+   * sql`select ${id}, ${bar} from ${model.identifiable}`;
+   * // select "baz"."foo"."id", "baz"."foo"."bar" from "baz"."foo"
+   * ```
+   *
+   * To update a column, use the `update` property since update queries are not allowed
+   * to reference the table name:
+   *
+   * @example
+   * ```ts
+   * const model = Model.create(`
+   *  create table foo (id varchar(32) primary key not null, bar bigint);
+   * `);
+   * const { id, bar } = model.identifiable;
+   *
+   * sql`update ${model.identifiable} set ${bar.update} = ${bar}`;
+   * // update "foo" set "bar" = $1
+   * ```
+   *
+   * @see {@link IdentifiableModel} For more details.
+   */
+  get identifiable(): Readonly<IdentifiableModel<ModelType>> {
+    const metadata: IdentifiableModelMetadata = Object.freeze({
+      schema: this.schema,
+      tableName: this.tableName,
+    });
+
+    return Object.freeze({
+      [idSymbols.model]: metadata,
+      // eslint-disable-next-line no-restricted-syntax
+      ...(Object.fromEntries(
+        Object.entries(this.rawKeys).map(([key, rawKey]) => [
+          key,
+          {
+            [idSymbols.column]: true,
+            model: metadata,
+            name: rawKey,
+            get update() {
+              return Object.freeze({ [idSymbols.updateColumn]: true, name: rawKey } as const);
+            },
+          } satisfies IdentifiableColumn,
+        ])
+      ) as Record<keyof ModelType, IdentifiableColumn>),
+    });
   }
 
   // TODO: Make `default` compatible with nullable types

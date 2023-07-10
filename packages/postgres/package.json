@@ -47,13 +47,17 @@
     "@withtyped/server": "workspace:^0.12.4"
   },
   "eslintConfig": {
-    "extends": "@silverhand"
+    "extends": "@silverhand",
+    "rules": {
+      "@typescript-eslint/padding-line-between-statements": "off"
+    }
   },
   "prettier": "@silverhand/eslint-config/.prettierrc",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@silverhand/essentials": "^2.7.0",
     "@types/pg": "^8.6.5",
     "@withtyped/shared": "workspace:*",
     "pg": "^8.8.0"
