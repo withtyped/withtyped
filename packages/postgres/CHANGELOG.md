@@ -1,5 +1,13 @@
 # @withtyped/postgres
 
+## 0.12.5
+
+### Patch Changes
+
+- b3b48dc: Add `.identifiable` to model and recognize its values in Postgres SQL
+- Updated dependencies [b3b48dc]
+  - @withtyped/server@0.12.5
+
 ## 0.12.4
 
 ### Patch Changes

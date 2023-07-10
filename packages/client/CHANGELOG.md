@@ -1,5 +1,13 @@
 # @withtyped/client
 
+## 0.7.16
+
+### Patch Changes
+
+- 118e63d: Refine client request handler type
+- Updated dependencies [b3b48dc]
+  - @withtyped/server@0.12.5
+
 ## 0.7.15
 
 ### Patch Changes
