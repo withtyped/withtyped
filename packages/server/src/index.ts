@@ -166,3 +166,4 @@ export { default as ModelClient } from './model-client/index.js';
 export * from './model-client/index.js';
 export { default as DatabaseInitializer } from './database-initializer/index.js';
 export * from './query/index.js';
+export * from './identifiable/index.js';

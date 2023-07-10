@@ -115,6 +115,9 @@ importers:
 
   packages/postgres:
     dependencies:
+      '@silverhand/essentials':
+        specifier: ^2.7.0
+        version: 2.7.0
       '@types/pg':
         specifier: ^8.6.5
         version: 8.6.5
@@ -165,8 +168,8 @@ importers:
   packages/sample:
     dependencies:
       '@silverhand/essentials':
-        specifier: ^2.3.0
-        version: 2.3.0
+        specifier: ^2.7.0
+        version: 2.7.0
       '@withtyped/client':
         specifier: workspace:*
         version: link:../client
@@ -211,8 +214,8 @@ importers:
   packages/server:
     dependencies:
       '@silverhand/essentials':
-        specifier: ^2.5.0
-        version: 2.5.0
+        specifier: ^2.7.0
+        version: 2.7.0
       '@withtyped/shared':
         specifier: workspace:*
         version: link:../shared
@@ -692,14 +695,9 @@ packages:
       lodash: 4.17.21
     dev: true
 
-  /@silverhand/essentials@2.3.0:
-    resolution: {integrity: sha512-vZ8eT0ew2bTIo86vwcPSduL1o2oXxH9DPnQe8sV3K3g1/sSgCyAj9ULHObZLjg/YNGlp16Wiby1hSs8P9VtU7g==}
-    engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^7}
-    dev: false
-
-  /@silverhand/essentials@2.5.0:
-    resolution: {integrity: sha512-8GgVFAmbo6S0EgsjYXH4aH8a69O7SzEtPFPDpVZmJuGEt8e3ODVx0F2V4rXyC3/SzFbcb2md2gRbA+Z6aTad6g==}
-    engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^7}
+  /@silverhand/essentials@2.7.0:
+    resolution: {integrity: sha512-F5Qo5ZNnERUURK/9F1ZIi4FBDM22aeD59Zv0VtkgIhUL9tYK9svA2Jz88NNdYBwqCPrh8ExZlpFNi+pNmXKNlQ==}
+    engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^8.0.0}
     dev: false
 
   /@silverhand/ts-config@3.0.0(typescript@5.1.3):

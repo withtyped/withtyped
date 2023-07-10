@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import Model from '@withtyped/server/model';
 import { normalizeString } from '@withtyped/shared';
 
 import type { PostgresJson } from './sql.js';
@@ -69,6 +70,45 @@ describe('sql tag', () => {
     );
     assert.deepStrictEqual(args, [123, true, null, { foo: 'bar' }]);
   });
+});
+
+it('should recognize model as identifiers', () => {
+  const forms = Model.create(/* Sql */ `
+    CREATE table forms (
+      id VARCHAR(32) not null,
+      data_2 bigint
+    );`).identifiable;
+
+  const { raw, args } = sql`
+    select * from ${forms}    
+    where    ${([[forms.data2, 123]] as const).map(([key, value]) => sql`${key}=${value}`)}
+    and  ${forms.id} = ${'foo'}
+  `.composed;
+
+  assert.strictEqual(
+    normalizeString(raw),
+    'select * from "forms" where "forms"."data_2"=$1 and "forms"."id" = $2'
+  );
+  assert.deepStrictEqual(args, [123, 'foo']);
+});
+
+it('should recognize model as identifiers with schema', () => {
+  const foo = Model.create(
+    /* Sql */ `create table foo (id varchar(32) primary key not null, bar bigint);`,
+    'baz'
+  ).identifiable;
+
+  const { raw, args } = sql`
+    update ${foo}    
+    set    ${([[foo.bar.update, '123']] as const).map(([key, value]) => sql`${key}=${value}`)}
+    where  ${foo.id} = ${'foo'}
+  `.composed;
+
+  assert.strictEqual(
+    normalizeString(raw),
+    'update "baz"."foo" set "bar"=$1 where "baz"."foo"."id" = $2'
+  );
+  assert.deepStrictEqual(args, ['123', 'foo']);
 });
 
 describe('json utils', () => {
