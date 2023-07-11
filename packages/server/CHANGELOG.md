@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.7
+
+### Patch Changes
+
+- 321c627: Inherit model schema and fix model key types after `.exclude()`
+
 ## 0.12.6
 
 ### Patch Changes
