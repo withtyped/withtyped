@@ -1,6 +1,15 @@
 import type { Router, BaseRoutes, GuardedPayload, GuardedResponse } from '@withtyped/server';
 import type { RequestMethod } from '@withtyped/shared';
 
+export type {
+  BaseRoutes,
+  Guarded,
+  GuardedPayload,
+  GuardedResponse,
+  PathGuard,
+  RequestGuard,
+} from '@withtyped/server';
+
 export type ClientPayload = {
   params?: Record<string, string>;
   search?: Record<string, string | string[]>;
@@ -19,7 +28,8 @@ export type RouterRoutes<RouterInstance> = RouterInstance extends Router<
   ? Routes
   : never;
 
-type EmptyPayloadRoutes<MethodRoutes> = {
+/** Extract the routes that have empty payload from a method routes type. */
+export type EmptyPayloadRoutes<MethodRoutes> = {
   [K in keyof MethodRoutes]: keyof GuardedPayload<MethodRoutes[K]> extends never ? K : never;
 }[keyof MethodRoutes];
 
