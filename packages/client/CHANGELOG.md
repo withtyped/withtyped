@@ -1,5 +1,11 @@
 # @withtyped/client
 
+## 0.7.17
+
+### Patch Changes
+
+- f8b7736: Export more types
+
 ## 0.7.16
 
 ### Patch Changes
