@@ -1,5 +1,12 @@
 # @withtyped/integration-test
 
+## 0.7.14
+
+### Patch Changes
+
+- Updated dependencies [f8b7736]
+  - @withtyped/client@0.7.17
+
 ## 0.7.13
 
 ### Patch Changes
