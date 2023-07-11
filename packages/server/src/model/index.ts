@@ -97,11 +97,12 @@ export default class Model<
   public readonly rawKeys: Readonly<Record<keyof ModelType, string>>;
   protected readonly excludedKeySet: Set<string>;
 
+  /** @internal Use {@link create()} instead. */
   constructor(
     public readonly raw: string,
     public readonly extendedConfigs: Record<string, ModelExtendConfig<unknown>>,
     public readonly excludedKeys: string[],
-    public readonly schema?: string
+    public readonly schema: string | undefined
   ) {
     const tableName = parseTableName(raw);
 
@@ -278,7 +279,8 @@ export default class Model<
           ...(config instanceof z.ZodType ? { parser: config } : config),
         },
       }),
-      this.excludedKeys
+      this.excludedKeys,
+      this.schema
     );
   }
 
@@ -288,10 +290,10 @@ export default class Model<
   ): Model<
     Table,
     { [key in keyof ModelType as key extends Key ? never : key]: ModelType[key] },
-    DefaultKeys,
-    ReadonlyKeys
+    Exclude<DefaultKeys, Key>,
+    Exclude<ReadonlyKeys, Key>
   > {
-    return new Model(this.raw, this.extendedConfigs, this.excludedKeys.concat(key));
+    return new Model(this.raw, this.extendedConfigs, this.excludedKeys.concat(key), this.schema);
   }
 
   /**
