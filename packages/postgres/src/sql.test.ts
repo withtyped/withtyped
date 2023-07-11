@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { idSymbolKeys, idSymbols } from '@withtyped/server';
 import Model from '@withtyped/server/model';
 import { normalizeString } from '@withtyped/shared';
 
@@ -97,6 +98,10 @@ it('should recognize model as identifiers with schema', () => {
     /* Sql */ `create table foo (id varchar(32) primary key not null, bar bigint);`,
     'baz'
   ).identifiable;
+
+  // @ts-expect-error Should be able to access the model's metadata by
+  // accessing the global symbol with the same key.
+  assert.strictEqual(foo[idSymbols.model], foo[Symbol.for(idSymbolKeys.model)]);
 
   const { raw, args } = sql`
     update ${foo}    

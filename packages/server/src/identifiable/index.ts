@@ -2,33 +2,45 @@
 // classes cannot have dynamic index signatures.
 
 /**
+ * The global symbol keys used to identify identifiable types.
+ * Usually you don't need to use them directly.
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol#shared_symbols_in_the_global_symbol_registry | MDN: Shared symbols in the global symbol registry}
+ */
+export const idSymbolKeys = Object.freeze({
+  model: '@withtyped/server/identifiable',
+  column: '@withtyped/server/identifiable.column',
+  updateColumn: '@withtyped/server/identifiable.update_column',
+} as const);
+
+/**
  * The symbol used to identify `IdentifiableModel` types. It should be used as
  * a property on the model object with the value of the model metadata.
  *
  * @see {@link IdentifiableModel}
  */
-const identifiableSymbol = Symbol('identifiable');
+const identifiableSymbol = Symbol.for(idSymbolKeys.model);
 /**
  * The symbol used to identify `IdentifiableColumn` types. It should be used as
  * a property on the column object with the value of `true`.
  *
  * @see {@link IdentifiableColumn}
  */
-const identifiableColumnSymbol = Symbol('identifiable.column');
+const identifiableColumnSymbol = Symbol.for(idSymbolKeys.column);
 /**
  * The symbol used to identify `IdentifiableUpdateColumn` types. It should be
  * used as a property on the column object with the value of `true`.
  *
  * @see {@link IdentifiableUpdateColumn}
  */
-const IdentifiableUpdateColumnSymbol = Symbol('identifiable.update_column');
+const IdentifiableUpdateColumnSymbol = Symbol.for(idSymbolKeys.updateColumn);
 
 /** The symbols used to identify identifiable types. */
-export const idSymbols = {
+export const idSymbols = Object.freeze({
   model: identifiableSymbol,
   column: identifiableColumnSymbol,
   updateColumn: IdentifiableUpdateColumnSymbol,
-} as const;
+} as const);
 
 export type IdentifiableModelMetadata = {
   /** The corresponding schema name in the database. */
