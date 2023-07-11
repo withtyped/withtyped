@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.6
+
+### Patch Changes
+
+- aece9eb: Use global Symbol registry to increase compatibility when multiple @withtyped libraries exist
+
 ## 0.12.5
 
 ### Patch Changes
