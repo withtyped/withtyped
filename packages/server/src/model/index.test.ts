@@ -131,6 +131,23 @@ describe('Model class', () => {
     assert.throws(() => forms.guard('patch').parse({ id: 'baz', createdAt: new Date() }), ZodError);
   });
 
+  it('inherit schema after `.extend()` or `.exclude()`', () => {
+    const forms = Model.create(
+      /* Sql */ `
+      create table forms (
+        id VARCHAR(32) not null,
+        created_at timestamptz not null default(now())
+      );`,
+      'baz'
+    );
+    assert.deepStrictEqual(forms.schema, 'baz');
+    assert.deepStrictEqual(forms.exclude('createdAt').schema, 'baz');
+    assert.deepStrictEqual(
+      forms.exclude('createdAt').extend('id', { default: '1', readonly: true }).schema,
+      'baz'
+    );
+  });
+
   it('should throw error when table name is missing in query', () => {
     assert.throws(
       () =>
