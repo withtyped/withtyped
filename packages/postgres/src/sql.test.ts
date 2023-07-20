@@ -191,10 +191,10 @@ describe('join', () => {
     const query = sql`
       select *
       from foo
-      where ${join([sql`bar = ${'baz'}`, { qux: 'quux' }], sql` and `)}
+      where ${join([sql`${'baz'}`, json({ qux: 'quux' }), { qux: 'quux' }], sql` and `)}
     `;
     const { raw, args } = query.composed;
-    assert.strictEqual(normalizeString(raw), 'select * from foo where bar = $1 and qux=$2::json');
-    assert.deepStrictEqual(args, ['baz', { qux: 'quux' }]);
+    assert.strictEqual(normalizeString(raw), 'select * from foo where $1 and $2::json and $3');
+    assert.deepStrictEqual(args, ['baz', '{"qux":"quux"}', { qux: 'quux' }]);
   });
 });
