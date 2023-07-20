@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.8
+
+### Patch Changes
+
+- 8d02b85: throw error when there is no response guard but a response json is provided
+
 ## 0.12.7
 
 ### Patch Changes
