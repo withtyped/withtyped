@@ -242,6 +242,17 @@ describe('Router', () => {
     assert.throws(() => new Router('/foo/bar/'), TypeError);
   });
 
+  it('should throw when there is no response guard but a response json is provided', async () => {
+    const run = new Router()
+      .get('/books', {}, async (context, next) => next({ ...context, json: { books: [] } }))
+      .routes();
+
+    await assert.rejects(
+      run(createRequestContext(RequestMethod.GET, '/books'), noop, createHttpContext()),
+      new TypeError('Response guard is required when providing a response json.')
+    );
+  });
+
   it('should do nothing when no route matches', async () => {
     const run = new Router()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
