@@ -24,6 +24,7 @@ import type {
 import { matchRoute } from './utils.js';
 
 export * from './types.js';
+export const openApiRoute = '/openapi.json';
 
 export type MethodRoutesMap<InputContext extends RequestContext> = Record<
   string,
@@ -122,6 +123,8 @@ export default class Router<
 
             if (responseGuard) {
               responseGuard.parse(context.json);
+            } else if (route.path !== openApiRoute && context.json !== undefined) {
+              throw new TypeError('Response guard is required when providing a response json.');
             }
 
             return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
@@ -144,8 +147,8 @@ export default class Router<
     parse?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
     info?: Partial<OpenAPIV3.InfoObject>
   ) {
-    return this.get<'/openapi.json', unknown, unknown, OpenAPIV3.Document>(
-      '/openapi.json',
+    return this.get<typeof openApiRoute, unknown, unknown, OpenAPIV3.Document>(
+      openApiRoute,
       {},
       async (context, next) => {
         return next({
