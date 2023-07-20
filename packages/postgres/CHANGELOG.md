@@ -1,5 +1,13 @@
 # @withtyped/postgres
 
+## 0.12.7
+
+### Patch Changes
+
+- 8fa3ce1: Add `join()` to join multiple sql tags or json values
+- Updated dependencies [8d02b85]
+  - @withtyped/server@0.12.8
+
 ## 0.12.6
 
 ### Patch Changes
