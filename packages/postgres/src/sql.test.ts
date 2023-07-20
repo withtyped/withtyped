@@ -17,6 +17,7 @@ import {
   json,
   JsonPostgreSql,
   sql,
+  join,
 } from './sql.js';
 
 describe('IdentifierPostgreSql', () => {
@@ -171,5 +172,29 @@ describe('json utils', () => {
 
     const json3 = sql`select * from somewhere;`;
     assert.strictEqual(jsonbIfNeeded(json3), json3);
+  });
+});
+
+describe('join', () => {
+  it('should be able to join sql tags', () => {
+    const query = sql`
+      select *
+      from foo
+      where ${join([sql`bar = ${'baz'}`, sql`qux = ${'quux'}`], sql` and `)}
+    `;
+    const { raw, args } = query.composed;
+    assert.strictEqual(normalizeString(raw), 'select * from foo where bar = $1 and qux = $2');
+    assert.deepStrictEqual(args, ['baz', 'quux']);
+  });
+
+  it('should be able to join an mixed array with sql tags and PostgresJson', () => {
+    const query = sql`
+      select *
+      from foo
+      where ${join([sql`bar = ${'baz'}`, { qux: 'quux' }], sql` and `)}
+    `;
+    const { raw, args } = query.composed;
+    assert.strictEqual(normalizeString(raw), 'select * from foo where bar = $1 and qux=$2::json');
+    assert.deepStrictEqual(args, ['baz', { qux: 'quux' }]);
   });
 });
