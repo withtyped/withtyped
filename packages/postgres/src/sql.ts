@@ -23,6 +23,31 @@ const escapeIdentifier = function (value: string) {
   return '"' + value.replace(/"/g, '""') + '"';
 };
 
+export class PostgresJoin {
+  constructor(
+    public readonly array: Array<PostgresJson | PostgreSql>,
+    public readonly separator: PostgreSql
+  ) {}
+}
+
+/**
+ * Join an array of SQL values with a separator.
+ *
+ * @example ```ts
+ * sql`
+ *   select *
+ *   from foo
+ *   where ${join([sql`bar = ${'baz'}`, sql`qux = ${'quux'}`], sql` and `)}
+ * `
+ * // select * from foo where bar = $1 and qux = $2
+ * ```
+ *
+ * @param array The array of values to join.
+ * @param separator The separator to use between values.
+ */
+export const join = (array: Array<PostgresJson | PostgreSql>, separator: PostgreSql) =>
+  new PostgresJoin(array, separator);
+
 export class DangerousRawPostgreSql extends Sql {
   public compose(rawArray: string[], _: unknown[], indexInit = 0) {
     // eslint-disable-next-line @silverhand/fp/no-mutating-methods
@@ -102,7 +127,8 @@ export type InputArgument =
   | Array<Sql | Exclude<PostgresJson, JsonArray | JsonObject>>
   | IdentifiableModel<Record<string, unknown>>
   | IdentifiableColumn
-  | IdentifiableUpdateColumn;
+  | IdentifiableUpdateColumn
+  | PostgresJoin;
 
 /** Sql tag class for `pg` (i.e. node-pg) */
 export class PostgreSql extends Sql<PostgresJson, InputArgument> {
@@ -116,6 +142,8 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
       globalIndex = lastIndex;
     };
 
+    // To be refactored
+    // eslint-disable-next-line complexity
     const handle = (argument?: InputArgument) => {
       log.debug('handle', argument);
 
@@ -125,6 +153,21 @@ export class PostgreSql extends Sql<PostgresJson, InputArgument> {
 
       if (argument instanceof Sql) {
         combineSql(argument);
+        return;
+      }
+
+      if (argument instanceof PostgresJoin) {
+        const { array, separator } = argument;
+        const [first, ...rest] = array;
+
+        if (first) {
+          handle(first);
+        }
+
+        for (const sql of rest) {
+          combineSql(separator);
+          handle(sql);
+        }
         return;
       }
 
