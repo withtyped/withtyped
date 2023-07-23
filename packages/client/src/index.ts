@@ -8,7 +8,7 @@ import type {
   ClientConfig,
   ClientConfigInit,
 } from './types.js';
-import { buildSearch, isPromise, tryJson } from './utils.js';
+import { buildSearch, isPromise } from './utils.js';
 
 export class ResponseError extends Error {
   constructor(public readonly response: Response) {
@@ -136,12 +136,40 @@ export default class Client<
         throw new ResponseError(response);
       }
 
+      if (response.status === 204) {
+        // The return type should be `undefined` here since the response code is 204
+        // Trust backend since it's a HTTP standard
+        // eslint-disable-next-line no-restricted-syntax
+        return undefined as unknown as ReturnType<ClientRequestHandler<Routes[Method]>>;
+      }
+
       // Trust backend since it has been guarded
       // eslint-disable-next-line no-restricted-syntax
-      return tryJson(response) as ReturnType<ClientRequestHandler<Routes[Method]>>;
+      return (await response.json()) as ReturnType<ClientRequestHandler<Routes[Method]>>;
     };
 
-    return handler;
+    const withHook: ClientRequestHandler<MethodRoutes> = async (...args) => {
+      try {
+        return await handler(...args);
+      } catch (error) {
+        const hook = this.config.before?.error;
+
+        if (!hook) {
+          throw error;
+        }
+
+        const unwrapped = hook(error);
+        const result = isPromise(unwrapped) ? await unwrapped : unwrapped;
+
+        if (result instanceof Error) {
+          throw result;
+        }
+
+        throw error;
+      }
+    };
+
+    return withHook;
   }
 }
 

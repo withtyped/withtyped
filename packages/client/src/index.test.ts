@@ -33,26 +33,26 @@ const router = new Router('/books')
   )
   .delete('/:what/:ever', { search: z.object({ foo: z.string(), bar: z.string().array() }) }, noop);
 
+const baseUrl = new URL('https://localhost');
+const errorResponse = new Response('{ "message": "Not ok" }', { status: 400 });
+const fakeFetch = sinon.stub(global, 'fetch').callsFake(async (input, init) => {
+  log.debug('fetch', input, init);
+
+  if (
+    (input instanceof URL ? input.toString() : input instanceof Request ? input.url : input) ===
+    'https://localhost/books/error'
+  ) {
+    return errorResponse;
+  }
+
+  // For testing
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return { ok: true, json: async () => ({ origin: 'fakeFetch' }) } as Response;
+});
+
+const withPath = (path: string) => new URL(path, baseUrl);
+
 describe('Client', () => {
-  const baseUrl = new URL('https://localhost');
-  const errorResponse = new Response('{ "message": "Not ok" }', { status: 400 });
-  const fakeFetch = sinon.stub(global, 'fetch').callsFake(async (input, init) => {
-    log.debug('fetch', input, init);
-
-    if (
-      (input instanceof URL ? input.toString() : input instanceof Request ? input.url : input) ===
-      'https://localhost/books/error'
-    ) {
-      return errorResponse;
-    }
-
-    // For testing
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { ok: true, json: async () => ({ origin: 'fakeFetch' }) } as Response;
-  });
-
-  const withPath = (path: string) => new URL(path, baseUrl);
-
   beforeEach(() => {
     fakeFetch.resetHistory();
   });
@@ -207,5 +207,55 @@ describe('Client', () => {
         body: JSON.stringify(body),
       })
     );
+  });
+});
+
+describe('Client hooks', () => {
+  beforeEach(() => {
+    fakeFetch.resetHistory();
+  });
+
+  it('should throw when hook returns error', async () => {
+    const client = new Client<typeof router>({
+      baseUrl,
+      before: {
+        error: () => new Error('Hook error'),
+      },
+    });
+
+    await assert.rejects(client.get('/books/error'), new Error('Hook error'));
+  });
+
+  it('should throw when hook returns promise error', async () => {
+    const client = new Client<typeof router>({
+      baseUrl,
+      before: {
+        error: async () => new Error('Hook error'),
+      },
+    });
+
+    await assert.rejects(client.get('/books/error'), new Error('Hook error'));
+  });
+
+  it('should throw original error when hook returns non-error', async () => {
+    const client = new Client<typeof router>({
+      baseUrl,
+      before: {
+        error: () => 'Hook error',
+      },
+    });
+
+    await assert.rejects(client.get('/books/error'), new ResponseError(errorResponse));
+  });
+
+  it('should throw original error when hook returns promise non-error', async () => {
+    const client = new Client<typeof router>({
+      baseUrl,
+      before: {
+        error: async () => 'Hook error',
+      },
+    });
+
+    await assert.rejects(client.get('/books/error'), new ResponseError(errorResponse));
   });
 });
