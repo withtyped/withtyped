@@ -1,5 +1,11 @@
 # @withtyped/client
 
+## 0.7.21
+
+### Patch Changes
+
+- 901ab53: support before error hook
+
 ## 0.7.20
 
 ### Patch Changes
