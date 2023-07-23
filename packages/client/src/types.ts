@@ -56,15 +56,27 @@ export type HeadersOption =
     >;
 
 export type ClientConfig = {
+  /** Base URL to prepend for every request. Only origin and pathname will be applied. */
   baseUrl: URL;
+  /**
+   * Additional headers to append for every request, also accepts a function that returns
+   * headers, or a promise that resolves to headers.
+   */
   headers?: HeadersOption;
+  /** Hooks to be called before actions. */
+  before?: Partial<{
+    /**
+     * The function to be called before an error is thrown.
+     *
+     * - If the function returns or resolves an `Error` instance, the instance will be thrown.
+     * - Otherwise, the original error will be thrown.
+     */
+    error: CanBePromise<(error: unknown) => unknown>;
+  }>;
 };
 
-export type ClientConfigInit = {
-  /** Base URL to prepend for every request. Only origin and pathname will be applied. */
+export type ClientConfigInit = Omit<ClientConfig, 'baseUrl'> & {
   baseUrl: string | URL;
-  /** Additional headers to append for every request, also accepts a function that returns headers. */
-  headers?: HeadersOption;
 };
 
 export { RequestMethod } from '@withtyped/shared';
