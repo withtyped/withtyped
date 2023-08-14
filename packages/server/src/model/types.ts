@@ -9,7 +9,6 @@ export type PrimitiveTypeMap = {
   json: JsonObject | JsonArray;
   date: Date;
 };
-// Should work in TS 4.9, wait for VSCode support: satisfies Record<PrimitiveType, unknown>
 
 // This section should match `findType()` in `utils.ts`
 export type NumberType =
@@ -23,7 +22,7 @@ export type DateType = `timestamp${string}`;
 
 export type StringType = `varchar${string}` | 'text';
 
-export type BooleanType = `bool${string}`;
+export type BooleanType = `bool${string}` | `boolean${string}`;
 
 export type JsonType = 'json' | 'jsonb';
 
@@ -35,6 +34,8 @@ export type DataType<T extends string> = T extends NumberType
   ? string
   : T extends JsonType
   ? JsonObject | JsonArray
+  : T extends BooleanType
+  ? boolean
   : never;
 
 // TODO: Need clear docs for the transpilation

@@ -68,7 +68,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@silverhand/essentials": "^2.7.0",
+    "@silverhand/essentials": "^2.8.1",
     "@withtyped/shared": "workspace:*"
   },
   "peerDependencies": {

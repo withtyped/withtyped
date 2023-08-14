@@ -57,7 +57,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@silverhand/essentials": "^2.7.0",
+    "@silverhand/essentials": "^2.8.1",
     "@types/pg": "^8.6.5",
     "@withtyped/shared": "workspace:*",
     "pg": "^8.8.0"

@@ -116,8 +116,8 @@ importers:
   packages/postgres:
     dependencies:
       '@silverhand/essentials':
-        specifier: ^2.7.0
-        version: 2.7.0
+        specifier: ^2.8.1
+        version: 2.8.1
       '@types/pg':
         specifier: ^8.6.5
         version: 8.6.5
@@ -168,8 +168,8 @@ importers:
   packages/sample:
     dependencies:
       '@silverhand/essentials':
-        specifier: ^2.7.0
-        version: 2.7.0
+        specifier: ^2.8.1
+        version: 2.8.1
       '@withtyped/client':
         specifier: workspace:*
         version: link:../client
@@ -214,8 +214,8 @@ importers:
   packages/server:
     dependencies:
       '@silverhand/essentials':
-        specifier: ^2.7.0
-        version: 2.7.0
+        specifier: ^2.8.1
+        version: 2.8.1
       '@withtyped/shared':
         specifier: workspace:*
         version: link:../shared
@@ -695,8 +695,8 @@ packages:
       lodash: 4.17.21
     dev: true
 
-  /@silverhand/essentials@2.7.0:
-    resolution: {integrity: sha512-F5Qo5ZNnERUURK/9F1ZIi4FBDM22aeD59Zv0VtkgIhUL9tYK9svA2Jz88NNdYBwqCPrh8ExZlpFNi+pNmXKNlQ==}
+  /@silverhand/essentials@2.8.1:
+    resolution: {integrity: sha512-LtLb0QfNPViJOFfBUkJoktAcA4mvEpUL78pRGXiLxeG+3G6f0UNh+XOJ09t7jCr+r+LXpScEpqdWZ0/cGsvIcw==}
     engines: {node: ^16.13.0 || ^18.12.0 || ^19.2.0, pnpm: ^8.0.0}
     dev: false
 
