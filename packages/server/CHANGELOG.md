@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.12.9
+
+### Patch Changes
+
+- 9b4fafe: fix model boolean type inference
+
 ## 0.12.8
 
 ### Patch Changes
