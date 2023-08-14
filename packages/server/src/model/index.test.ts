@@ -1,10 +1,58 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
+import { type Nullable } from '@silverhand/essentials';
 import { z, ZodError } from 'zod';
+
+import { type JsonArray, type JsonObject } from '../types.js';
 
 import type { InferModelType } from './index.js';
 import Model from './index.js';
+
+describe('Model class types', () => {
+  const forms = Model.create(
+    /* Sql */ `
+    cREaTe taBle forms (
+      id VARCHAR(32) not null,
+      remote_address varchar(128),
+      headers jsonb not null,
+      data jsonb,
+      data_2 bigint,
+      to_exclude varchar(12) not null,
+      num bigint array,
+      test decimal not null array default([]),
+      is_good boolean not null default(true),
+      is_bad boolean default(false),
+      created_at timestamptz not null default(now())
+    );`
+  )
+    .extend('toExclude', z.string().optional())
+    .exclude('toExclude')
+    .extend('data', z.object({ foo: z.string(), bar: z.number() }))
+    .extend('data2', z.number().gt(10).nullable())
+    .extend('num', { default: () => [1, 2, 3], readonly: true })
+    .extend('test', { default: [2, 3, 4] });
+
+  type Equals<A, B> = A extends B ? (B extends A ? true : false) : false;
+
+  // This should be always ok on runtime, but the compilation should fail if the types are not correct
+  it('should have proper types', () => {
+    type Expect = {
+      id: string;
+      remoteAddress: Nullable<string>;
+      headers: JsonObject | JsonArray;
+      data: { foo: string; bar: number };
+      data2: Nullable<number>;
+      num: number[];
+      test: number[];
+      isGood: boolean;
+      isBad: Nullable<boolean>;
+      createdAt: Date;
+    };
+    const ok: Equals<Expect, InferModelType<typeof forms>> = true;
+    assert(ok);
+  });
+});
 
 describe('Model class', () => {
   const forms = Model.create(
@@ -131,7 +179,7 @@ describe('Model class', () => {
     assert.throws(() => forms.guard('patch').parse({ id: 'baz', createdAt: new Date() }), ZodError);
   });
 
-  it('inherit schema after `.extend()` or `.exclude()`', () => {
+  it('inherits schema after `.extend()` or `.exclude()`', () => {
     const forms = Model.create(
       /* Sql */ `
       create table forms (
