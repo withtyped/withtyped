@@ -1,5 +1,11 @@
 # @withtyped/postgres
 
+## 0.12.8
+
+### Patch Changes
+
+- 1e627c2: honor transform config in transaction
+
 ## 0.12.7
 
 ### Patch Changes
