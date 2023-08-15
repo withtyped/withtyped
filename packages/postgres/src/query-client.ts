@@ -7,9 +7,40 @@ import pg from 'pg';
 
 import type { PostgreSql } from './sql.js';
 
+class ResultTransformer {
+  constructor(protected readonly clientConfig?: ClientConfig) {}
+
+  transform<T extends Record<string, unknown> = Record<string, unknown>>(
+    data: QueryResult<T>
+  ): QueryResult<T> {
+    if (this.clientConfig?.transform?.result === 'camelCase') {
+      return {
+        ...data,
+        // It could be `undefined` if it is not a `SELECT` query.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        rows: data.rows?.map(
+          (data: Record<string, unknown>) =>
+            // eslint-disable-next-line no-restricted-syntax
+            Object.fromEntries(
+              Object.entries(data).map(([key, value]) => [camelCase(key), value])
+            ) as T
+        ),
+      };
+    }
+
+    return data;
+  }
+}
+
 export class PostgresTransaction extends Transaction<PostgreSql> {
-  constructor(protected readonly client: PoolClient) {
+  #transformer: ResultTransformer;
+
+  constructor(
+    protected readonly client: PoolClient,
+    protected readonly clientConfig?: ClientConfig
+  ) {
     super();
+    this.#transformer = new ResultTransformer(clientConfig);
   }
 
   async start(): Promise<void> {
@@ -36,7 +67,8 @@ export class PostgresTransaction extends Transaction<PostgreSql> {
     Args extends unknown[] = unknown[]
   >(text: string, args?: Args) {
     try {
-      return await this.client.query<Result, Args>(text, args);
+      const result = await this.client.query<Result, Args>(text, args);
+      return this.#transformer.transform(result);
     } catch (error: unknown) {
       await this.client.query('rollback');
       this.client.release();
@@ -53,6 +85,7 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   public pool: pg.Pool;
 
   #status: 'active' | 'ended' = 'active';
+  #transformer: ResultTransformer;
 
   constructor(
     /** The config for inner `pg.Pool`. */
@@ -62,6 +95,7 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
   ) {
     super();
     this.pool = new pg.Pool(config);
+    this.#transformer = new ResultTransformer(clientConfig);
   }
 
   get status() {
@@ -88,29 +122,13 @@ export default class PostgresQueryClient extends QueryClient<PostgreSql> {
     log.debug('query', raw, args);
 
     const result = await this.pool.query(raw, args);
-
-    if (this.clientConfig?.transform?.result === 'camelCase') {
-      return {
-        ...result,
-        // It could be `undefined` if it is not a `SELECT` query.
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        rows: result.rows?.map(
-          (data: Record<string, unknown>) =>
-            // eslint-disable-next-line no-restricted-syntax
-            Object.fromEntries(
-              Object.entries(data).map(([key, value]) => [camelCase(key), value])
-            ) as T
-        ),
-      };
-    }
-
-    return result;
+    return this.#transformer.transform(result);
   }
 
   async transaction(): Promise<Transaction<PostgreSql>> {
     const client = await this.pool.connect();
 
-    return new PostgresTransaction(client);
+    return new PostgresTransaction(client, this.clientConfig);
   }
 }
 

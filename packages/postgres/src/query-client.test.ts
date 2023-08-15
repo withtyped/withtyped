@@ -125,4 +125,31 @@ describe('PostgresTransaction', () => {
     assert.ok(fakeClient.query.calledWithExactly('rollback'));
     assert.ok(fakeClient.release.calledOnceWithExactly());
   });
+
+  it('should be able to transform the result to camelCase', async () => {
+    const fakeClient = new FakePoolClient();
+    // @ts-expect-error for testing
+    const transaction = new PostgresTransaction(fakeClient, { transform: { result: 'camelCase' } });
+
+    fakeClient.query.onFirstCall().resolves({ rows: [], rowCount: 0 });
+    await transaction.start();
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    assert.ok(fakeClient.query.calledWithExactly('begin', undefined));
+
+    const query = sql`select * from samurai;`;
+    fakeClient.query.onSecondCall().resolves({
+      rows: [{ 'foo-bar': 'a', 'foo_bar-baz': 'b' }, { foo: 'c' }],
+      rowCount: 2,
+    });
+    const { rows, rowCount } = await transaction.query(query);
+
+    assert.deepStrictEqual(rows, [{ fooBar: 'a', fooBarBaz: 'b' }, { foo: 'c' }]);
+    assert.strictEqual(rowCount, 2);
+
+    fakeClient.query.onThirdCall().resolves({ rows: [], rowCount: 0 });
+    await transaction.end();
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    assert.ok(fakeClient.query.calledWithExactly('commit', undefined));
+    assert.ok(fakeClient.release.calledOnceWithExactly());
+  });
 });
