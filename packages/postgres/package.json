@@ -1,6 +1,6 @@
 {
   "name": "@withtyped/postgres",
-  "version": "0.12.8",
+  "version": "0.13.0",
   "author": "Gao Sun",
   "license": "MIT",
   "type": "module",
@@ -44,7 +44,7 @@
     "zod": "^3.19.1"
   },
   "peerDependencies": {
-    "@withtyped/server": "workspace:^0.12.9"
+    "@withtyped/server": "workspace:^0.13.0"
   },
   "eslintConfig": {
     "extends": "@silverhand",
