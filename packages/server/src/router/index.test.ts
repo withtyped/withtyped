@@ -109,6 +109,23 @@ describe('Router', () => {
     );
   });
 
+  it('should respond with parsed json when the route matches', async () => {
+    const router = new Router().get(
+      '/books',
+      { response: z.object({ foo: z.string() }) },
+      // @ts-expect-error for testing
+      async (context, next) => next({ ...context, json: { foo: 'bar', bar: 123 } })
+    );
+    await router.routes()(
+      createRequestContext(RequestMethod.GET, '/books'),
+      async (context) => {
+        assert.strictEqual(context.status, 200);
+        assert.deepStrictEqual(context.json, { foo: 'bar' });
+      },
+      createHttpContext()
+    );
+  });
+
   it('should not call general middleware functions when no route matches', async () => {
     const mid1 = sinon.fake(async (context, next) =>
       next({ ...context, foo: 'bar' })

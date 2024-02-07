@@ -130,13 +130,15 @@ export default class Router<
           async (context) => {
             const responseGuard = route.guard.response;
 
-            if (responseGuard) {
-              responseGuard.parse(context.json);
-            } else if (route.path !== openApiRoute && context.json !== undefined) {
+            if (!responseGuard && route.path !== openApiRoute && context.json !== undefined) {
               throw new TypeError('Response guard is required when providing a response json.');
             }
 
-            return next({ ...context, status: context.status ?? (context.json ? 200 : 204) });
+            return next({
+              ...context,
+              json: responseGuard?.parse(context.json) ?? context.json,
+              status: context.status ?? (context.json ? 200 : 204),
+            });
           },
           http
         );
@@ -185,7 +187,7 @@ export default class Router<
   }
 
   public pack<AnotherRoutes extends BaseRoutes>(
-    another: Router<PreInputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+    another: Router<InputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
   ): Router<
     PreInputContext,
     InputContext,
@@ -238,7 +240,7 @@ export default class Router<
 }
 
 export type CreateRouter = {
-  <InputContext extends RequestContext>(): Router<InputContext>;
+  <InputContext extends RequestContext>(): Router<InputContext, InputContext>;
   <InputContext extends RequestContext, Prefix extends string>(
     prefix: NormalizedPrefix<Prefix>
   ): Router<InputContext, InputContext, BaseRoutes, NormalizedPrefix<Prefix>>;
