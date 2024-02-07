@@ -1,5 +1,12 @@
 # @withtyped/client
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [2482021]
+  - @withtyped/server@0.13.1
+
 ## 0.8.0
 
 ### Minor Changes
