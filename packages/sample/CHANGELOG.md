@@ -7,7 +7,7 @@
 - Updated dependencies [a8b304b]
   - @withtyped/client@0.8.0
   - @withtyped/server@0.13.0
-  - @withtyped/postgres@1.0.0
+  - @withtyped/postgres@0.13.0
 
 ## 0.3.20
 
@@ -135,7 +135,7 @@
 
 - Updated dependencies [81f1467]
 - Updated dependencies [81f1467]
-  - @withtyped/postgres@1.0.0
+  - @withtyped/postgres@0.13.0
   - @withtyped/client@0.7.11
   - @withtyped/server@0.12.0
 
@@ -169,7 +169,7 @@
 - Updated dependencies [0017a81]
   - @withtyped/server@0.11.0
   - @withtyped/client@0.7.7
-  - @withtyped/postgres@1.0.0
+  - @withtyped/postgres@0.13.0
 
 ## 0.3.1
 
@@ -209,7 +209,7 @@
 ### Patch Changes
 
 - Updated dependencies [8851348]
-  - @withtyped/postgres@1.0.0
+  - @withtyped/postgres@0.13.0
   - @withtyped/server@0.10.0
   - @withtyped/client@0.7.5
 
