@@ -185,7 +185,7 @@ export default class Router<
   }
 
   public pack<AnotherRoutes extends BaseRoutes>(
-    another: Router<PreInputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+    another: Router<InputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
   ): Router<
     PreInputContext,
     InputContext,
