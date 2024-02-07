@@ -240,7 +240,7 @@ export default class Router<
 }
 
 export type CreateRouter = {
-  <InputContext extends RequestContext>(): Router<InputContext>;
+  <InputContext extends RequestContext>(): Router<InputContext, InputContext>;
   <InputContext extends RequestContext, Prefix extends string>(
     prefix: NormalizedPrefix<Prefix>
   ): Router<InputContext, InputContext, BaseRoutes, NormalizedPrefix<Prefix>>;
