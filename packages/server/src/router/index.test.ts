@@ -53,6 +53,91 @@ describe('Router', () => {
     );
   });
 
+  it('should be able to add general middleware functions using `.use()`', async () => {
+    const mid1 = sinon.fake(async (context, next) =>
+      next({ ...context, foo: 'bar' })
+    ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
+    const mid2 = sinon.fake(async (context, next) =>
+      next({ ...context, bar: 123 })
+    ) satisfies MiddlewareFunction<
+      RequestContext & { foo: string },
+      RequestContext & { foo: string; bar: number }
+    >;
+    const handler = sinon.fake(async (context, next) => next(context)) satisfies MiddlewareFunction<
+      RequestContext & { foo: string; bar: number },
+      RequestContext & { foo: string; bar: number }
+    >;
+
+    const router1 = new Router().use(mid1).use(mid2).get('/books', {}, handler);
+    const context1 = createRequestContext(RequestMethod.GET, '/books');
+    const run = router1.routes();
+    const httpContext = createHttpContext();
+
+    await run(context1, noop, httpContext);
+    assert.strictEqual(mid1.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(
+      mid2.calledOnceWith(sinon.match({ ...context1, foo: 'bar' }), sinon.match.func),
+      true
+    );
+    assert.strictEqual(
+      handler.calledOnceWith(sinon.match({ ...context1, foo: 'bar', bar: 123 }), sinon.match.func),
+      true
+    );
+  });
+
+  it('should throw error when using `.use()` after adding routes', () => {
+    const mid1 = sinon.fake(async (context, next) =>
+      next({ ...context, foo: 'bar' })
+    ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
+    const handler = sinon.fake(async (context, next) => next(context)) satisfies MiddlewareFunction<
+      RequestContext,
+      RequestContext
+    >;
+
+    assert.throws(
+      () => new Router().get('/books', {}, handler).use(mid1),
+      Error,
+      'Middleware must be added before adding routes'
+    );
+
+    const router = new Router().get('/books', {}, handler);
+
+    assert.throws(
+      () => new Router().pack(router).use(mid1),
+      Error,
+      'Middleware must be added before adding routes'
+    );
+  });
+
+  it('should not call general middleware functions when no route matches', async () => {
+    const mid1 = sinon.fake(async (context, next) =>
+      next({ ...context, foo: 'bar' })
+    ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
+    const handler = sinon.fake(async (context, next) => next(context)) satisfies MiddlewareFunction<
+      RequestContext & { foo: string },
+      RequestContext & { foo: string }
+    >;
+    const router1 = new Router().use(mid1).get('/books', {}, handler);
+    const context1 = createRequestContext(RequestMethod.GET, '/books1');
+    const context2 = createRequestContext(RequestMethod.GET, '/books/1');
+    const context3 = createRequestContext(undefined, '/books');
+
+    const run = router1.routes();
+    const httpContext = createHttpContext();
+
+    await run(context1, noop, httpContext);
+    assert.strictEqual(mid1.notCalled, true);
+    assert.strictEqual(handler.notCalled, true);
+
+    await run(context2, noop, httpContext);
+    assert.strictEqual(mid1.notCalled, true);
+    assert.strictEqual(handler.notCalled, true);
+
+    await run(context3, noop, httpContext);
+    assert.strictEqual(mid1.notCalled, true);
+    assert.strictEqual(handler.notCalled, true);
+  });
+
   it('should run multiple middleware functions in chain', async () => {
     const mid1 = sinon.fake((async (context, next) =>
       next({ ...context, foo: 'bar' })) satisfies MiddlewareFunction<

@@ -22,6 +22,7 @@ export type ClientPayload = {
  */
 export type RouterRoutes<RouterInstance> = RouterInstance extends Router<
   infer _,
+  infer _,
   infer Routes,
   string
 >
