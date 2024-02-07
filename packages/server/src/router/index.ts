@@ -32,14 +32,16 @@ export type MethodRoutesMap<InputContext extends RequestContext> = Record<
 >;
 
 type BaseRouter<
+  PreInputContext extends RequestContext,
   InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string
 > = {
-  [key in Lowercase<RequestMethod>]: BuildRoute<InputContext, Routes, Prefix, key>;
+  [key in Lowercase<RequestMethod>]: BuildRoute<PreInputContext, InputContext, Routes, Prefix, key>;
 };
 
 export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
+  infer _,
   infer _,
   infer Routes
 >
@@ -61,10 +63,11 @@ const composeArray = <InputContext extends BaseContext, OutputContext extends Ba
 };
 
 export default class Router<
+  PreInputContext extends RequestContext = RequestContext,
   InputContext extends RequestContext = RequestContext,
   Routes extends BaseRoutes = BaseRoutes,
   Prefix extends string = ''
-> implements BaseRouter<InputContext, Routes, Prefix>
+> implements BaseRouter<PreInputContext, InputContext, Routes, Prefix>
 {
   // Use the dumb way to init since it's easier to make the compiler happy
   get = this.buildRoute('get');
@@ -78,6 +81,7 @@ export default class Router<
 
   public readonly prefix: string;
   protected readonly routesMap: MethodRoutesMap<InputContext> = {};
+  protected readonly middlewareArray: Array<MiddlewareFunction<PreInputContext, InputContext>> = [];
 
   /**
    * Create a router instance.
@@ -100,7 +104,7 @@ export default class Router<
     this.prefix = prefix ?? '';
   }
 
-  public routes(): MiddlewareFunction<InputContext> {
+  public routes(): MiddlewareFunction<PreInputContext, InputContext | PreInputContext> {
     return async (originalContext, next, http) => {
       const { request } = originalContext;
 
@@ -115,8 +119,13 @@ export default class Router<
 
       log.debug('matched route', this.prefix, route.path);
 
+      const run = composeArray<PreInputContext, InputContext>(
+        ...this.middlewareArray,
+        route.runnable
+      );
+
       try {
-        await route.runnable(
+        await run(
           originalContext,
           async (context) => {
             const responseGuard = route.guard.response;
@@ -142,6 +151,22 @@ export default class Router<
     };
   }
 
+  public use<NewInputContext extends InputContext>(
+    middleware: MiddlewareFunction<InputContext, NewInputContext>
+  ): Router<PreInputContext, NewInputContext, Routes, Prefix> {
+    if (Object.values(this.routesMap).length > 0) {
+      throw new Error('Middleware must be added before adding routes');
+    }
+
+    // @ts-expect-error Force update for the new input context
+    // eslint-disable-next-line @silverhand/fp/no-mutating-methods
+    this.middlewareArray.push(middleware);
+
+    // @ts-expect-error Force update for the new input context
+    // eslint-disable-next-line no-restricted-syntax
+    return this as Router<NewInputContext, Routes, Prefix>;
+  }
+
   public withOpenApi(
     parseSearch?: <T>(guard?: Parser<T>) => OpenAPIV3.ParameterObject[],
     parse?: <T>(guard?: Parser<T>) => OpenAPIV3.SchemaObject,
@@ -160,8 +185,13 @@ export default class Router<
   }
 
   public pack<AnotherRoutes extends BaseRoutes>(
-    another: Router<InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
-  ): Router<InputContext, MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>, Prefix> {
+    another: Router<PreInputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+  ): Router<
+    PreInputContext,
+    InputContext,
+    MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>,
+    Prefix
+  > {
     for (const [method, routes] of Object.entries(another.routesMap)) {
       this.routesMap[method] = (this.routesMap[method] ?? []).concat(
         routes.map((instance) => instance.clone(this.prefix + instance.prefix))
@@ -171,6 +201,7 @@ export default class Router<
     // Intended
     // eslint-disable-next-line no-restricted-syntax
     return this as Router<
+      PreInputContext,
       InputContext,
       MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>,
       Prefix
@@ -188,7 +219,7 @@ export default class Router<
 
   private buildRoute<Method extends Lowercase<RequestMethod>>(
     method: Method
-  ): BuildRoute<InputContext, Routes, Prefix, Method> {
+  ): BuildRoute<PreInputContext, InputContext, Routes, Prefix, Method> {
     // @ts-expect-error The function overload it too complex to make TypeScript happy
     // We'll make it right in the implementation
     return <Path extends string, Search, Body, JsonResponse>(
@@ -210,7 +241,7 @@ export type CreateRouter = {
   <InputContext extends RequestContext>(): Router<InputContext>;
   <InputContext extends RequestContext, Prefix extends string>(
     prefix: NormalizedPrefix<Prefix>
-  ): Router<InputContext, BaseRoutes, NormalizedPrefix<Prefix>>;
+  ): Router<InputContext, InputContext, BaseRoutes, NormalizedPrefix<Prefix>>;
 };
 
 export const createRouter: CreateRouter = <Prefix extends string>(

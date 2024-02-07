@@ -23,7 +23,7 @@ export class ResponseError extends Error {
 export default class Client<
   // Use `any` here to avoid context conflicts. The final type can be correctly inferred.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends Router<any, BaseRoutes, string>,
+  R extends Router<any, any, BaseRoutes, string>,
   Routes extends BaseRoutes = RouterRoutes<R>
 > implements RouterClient<Routes>
 {

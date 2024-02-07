@@ -7,6 +7,7 @@ import type Router from './index.js';
 import type { BaseRoutes, GuardedContext, Normalized, PathGuard, RequestGuard } from './types.js';
 
 export type RouterWithRoute<
+  PreInputContext extends RequestContext,
   InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string,
@@ -16,6 +17,7 @@ export type RouterWithRoute<
   Body,
   JsonResponse
 > = Router<
+  PreInputContext,
   InputContext,
   {
     [method in Lowercase<RequestMethod>]: method extends Method
@@ -38,6 +40,7 @@ export type RouterWithRoute<
  * function for each number of middleware functions.
  */
 export type BuildRoute<
+  PreInputContext extends RequestContext,
   InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string,
@@ -53,6 +56,7 @@ export type BuildRoute<
       }
     >
   ): RouterWithRoute<
+    PreInputContext,
     InputContext,
     Routes,
     Prefix,
@@ -76,6 +80,7 @@ export type BuildRoute<
       }
     >
   ): RouterWithRoute<
+    PreInputContext,
     InputContext,
     Routes,
     Prefix,
@@ -100,6 +105,7 @@ export type BuildRoute<
       }
     >
   ): RouterWithRoute<
+    PreInputContext,
     InputContext,
     Routes,
     Prefix,
@@ -133,6 +139,7 @@ export type BuildRoute<
       }
     >
   ): RouterWithRoute<
+    PreInputContext,
     InputContext,
     Routes,
     Prefix,
@@ -168,6 +175,7 @@ export type BuildRoute<
       }
     >
   ): RouterWithRoute<
+    PreInputContext,
     InputContext,
     Routes,
     Prefix,
