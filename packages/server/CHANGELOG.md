@@ -1,5 +1,37 @@
 # @withtyped/server
 
+## 0.13.3
+
+### Patch Changes
+
+- 0745bb1: forbid packing routers with middleware functions
+
+  ```ts
+  import { Router } from "@withtyped/server";
+
+  const router = new Router();
+  const anotherRouter = new Router().use(/* ... */);
+
+  router.pack(anotherRouter); // throws an error
+  ```
+
+  This change is made to prevent packing routers with middleware functions, which is not supported and can lead to unexpected behavior.
+
+- 0745bb1: improve router's `.pack()` type, now it is compatible with "lower" context types
+
+  For example:
+
+  ```ts
+  import { Router, type RequestContext } from "@withtyped/server";
+
+  type Context = RequestContext & { userId: string };
+
+  const router = new Router<Context>();
+  const anotherRouter = new Router<RequestContext>();
+
+  router.pack(anotherRouter); // it is ok now
+  ```
+
 ## 0.13.2
 
 ### Patch Changes
