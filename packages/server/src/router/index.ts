@@ -35,18 +35,19 @@ type BaseRouter<
   PreInputContext extends RequestContext,
   InputContext extends RequestContext,
   Routes extends BaseRoutes,
-  Prefix extends string
+  Prefix extends string,
 > = {
   [key in Lowercase<RequestMethod>]: BuildRoute<PreInputContext, InputContext, Routes, Prefix, key>;
 };
 
-export type RouterRoutes<RouterInstance extends Router> = RouterInstance extends Router<
-  infer _,
-  infer _,
-  infer Routes
->
-  ? Routes
-  : never;
+export type RouterRoutes<RouterInstance> =
+  RouterInstance extends Router<
+    infer _,
+    infer __, // Use different names to avoid conflict since currently we cannot ignore inference. See https://github.com/microsoft/TypeScript/issues/26242
+    infer Routes
+  >
+    ? Routes
+    : never;
 
 /**
  * WARNING: Don't use this function unless you know what you are doing.
@@ -66,7 +67,7 @@ export default class Router<
   PreInputContext extends RequestContext = RequestContext,
   InputContext extends RequestContext = RequestContext,
   Routes extends BaseRoutes = BaseRoutes,
-  Prefix extends string = ''
+  Prefix extends string = '',
 > implements BaseRouter<PreInputContext, InputContext, Routes, Prefix>
 {
   // Use the dumb way to init since it's easier to make the compiler happy

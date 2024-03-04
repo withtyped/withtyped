@@ -15,13 +15,13 @@
     "lint": "eslint src/"
   },
   "devDependencies": {
-    "@silverhand/eslint-config": "^3.0.0",
-    "@silverhand/ts-config": "^3.0.0",
+    "@silverhand/eslint-config": "^5.0.0",
+    "@silverhand/ts-config": "^5.0.0",
     "@types/node": "^18.11.9",
-    "eslint": "^8.36.0",
+    "eslint": "^8.42.0",
     "lint-staged": "^13.0.4",
-    "prettier": "^2.8.4",
-    "typescript": "^5.1.0"
+    "prettier": "^3.0.0",
+    "typescript": "^5.3.3"
   },
   "eslintConfig": {
     "extends": "@silverhand"

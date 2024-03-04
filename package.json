@@ -8,7 +8,7 @@
     "test:all": "c8 pnpm -r test:only"
   },
   "engines": {
-    "node": "^18.13.0 || ^19.2.0",
+    "node": "^20.9.0",
     "pnpm": "^8.6.0"
   },
   "devDependencies": {
