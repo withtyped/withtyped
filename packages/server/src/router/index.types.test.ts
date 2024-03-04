@@ -49,4 +49,61 @@ describe('router types', () => {
       PathGuard<'/bar', unknown, unknown, { storeIds: string[] }>
     >();
   });
+
+  it('should be able to `.pack()` another router with "lower" context types', () => {
+    const subRouter = new Router<RequestContext, RequestContext>().get(
+      '/bar',
+      { response: z.object({ storeIds: z.string().array() }) },
+      async (context, next) => {
+        return next({ ...context, json: { storeIds: [] } });
+      }
+    );
+
+    const router = new Router<RequestContext, RequestContext & { foo: string }>()
+      .use(mid1)
+      .get(
+        '/foo',
+        { response: z.object({ bookIds: z.string().array() }) },
+        async (context, next) => {
+          return next({ ...context, json: { bookIds: [] } });
+        }
+      )
+      .pack(subRouter);
+
+    type Routes = RouterRoutes<typeof router>;
+
+    // Type tests, should report compile errors if the types are not inferred correctly
+    expectTypeOf<Routes['get']['/foo']>().toEqualTypeOf<
+      PathGuard<'/foo', unknown, unknown, { bookIds: string[] }>
+    >();
+    expectTypeOf<Routes['get']['/bar']>().toEqualTypeOf<
+      PathGuard<'/bar', unknown, unknown, { storeIds: string[] }>
+    >();
+  });
+
+  it('should forbid to `.pack()` another router with incompatible context types', () => {
+    const subRouter = new Router<
+      RequestContext & { foo: number },
+      RequestContext & { foo: number }
+    >().get(
+      '/bar',
+      { response: z.object({ storeIds: z.string().array() }) },
+      async (context, next) => {
+        return next({ ...context, json: { storeIds: [] } });
+      }
+    );
+
+    const router = new Router<RequestContext, RequestContext & { foo: string }>()
+      .use(mid1)
+      .get(
+        '/foo',
+        { response: z.object({ bookIds: z.string().array() }) },
+        async (context, next) => {
+          return next({ ...context, json: { bookIds: [] } });
+        }
+      );
+
+    // @ts-expect-error
+    router.pack(subRouter);
+  });
 });
