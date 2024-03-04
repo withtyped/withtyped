@@ -83,6 +83,7 @@ describe('createServer()', () => {
   });
 
   it('should be able to respond signal', async () => {
+    // eslint-disable-next-line unicorn/prefer-event-target
     class FakeEventEmitter extends EventEmitter {
       env = {};
       exit = sinon.stub();

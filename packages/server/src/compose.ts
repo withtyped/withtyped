@@ -9,7 +9,7 @@ import type {
 export type ComposerProperties<
   MiddlewareFunctions extends unknown[],
   InputContext extends BaseContext,
-  OutputContext extends BaseContext
+  OutputContext extends BaseContext,
 > = {
   functions: Readonly<MiddlewareFunctions>;
   and: <Context extends BaseContext>(
@@ -24,7 +24,7 @@ export type ComposerProperties<
 export type Composer<
   MiddlewareFunctions extends unknown[],
   InputContext extends BaseContext,
-  OutputContext extends BaseContext
+  OutputContext extends BaseContext,
 > = MiddlewareFunction<InputContext, OutputContext> &
   ComposerProperties<MiddlewareFunctions, InputContext, OutputContext>;
 
@@ -68,7 +68,7 @@ const buildNext = (
 export const createComposer = function <
   T extends unknown[],
   InputContext extends BaseContext,
-  OutputContext extends BaseContext
+  OutputContext extends BaseContext,
 >(functions: Readonly<T>): Composer<T, InputContext, OutputContext> {
   /**
    * TypeScript won't derive the same type after spreading an array.
@@ -138,12 +138,12 @@ function compose<InputContext extends BaseContext, OutputContext extends BaseCon
 
 function compose<
   InputContext extends BaseContext = BaseContext,
-  OutputContext extends BaseContext = InputContext
+  OutputContext extends BaseContext = InputContext,
 >(): Composer<EmptyArray, InputContext, OutputContext>;
 
 function compose<
   InputContext extends BaseContext = BaseContext,
-  OutputContext extends BaseContext = InputContext
+  OutputContext extends BaseContext = InputContext,
 >(middleware?: MiddlewareFunction<InputContext, OutputContext>) {
   if (middleware) {
     return createComposer<

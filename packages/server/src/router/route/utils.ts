@@ -83,4 +83,4 @@ export const guardInput = <Path extends string, Search, Body>(
     params: parsePathParams(normalizePathname(prefix + path), url),
     search: guard.search?.parse(searchParamsToObject(url.searchParams)),
     body: guard.body?.parse(body),
-  } as Guarded<Path, Search, Body>);
+  }) as Guarded<Path, Search, Body>;

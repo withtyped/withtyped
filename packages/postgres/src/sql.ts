@@ -20,7 +20,7 @@ import { log } from '@withtyped/shared';
  */
 // Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c
 const escapeIdentifier = function (value: string) {
-  return '"' + value.replace(/"/g, '""') + '"';
+  return '"' + value.replaceAll('"', '""') + '"';
 };
 
 export class PostgresJoin {

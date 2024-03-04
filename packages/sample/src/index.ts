@@ -27,8 +27,8 @@ const server = createServer({
       await pool.query(sql`
         insert into forms (id, remote_address, headers, data)
         values (${nanoid()}, ${socket.remoteAddress ?? null}, ${sql.jsonb(rawHeaders)}, ${sql.jsonb(
-        body ?? {}
-      )})
+          body ?? {}
+        )})
       `);
 
       return next({ ...context, status: 204 });

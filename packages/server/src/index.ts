@@ -14,7 +14,7 @@ import { getWriteResponse, writeContextToResponse } from './response.js';
 export type CreateServer<
   T extends unknown[],
   InputContext extends BaseContext,
-  OutputContext extends BaseContext
+  OutputContext extends BaseContext,
 > = {
   /** Port to listen, default to 9001. */
   port?: number;

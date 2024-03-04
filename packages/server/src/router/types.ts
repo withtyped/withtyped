@@ -7,10 +7,10 @@ export type MergeRoutes<A, B> = {
   [key in keyof (A & B)]: key extends keyof (A | B)
     ? A[key] & B[key]
     : key extends keyof B
-    ? B[key]
-    : key extends keyof A
-    ? A[key]
-    : never;
+      ? B[key]
+      : key extends keyof A
+        ? A[key]
+        : never;
 };
 
 /* eslint-disable @typescript-eslint/ban-types */
@@ -22,20 +22,20 @@ export type BaseRoutes = {
 export type Normalized<T> = T extends `${string}//${string}`
   ? never
   : T extends `/${string}`
-  ? TrimEndSlash<T>
-  : never;
+    ? TrimEndSlash<T>
+    : never;
 
 export type NormalizedPrefix<T> = T extends `${string}:${string}`
   ? never
   : T extends `${string}/`
-  ? never
-  : Normalized<T>;
+    ? never
+    : Normalized<T>;
 
 type TrimEndSlash<Path extends string> = Path extends '/'
   ? Path
   : Path extends `${infer A}/`
-  ? A
-  : Path;
+    ? A
+    : Path;
 
 export type RoutesWithPrefix<Routes extends BaseRoutes, Prefix extends string> = {
   [method in keyof BaseRoutes]: {
@@ -51,8 +51,8 @@ export type IsParameter<Part> = Part extends `:${infer Name}` ? Name : never;
 export type Parts<Path extends string> = Path extends `/${infer A}`
   ? Parts<A>
   : Path extends `${infer A}/${infer B}`
-  ? IsParameter<A> | Parts<B>
-  : IsParameter<Path>;
+    ? IsParameter<A> | Parts<B>
+    : IsParameter<Path>;
 
 export type Params<Path extends string> = {
   [key in Parts<Path>]: string;
@@ -77,17 +77,17 @@ export type RemoveUsedKeys<T> = {
   [key in keyof T as keyof T[key] extends never ? never : key]: T[key];
 };
 
-export type GuardedPayload<T> = T extends PathGuard<infer Path, infer Search, infer Body, unknown>
-  ? RemoveUsedKeys<{
-      params: Params<Path>;
-      search: Search;
-      body: Body;
-    }>
-  : never;
+export type GuardedPayload<T> =
+  T extends PathGuard<infer Path, infer Search, infer Body, unknown>
+    ? RemoveUsedKeys<{
+        params: Params<Path>;
+        search: Search;
+        body: Body;
+      }>
+    : never;
 
-export type GuardedResponse<T> = T extends PathGuard<string, unknown, unknown, infer Response>
-  ? Response
-  : never;
+export type GuardedResponse<T> =
+  T extends PathGuard<string, unknown, unknown, infer Response> ? Response : never;
 
 export type Guarded<Path extends string, Search, Body> = {
   params: Params<Path>;
@@ -115,7 +115,7 @@ export type GuardedContext<
   InputContext extends RequestContext,
   Path extends string,
   Search,
-  Body
+  Body,
 > = InputContext & { guarded: Guarded<Path, Search, Body> };
 
 export type StringLiteral<T> = T extends string ? (string extends T ? never : T) : never;

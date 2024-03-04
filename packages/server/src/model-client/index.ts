@@ -11,7 +11,7 @@ export default abstract class ModelClient<
   Table extends string,
   ModelType extends Record<string, unknown> = {},
   DefaultKeys extends string = never,
-  ReadonlyKeys extends string = never
+  ReadonlyKeys extends string = never,
   /* eslint-enable @typescript-eslint/ban-types */
 > {
   abstract readonly model: Model<Table, ModelType, DefaultKeys, ReadonlyKeys>;

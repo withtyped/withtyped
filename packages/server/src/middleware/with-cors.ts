@@ -21,7 +21,7 @@ export type WithCorsConfig<T extends string> = {
 
 export default function withCors<
   InputContext extends RequestContext,
-  T extends string = 'adaptive'
+  T extends string = 'adaptive',
 >({
   allowedOrigin = 'adaptive',
   allowedHeaders = '*',

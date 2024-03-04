@@ -15,7 +15,7 @@ export type RouterWithRoute<
   Path extends string,
   Search,
   Body,
-  JsonResponse
+  JsonResponse,
 > = Router<
   PreInputContext,
   InputContext,
@@ -44,7 +44,7 @@ export type BuildRoute<
   InputContext extends RequestContext,
   Routes extends BaseRoutes,
   Prefix extends string,
-  Method extends Lowercase<RequestMethod>
+  Method extends Lowercase<RequestMethod>,
 > = {
   <Path extends string, Search, Body, JsonResponse>(
     path: Path extends Normalized<Path> ? Path : never,
@@ -122,7 +122,7 @@ export type BuildRoute<
     JsonResponse,
     C1 extends BaseContext,
     C2 extends BaseContext,
-    C3 extends BaseContext
+    C3 extends BaseContext,
   >(
     path: Path extends Normalized<Path> ? Path : never,
     guard: RequestGuard<Search, Body, JsonResponse>,
@@ -157,7 +157,7 @@ export type BuildRoute<
     C1 extends BaseContext,
     C2 extends BaseContext,
     C3 extends BaseContext,
-    C4 extends BaseContext
+    C4 extends BaseContext,
   >(
     path: Path extends Normalized<Path> ? Path : never,
     guard: RequestGuard<Search, Body, JsonResponse>,

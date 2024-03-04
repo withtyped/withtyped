@@ -12,7 +12,7 @@ export default class PostgresModelClient<
   Table extends string,
   ModelType extends Record<string, PostgresJson | undefined>,
   DefaultKeys extends string = never,
-  ReadonlyKeys extends string = never
+  ReadonlyKeys extends string = never,
 > extends ModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys> {
   protected rawKeys: string[];
 
@@ -133,7 +133,7 @@ export const createModelClient = <
   // eslint-disable-next-line @typescript-eslint/ban-types
   ModelType extends Record<string, PostgresJson | undefined> = {},
   DefaultKeys extends string = never,
-  ReadonlyKeys extends string = never
+  ReadonlyKeys extends string = never,
 >(
   ...args: ConstructorParameters<
     typeof PostgresModelClient<Table, ModelType, DefaultKeys, ReadonlyKeys>

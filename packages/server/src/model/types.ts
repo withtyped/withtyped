@@ -29,14 +29,14 @@ export type JsonType = 'json' | 'jsonb';
 export type DataType<T extends string> = T extends NumberType
   ? number
   : T extends DateType
-  ? Date
-  : T extends StringType
-  ? string
-  : T extends JsonType
-  ? JsonObject | JsonArray
-  : T extends BooleanType
-  ? boolean
-  : never;
+    ? Date
+    : T extends StringType
+      ? string
+      : T extends JsonType
+        ? JsonObject | JsonArray
+        : T extends BooleanType
+          ? boolean
+          : never;
 
 // TODO: Need clear docs for the transpilation
 export type ColumnNotNull<T> = T extends `${string}not null${string}` ? true : false;
@@ -48,8 +48,8 @@ export type ColumnLiteral<T> = T extends `${infer Name} ${infer Type} ${infer Pr
     ? never
     : [Name, DataType<Type>, ColumnNotNull<Props>, ColumnHasDefault<Props>, ColumnIsArray<Props>]
   : T extends `${infer Name} ${infer Type}`
-  ? [Name, DataType<Type>, false, false, false]
-  : never;
+    ? [Name, DataType<Type>, false, false, false]
+    : never;
 export type ColumnNonNullableType<T extends unknown[]> = T[4] extends true ? Array<T[1]> : T[1];
 export type ColumnType<T extends unknown[]> = T[2] extends true
   ? ColumnNonNullableType<T>
@@ -59,12 +59,12 @@ export type ColumnType<T extends unknown[]> = T[2] extends true
 export type Normalize<T> = T extends `${infer A}  ${infer B}`
   ? Normalize<`${A} ${B}`>
   : T extends `${infer A}\n${infer B}`
-  ? Normalize<`${A}${B}`>
-  : T extends ` ${infer A}`
-  ? Normalize<A>
-  : T extends `${infer A} `
-  ? Normalize<A>
-  : T;
+    ? Normalize<`${A}${B}`>
+    : T extends ` ${infer A}`
+      ? Normalize<A>
+      : T extends `${infer A} `
+        ? Normalize<A>
+        : T;
 
 export type CreateTableBody<T extends string> =
   Lowercase<T> extends `${string}create table${string}(${infer Body});${string}` ? Body : never;
@@ -138,7 +138,7 @@ export type ModelPatchType<ModelType, ReadonlyKeys extends keyof ModelType = nev
 export type ModelCreateType<
   ModelType,
   DefaultKeys extends keyof ModelType,
-  ReadonlyKeys extends keyof ModelType = never
+  ReadonlyKeys extends keyof ModelType = never,
 > = Omit<
   Omit<ModelType, DefaultKeys> & {
     [key in DefaultKeys]?: ModelType[key];
@@ -150,7 +150,7 @@ export type ModelParseType = 'model' | 'create' | 'patch';
 export type ModelParseReturnType<
   ModelType,
   DefaultKeys extends keyof ModelType,
-  ReadonlyKeys extends keyof ModelType = never
+  ReadonlyKeys extends keyof ModelType = never,
 > = {
   model: ModelType;
   create: ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>;

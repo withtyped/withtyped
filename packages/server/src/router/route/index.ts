@@ -10,7 +10,7 @@ export abstract class RouteLike<
   Path extends string = string,
   Search = unknown,
   Body = unknown,
-  JsonResponse = unknown
+  JsonResponse = unknown,
 > {
   abstract prefix: string;
   abstract path: Path;
@@ -25,7 +25,7 @@ export default class Route<
   Path extends string = string,
   Search = unknown,
   Body = unknown,
-  JsonResponse = unknown
+  JsonResponse = unknown,
 > implements RouteLike<InputContext, Path, Search, Body, JsonResponse>
 {
   constructor(

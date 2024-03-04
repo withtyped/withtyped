@@ -24,28 +24,20 @@ export type HttpContext = {
 
 export type MiddlewareFunction<
   InputContext extends BaseContext = BaseContext,
-  OutputContext extends BaseContext = InputContext
+  OutputContext extends BaseContext = InputContext,
 > = (context: InputContext, next: NextFunction<OutputContext>, http: HttpContext) => Promise<void>;
 
 export type GeneralMiddlewareFunction = <
   InputContext extends BaseContext = BaseContext,
-  OutputContext extends BaseContext = InputContext
+  OutputContext extends BaseContext = InputContext,
 >(
   context: InputContext,
   next: NextFunction<OutputContext>,
   http: HttpContext
 ) => Promise<void>;
 
-export type ExtractInputContext<Middleware> = Middleware extends MiddlewareFunction<
-  infer Input,
-  BaseContext
->
-  ? Input
-  : never;
+export type ExtractInputContext<Middleware> =
+  Middleware extends MiddlewareFunction<infer Input, BaseContext> ? Input : never;
 
-export type ExtractOutputContext<Middleware> = Middleware extends MiddlewareFunction<
-  BaseContext,
-  infer Output
->
-  ? Output
-  : never;
+export type ExtractOutputContext<Middleware> =
+  Middleware extends MiddlewareFunction<BaseContext, infer Output> ? Output : never;

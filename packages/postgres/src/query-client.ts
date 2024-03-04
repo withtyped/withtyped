@@ -64,7 +64,7 @@ export class PostgresTransaction extends Transaction<PostgreSql> {
 
   protected async tryQuery<
     Result extends Record<string, unknown> = Record<string, unknown>,
-    Args extends unknown[] = unknown[]
+    Args extends unknown[] = unknown[],
   >(text: string, args?: Args) {
     try {
       const result = await this.client.query<Result, Args>(text, args);

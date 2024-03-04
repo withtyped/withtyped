@@ -38,7 +38,7 @@ export default class Model<
   // eslint-disable-next-line @typescript-eslint/ban-types
   ModelType extends Record<string, unknown> = {},
   DefaultKeys extends string = never,
-  ReadonlyKeys extends string = never
+  ReadonlyKeys extends string = never,
 > {
   /**
    * Create a new model instance according to the raw query of creating a table.
@@ -390,28 +390,20 @@ export type InferModelType<M> = InferModel<M>;
  * The model creation type makes the original model fields with default value optional,
  * and forces readonly fields to be set as `undefined`.
  */
-export type InferModelCreate<M> = M extends Model<
-  string,
-  infer ModelType,
-  infer DefaultKeys,
-  infer ReadonlyKeys
->
-  ? ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>
-  : never;
+export type InferModelCreate<M> =
+  M extends Model<string, infer ModelType, infer DefaultKeys, infer ReadonlyKeys>
+    ? ModelCreateType<ModelType, DefaultKeys, ReadonlyKeys>
+    : never;
 
 /**
  * Infers the model patch type of a given model class.
  *
  * The model patch type makes all fields optional, except readonly fields are omitted.
  */
-export type InferModelPatch<M> = M extends Model<
-  string,
-  infer ModelType,
-  string,
-  infer ReadonlyKeys
->
-  ? ModelPatchType<ModelType, ReadonlyKeys>
-  : never;
+export type InferModelPatch<M> =
+  M extends Model<string, infer ModelType, string, infer ReadonlyKeys>
+    ? ModelPatchType<ModelType, ReadonlyKeys>
+    : never;
 
 export * from './types.js';
 export * from './utils.js';

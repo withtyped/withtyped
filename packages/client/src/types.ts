@@ -20,14 +20,8 @@ export type ClientPayload = {
  * Infer the routes type of a router. The result will be `never` if a non-router type is given.
  * @see {@link Router}
  */
-export type RouterRoutes<RouterInstance> = RouterInstance extends Router<
-  infer _,
-  infer _,
-  infer Routes,
-  string
->
-  ? Routes
-  : never;
+export type RouterRoutes<RouterInstance> =
+  RouterInstance extends Router<infer _, infer _, infer Routes, string> ? Routes : never;
 
 /** Extract the routes that have empty payload from a method routes type. */
 export type EmptyPayloadRoutes<MethodRoutes> = {
