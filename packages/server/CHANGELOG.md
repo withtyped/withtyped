@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.13.2
+
+### Patch Changes
+
+- 81fac52: fix `<RouterRoutes>` type inference
+
 ## 0.13.1
 
 ### Patch Changes
