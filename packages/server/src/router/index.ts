@@ -187,16 +187,27 @@ export default class Router<
     );
   }
 
-  public pack<AnotherRoutes extends BaseRoutes>(
-    another: Router<InputContext, InputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
+  public pack<
+    AnotherRoutes extends BaseRoutes,
+    AnotherInputContext extends InputContext extends AnotherInputContext ? RequestContext : never,
+  >(
+    another: Router<AnotherInputContext, AnotherInputContext, AnotherRoutes, string> // Don't care another prefix since routes are all prefixed
   ): Router<
     PreInputContext,
     InputContext,
     MergeRoutes<Routes, RoutesWithPrefix<AnotherRoutes, Prefix>>,
     Prefix
   > {
+    // TODO: Consider to add the instance from another router to support middleware
+    if (another.middlewareArray.length > 0) {
+      throw new Error('Another router must not have middleware');
+    }
+
     for (const [method, routes] of Object.entries(another.routesMap)) {
       this.routesMap[method] = (this.routesMap[method] ?? []).concat(
+        // @ts-expect-error It's ok for another router to have a different input context since:
+        // - We don't care the output contexts of routers.
+        // - As long as the pre-input context compatible with the current one
         routes.map((instance) => instance.clone(this.prefix + instance.prefix))
       );
     }

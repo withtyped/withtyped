@@ -109,6 +109,46 @@ describe('Router', () => {
     );
   });
 
+  it('should throw error when using `.pack()` with a router that has middleware', () => {
+    const mid1 = sinon.fake(async (context, next) =>
+      next({ ...context, foo: 'bar' })
+    ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
+    const handler = sinon.fake(async (context, next) => next(context)) satisfies MiddlewareFunction<
+      RequestContext & { foo: string },
+      RequestContext & { foo: string }
+    >;
+
+    const router1 = new Router().use(mid1).get('/books', {}, handler);
+    const router2 = new Router<RequestContext & { foo: string }, RequestContext & { foo: string }>()
+      .use(mid1)
+      .get('/books', {}, handler);
+
+    assert.throws(() => router1.pack(router2), Error, 'Another router must not have middleware');
+  });
+
+  it('should be able to pack another router after `.use().pack()` and execute the middleware functions for the packed router', async () => {
+    const mid = sinon.fake(async (context, next) =>
+      next({ ...context, bar: 123 })
+    ) satisfies MiddlewareFunction<RequestContext, RequestContext & { bar: number }>;
+    const handler = sinon.fake(async (context, next) => next(context)) satisfies MiddlewareFunction<
+      RequestContext,
+      RequestContext
+    >;
+
+    const router1 = new Router().get('/books', {}, handler);
+    const router2 = new Router().use(mid).pack(router1);
+    const context1 = createRequestContext(RequestMethod.GET, '/books');
+    const run = router2.routes();
+    const httpContext = createHttpContext();
+
+    await run(context1, noop, httpContext);
+    assert.strictEqual(mid.calledOnceWith(sinon.match(context1), sinon.match.func), true);
+    assert.strictEqual(
+      handler.calledOnceWith(sinon.match({ ...context1, bar: 123 }), sinon.match.func),
+      true
+    );
+  });
+
   it('should respond with parsed json when the route matches', async () => {
     const router = new Router().get(
       '/books',
@@ -421,5 +461,6 @@ describe('Router', () => {
       },
       createHttpContext()
     );
+    // eslint-disable-next-line max-lines
   });
 });
