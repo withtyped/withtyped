@@ -1,5 +1,11 @@
 # @withtyped/client
 
+## 0.8.4
+
+### Patch Changes
+
+- 956ea15: export `RouterRoutes` from server
+
 ## 0.8.3
 
 ### Patch Changes
