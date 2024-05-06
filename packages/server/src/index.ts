@@ -85,7 +85,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // Start log
     if (logLevel !== 'none') {
       console.debug(
-        requestId ? `${color(requestId, 'cyan')}  ${color('in', 'blue')}` : color('in', 'blue'),
+        requestId ? `${color(requestId, 'dim')}  ${color('in', 'blue')}` : color('in', 'blue'),
         color(request.method, 'bright'),
         request.url
       );
@@ -121,7 +121,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     if (logLevel !== 'none') {
       console.debug(
         requestId
-          ? `${color(requestId, 'cyan')} ${color('out', 'magenta')}`
+          ? `${color(requestId, 'dim')} ${color('out', 'magenta')}`
           : color('out', 'magenta'),
         color(request.method, 'bright'),
         request.url,
