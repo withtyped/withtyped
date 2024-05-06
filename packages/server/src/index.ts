@@ -91,16 +91,16 @@ export default function createServer<T extends unknown[], OutputContext extends 
     }
     const startTime = Date.now();
 
+    if (requestId) {
+      response.setHeader(requestIdHeader, requestId);
+    }
+
     // Run the middleware chain
     try {
-      await composed(
-        requestId ? { headers: { [requestIdHeader]: requestId } } : {},
-        async (context) => writeContextToResponse(response, context),
-        {
-          request,
-          response,
-        }
-      );
+      await composed({}, async (context) => writeContextToResponse(response, context), {
+        request,
+        response,
+      });
 
       // End
       if (!(response.writableEnded || response.destroyed)) {
