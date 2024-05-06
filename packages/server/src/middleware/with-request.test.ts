@@ -73,5 +73,23 @@ describe('withRequest()', () => {
   it('should throw error if no `host` header found', async () => {
     await assert.rejects(run({}, noop, createHttpContext()), TypeError);
   });
+
+  it('should set `context.request.id` if `context.requestId` is set', async () => {
+    const httpContext = createHttpContext();
+    httpContext.request.headers.host = 'localhost';
+    await run(
+      { requestId: '123456' },
+      assertContext({
+        requestId: '123456',
+        request: {
+          id: '123456',
+          headers: { host: 'localhost' },
+          method: undefined,
+          url: new URL('http://localhost'),
+        },
+      }),
+      httpContext
+    );
+  });
   /* eslint-enable @silverhand/fp/no-mutation */
 });

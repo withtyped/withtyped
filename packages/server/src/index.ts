@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 
 import { trySafe } from '@silverhand/essentials';
 import { color, contentTypes, log } from '@withtyped/shared';
+import { nanoid } from 'nanoid';
 
 import type { Composer } from './compose.js';
 import compose from './compose.js';
@@ -24,6 +25,24 @@ export type CreateServer<
   queryClients?: QueryClient[];
   /** Use 'none' to turn off the log. */
   logLevel?: 'none' | 'info';
+  /**
+   * If enabled, the server will add a 16-character request ID to the following places:
+   *
+   * - The context object
+   * - The response header
+   * - The log
+   *
+   * The request ID will be added to the response header with the name specified in `headerName`. Default to `x-request-id`.
+   */
+  requestId?: {
+    enabled: true;
+    /**
+     * The header name to add the request ID.
+     *
+     * @default 'x-request-id'
+     */
+    headerName?: string;
+  };
 };
 
 const promisifyEnd = (response: http.ServerResponse) =>
@@ -59,18 +78,29 @@ export default function createServer<T extends unknown[], OutputContext extends 
   const { port = 9001, composer, queryClients, logLevel = 'info' } = config;
   const composed = composer ?? compose();
   const server = http.createServer(async (request, response) => {
+    const requestId = config.requestId?.enabled ? nanoid(16) : undefined;
+    const requestIdHeader = config.requestId?.headerName ?? 'x-request-id';
+
     // Start log
     if (logLevel !== 'none') {
-      console.debug(color(' in', 'blue'), color(request.method, 'bright'), request.url);
+      console.debug(
+        requestId ? `${requestId}  ${color('in', 'blue')}` : color('in', 'blue'),
+        color(request.method, 'bright'),
+        request.url
+      );
     }
     const startTime = Date.now();
 
     // Run the middleware chain
     try {
-      await composed({}, async (context) => writeContextToResponse(response, context), {
-        request,
-        response,
-      });
+      await composed(
+        requestId ? { headers: { [requestIdHeader]: requestId } } : {},
+        async (context) => writeContextToResponse(response, context),
+        {
+          request,
+          response,
+        }
+      );
 
       // End
       if (!(response.writableEnded || response.destroyed)) {
@@ -85,7 +115,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // End log
     if (logLevel !== 'none') {
       console.debug(
-        color('out', 'magenta'),
+        requestId ? `${requestId} ${color('out', 'magenta')}` : color('out', 'magenta'),
         color(request.method, 'bright'),
         request.url,
         response.statusCode,
