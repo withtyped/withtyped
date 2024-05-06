@@ -52,17 +52,17 @@ const fakeFetch = sinon.stub(global, 'fetch').callsFake(async (input, init) => {
 
 const withPath = (path: string) => new URL(path, baseUrl);
 
-describe('Client', () => {
+void describe('Client', () => {
   beforeEach(() => {
     fakeFetch.resetHistory();
   });
 
-  it('should not explode', () => {
+  void it('should not explode', () => {
     assert.ok(new Client(baseUrl.toString()));
     assert.ok(new Client(baseUrl));
   });
 
-  it('should support all available request methods', () => {
+  void it('should support all available request methods', () => {
     const client = new Client(baseUrl);
 
     for (const method of lowerRequestMethods) {
@@ -70,7 +70,7 @@ describe('Client', () => {
     }
   });
 
-  it('should send with static custom headers', async () => {
+  void it('should send with static custom headers', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       headers: { authorization: 'top-secret' },
@@ -87,7 +87,7 @@ describe('Client', () => {
     );
   });
 
-  it('should send with dynamic custom headers', async () => {
+  void it('should send with dynamic custom headers', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       headers: (url, method) => ({ foo: url.pathname, bar: method }),
@@ -104,7 +104,7 @@ describe('Client', () => {
     );
   });
 
-  it('should send with dynamic promise custom headers', async () => {
+  void it('should send with dynamic promise custom headers', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       headers: async (url, method) => ({ foo: url.pathname, bar: method }),
@@ -121,14 +121,14 @@ describe('Client', () => {
     );
   });
 
-  it('should throw when path is not string', async () => {
+  void it('should throw when path is not string', async () => {
     const client = new Client<typeof router>(baseUrl);
 
     // @ts-expect-error for testing
     await assert.rejects(client.get(123), new TypeError('Path is not string'));
   });
 
-  it('should throw when response is not ok', async () => {
+  void it('should throw when response is not ok', async () => {
     const client = new Client<typeof router>(baseUrl);
 
     await assert.rejects(client.get('/books/error'), (error) => {
@@ -138,7 +138,7 @@ describe('Client', () => {
     });
   });
 
-  it('should be able to send URL parameters', async () => {
+  void it('should be able to send URL parameters', async () => {
     const client = new Client<typeof router>(baseUrl);
 
     await client.patch('/books/:id', { params: { id: '123' } });
@@ -152,7 +152,7 @@ describe('Client', () => {
     );
   });
 
-  it('should be able to send search parameters', async () => {
+  void it('should be able to send search parameters', async () => {
     const client = new Client<typeof router>(baseUrl);
     const search = { foo: 's1=&&&', bar: ['s2', 's2'] };
 
@@ -170,7 +170,7 @@ describe('Client', () => {
     );
   });
 
-  it('should throw when URL parameter is missing', async () => {
+  void it('should throw when URL parameter is missing', async () => {
     const client = new Client<typeof router>(baseUrl);
     const search = { foo: 's1', bar: ['s2', 's2'] };
 
@@ -184,7 +184,7 @@ describe('Client', () => {
     );
   });
 
-  it('should stringify body and send', async () => {
+  void it('should stringify body and send', async () => {
     const client = new Client<typeof router>(baseUrl);
     const body = {
       foo: 123,
@@ -210,12 +210,12 @@ describe('Client', () => {
   });
 });
 
-describe('Client hooks', () => {
+void describe('Client hooks', () => {
   beforeEach(() => {
     fakeFetch.resetHistory();
   });
 
-  it('should throw when hook returns error', async () => {
+  void it('should throw when hook returns error', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       before: {
@@ -226,7 +226,7 @@ describe('Client hooks', () => {
     await assert.rejects(client.get('/books/error'), new Error('Hook error'));
   });
 
-  it('should throw when hook returns promise error', async () => {
+  void it('should throw when hook returns promise error', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       before: {
@@ -237,7 +237,7 @@ describe('Client hooks', () => {
     await assert.rejects(client.get('/books/error'), new Error('Hook error'));
   });
 
-  it('should throw original error when hook returns non-error', async () => {
+  void it('should throw original error when hook returns non-error', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       before: {
@@ -248,7 +248,7 @@ describe('Client hooks', () => {
     await assert.rejects(client.get('/books/error'), new ResponseError(errorResponse));
   });
 
-  it('should throw original error when hook returns promise non-error', async () => {
+  void it('should throw original error when hook returns promise non-error', async () => {
     const client = new Client<typeof router>({
       baseUrl,
       before: {

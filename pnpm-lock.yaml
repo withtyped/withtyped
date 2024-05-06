@@ -37,11 +37,11 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
-        specifier: ^10.0.13
-        version: 10.0.13
+        specifier: ^17.0.3
+        version: 17.0.3
       c8:
         specifier: ^7.12.0
         version: 7.12.0
@@ -55,8 +55,8 @@ importers:
         specifier: ^3.0.0
         version: 3.2.5
       sinon:
-        specifier: ^14.0.2
-        version: 14.0.2
+        specifier: ^17.0.1
+        version: 17.0.1
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -98,8 +98,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       eslint:
         specifier: ^8.42.0
         version: 8.57.0
@@ -135,11 +135,11 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
-        specifier: ^10.0.13
-        version: 10.0.13
+        specifier: ^17.0.3
+        version: 17.0.3
       '@withtyped/server':
         specifier: workspace:*
         version: link:../server
@@ -156,8 +156,8 @@ importers:
         specifier: ^3.0.0
         version: 3.2.5
       sinon:
-        specifier: ^14.0.2
-        version: 14.0.2
+        specifier: ^17.0.1
+        version: 17.0.1
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -196,8 +196,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       eslint:
         specifier: ^8.42.0
         version: 8.57.0
@@ -233,11 +233,11 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
-        specifier: ^10.0.13
-        version: 10.0.13
+        specifier: ^17.0.3
+        version: 17.0.3
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.2
@@ -260,8 +260,8 @@ importers:
         specifier: ^3.0.0
         version: 3.2.5
       sinon:
-        specifier: ^14.0.2
-        version: 14.0.2
+        specifier: ^17.0.1
+        version: 17.0.1
       supertest:
         specifier: ^7.0.0
         version: 7.0.0
@@ -281,11 +281,11 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
-        specifier: ^10.0.13
-        version: 10.0.13
+        specifier: ^17.0.3
+        version: 17.0.3
       eslint:
         specifier: ^8.42.0
         version: 8.57.0
@@ -296,8 +296,8 @@ importers:
         specifier: ^3.0.0
         version: 3.2.5
       sinon:
-        specifier: ^14.0.2
-        version: 14.0.2
+        specifier: ^17.0.1
+        version: 17.0.1
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -731,32 +731,26 @@ packages:
       typescript: 5.3.3
     dev: true
 
-  /@sinonjs/commons@1.8.5:
-    resolution: {integrity: sha512-rTpCA0wG1wUxglBSFdMMY0oTrKYvgf4fNgv/sXbfCVAdf+FnPBdKJR/7XbpTCwbCrvCbdPYnlWaUUYz4V2fPDA==}
-    dependencies:
-      type-detect: 4.0.8
-    dev: true
-
   /@sinonjs/commons@2.0.0:
     resolution: {integrity: sha512-uLa0j859mMrg2slwQYdO/AkrOfmH+X6LTVmNTS9CqexuE2IvVORIkSpJLqePAbEnKJ77aMmCwr1NUZ57120Xcg==}
     dependencies:
       type-detect: 4.0.8
     dev: true
 
-  /@sinonjs/fake-timers@7.1.2:
-    resolution: {integrity: sha512-iQADsW4LBMISqZ6Ci1dupJL9pprqwcVFTcOsEmQOEhW+KLCVn/Y4Jrvg2k19fIHCp+iFprriYPTdRcQR8NbUPg==}
+  /@sinonjs/commons@3.0.1:
+    resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
     dependencies:
-      '@sinonjs/commons': 1.8.5
+      type-detect: 4.0.8
     dev: true
 
-  /@sinonjs/fake-timers@9.1.2:
-    resolution: {integrity: sha512-BPS4ynJW/o92PUR4wgriz2Ud5gpST5vz6GQfMixEDK0Z8ZCUv2M7SkBLykH56T++Xs+8ln9zTGbOvNGIe02/jw==}
+  /@sinonjs/fake-timers@11.2.2:
+    resolution: {integrity: sha512-G2piCSxQ7oWOxwGSAyFHfPIsyeJGXYtc6mFbnFA+kRXkiEnTl8c/8jul2S329iFBnDI9HGoeWWAZvuvOkZccgw==}
     dependencies:
-      '@sinonjs/commons': 1.8.5
+      '@sinonjs/commons': 3.0.1
     dev: true
 
-  /@sinonjs/samsam@7.0.1:
-    resolution: {integrity: sha512-zsAk2Jkiq89mhZovB2LLOdTCxJF4hqqTToGP0ASWlhp4I1hqOjcfmZGafXntCN7MDC6yySH0mFHrYtHceOeLmw==}
+  /@sinonjs/samsam@8.0.0:
+    resolution: {integrity: sha512-Bp8KUVlLp8ibJZrnvq2foVhP0IVX2CIprMJPK0vqGqgrDa0OHVKeZyBykqskkrdxV6yKBPmGasO8LVjAKR3Gew==}
     dependencies:
       '@sinonjs/commons': 2.0.0
       lodash.get: 4.4.2
@@ -801,8 +795,10 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: true
 
-  /@types/node@18.11.9:
-    resolution: {integrity: sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==}
+  /@types/node@20.12.8:
+    resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
+    dependencies:
+      undici-types: 5.26.5
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -811,7 +807,7 @@ packages:
   /@types/pg@8.6.5:
     resolution: {integrity: sha512-tOkGtAqRVkHa/PVZicq67zuujI4Oorfglsr2IbKofDwBSysnaqSx7W1mDqFqdkGE6Fbgh+PZAl0r/BWON/mozw==}
     dependencies:
-      '@types/node': 18.11.9
+      '@types/node': 20.12.8
       pg-protocol: 1.5.0
       pg-types: 2.2.0
     dev: false
@@ -824,8 +820,8 @@ packages:
     resolution: {integrity: sha512-WwA1MW0++RfXmCr12xeYOOC5baSC9mSb0ZqCquFzKhcoF4TvHu5MKOuXsncgZcpVFhB1pXd5hZmM0ryAoCp12A==}
     dev: true
 
-  /@types/sinon@10.0.13:
-    resolution: {integrity: sha512-UVjDqJblVNQYvVNUsj0PuYYw0ELRmgt1Nt5Vk0pT5f16ROGfcKJY8o1HVuMOJOpD727RrGB9EGvoaTQE5tgxZQ==}
+  /@types/sinon@17.0.3:
+    resolution: {integrity: sha512-j3uovdn8ewky9kRBG19bOwaZbexJu/XjtkHyjvUgt4xfPFz18dcORIMqnYh66Fx3Powhcr85NT5+er3+oViapw==}
     dependencies:
       '@types/sinonjs__fake-timers': 8.1.2
     dev: true
@@ -839,7 +835,7 @@ packages:
     dependencies:
       '@types/cookiejar': 2.1.5
       '@types/methods': 1.1.4
-      '@types/node': 18.11.9
+      '@types/node': 20.12.8
     dev: true
 
   /@types/supertest@6.0.2:
@@ -2760,10 +2756,6 @@ packages:
       is-docker: 2.2.1
     dev: true
 
-  /isarray@0.0.1:
-    resolution: {integrity: sha512-D2S+3GLxWH+uhrNEcoh/fnmYeP8E8/zHl644d/jdA0g2uyXvy3sb0qxotE+ne0LtccHknQzWwZEzhak7oJ0COQ==}
-    dev: true
-
   /isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
@@ -2856,8 +2848,8 @@ packages:
       graceful-fs: 4.2.10
     dev: true
 
-  /just-extend@4.2.1:
-    resolution: {integrity: sha512-g3UB796vUFIY90VIv/WX3L2c8CS2MdWUww3CNrYmqza1Fg0DURc2K/O4YrnklBdQarSJ/y8JnJYDGc+1iumQjg==}
+  /just-extend@6.2.0:
+    resolution: {integrity: sha512-cYofQu2Xpom82S6qD778jBDpwvvy39s1l/hrYij2u9AMdQcGRpaBu6kY4mVhuno5kJVi1DAz4aiphA2WI1/OAw==}
     dev: true
 
   /kind-of@6.0.3:
@@ -3144,14 +3136,14 @@ packages:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
 
-  /nise@5.1.2:
-    resolution: {integrity: sha512-+gQjFi8v+tkfCuSCxfURHLhRhniE/+IaYbIphxAN2JRR9SHKhY8hgXpaXiYfHdw+gcGe4buxgbprBQFab9FkhA==}
+  /nise@5.1.9:
+    resolution: {integrity: sha512-qOnoujW4SV6e40dYxJOb3uvuoPHtmLzIk4TFo+j0jPJoC+5Z9xja5qH5JZobEPsa8+YYphMrOSwnrshEhG2qww==}
     dependencies:
-      '@sinonjs/commons': 2.0.0
-      '@sinonjs/fake-timers': 7.1.2
+      '@sinonjs/commons': 3.0.1
+      '@sinonjs/fake-timers': 11.2.2
       '@sinonjs/text-encoding': 0.7.2
-      just-extend: 4.2.1
-      path-to-regexp: 1.8.0
+      just-extend: 6.2.0
+      path-to-regexp: 6.2.2
     dev: true
 
   /normalize-package-data@2.5.0:
@@ -3374,10 +3366,8 @@ packages:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
     dev: true
 
-  /path-to-regexp@1.8.0:
-    resolution: {integrity: sha512-n43JRhlUKUAlibEJhPeir1ncUID16QnEjNpwzNdO3Lm4ywrBpBZ5oLD0I6br9evr1Y9JTqwRtAh7JLoOzAQdVA==}
-    dependencies:
-      isarray: 0.0.1
+  /path-to-regexp@6.2.2:
+    resolution: {integrity: sha512-GQX3SSMokngb36+whdpRXE+3f9V8UzyAorlYvOGx87ufGHehNTn5lCxrKtLyZ4Yl/wEKnNnr98ZzOwwDZV5ogw==}
     dev: true
 
   /path-type@4.0.0:
@@ -3902,14 +3892,14 @@ packages:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
     dev: true
 
-  /sinon@14.0.2:
-    resolution: {integrity: sha512-PDpV0ZI3ZCS3pEqx0vpNp6kzPhHrLx72wA0G+ZLaaJjLIYeE0n8INlgaohKuGy7hP0as5tbUd23QWu5U233t+w==}
+  /sinon@17.0.1:
+    resolution: {integrity: sha512-wmwE19Lie0MLT+ZYNpDymasPHUKTaZHUH/pKEubRXIzySv9Atnlw+BUMGCzWgV7b7wO+Hw6f1TEOr0IUnmU8/g==}
     dependencies:
-      '@sinonjs/commons': 2.0.0
-      '@sinonjs/fake-timers': 9.1.2
-      '@sinonjs/samsam': 7.0.1
+      '@sinonjs/commons': 3.0.1
+      '@sinonjs/fake-timers': 11.2.2
+      '@sinonjs/samsam': 8.0.0
       diff: 5.1.0
-      nise: 5.1.2
+      nise: 5.1.9
       supports-color: 7.2.0
     dev: true
 
@@ -4374,6 +4364,9 @@ packages:
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
     dev: true
+
+  /undici-types@5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
   /universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}

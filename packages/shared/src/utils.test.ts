@@ -5,13 +5,13 @@ import sinon from 'sinon';
 
 import { color, log, noop } from './utils.js';
 
-describe('utils', { concurrency: 1 }, () => {
-  it('returns nothing from `noop()`', async () => {
+void describe('utils', { concurrency: 1 }, () => {
+  void it('returns nothing from `noop()`', async () => {
     // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     assert.strictEqual(await noop(), undefined);
   });
 
-  it('should return no color in TTY', () => {
+  void it('should return no color in TTY', () => {
     const stub = sinon.stub(global, 'process').value({ stdout: { isTTY: true } });
     // eslint-disable-next-line no-useless-concat
     assert.strictEqual(color('foo', 'black'), '\u001B[30m' + 'foo' + '\u001B[0m');
@@ -24,7 +24,7 @@ describe('utils', { concurrency: 1 }, () => {
     stub.restore();
   });
 
-  it('should log as expected', () => {
+  void it('should log as expected', () => {
     if (!process.env.DEBUG) {
       process.env.DEBUG = '';
     }

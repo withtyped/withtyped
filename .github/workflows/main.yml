@@ -15,12 +15,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node and pnpm
-        uses: silverhand-io/actions-node-pnpm-run-steps@v3
+        uses: silverhand-io/actions-node-pnpm-run-steps@v4
         with:
-          node-version: 20.9 # temporary workaround, will fix soon
+          # Remove until https://github.com/sinonjs/sinon/issues/2590 is resolved
+          node-version: 20.11.1
 
       - name: Build
         run: pnpm -r build --sourcemap

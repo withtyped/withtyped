@@ -30,7 +30,7 @@ class FakeQueryClient extends PostgresQueryClient {
   });
 }
 
-describe('PostgresModelClient', () => {
+void describe('PostgresModelClient', () => {
   const forms = Model.create(
     /* Sql */ `
     CREATE table forms (
@@ -47,7 +47,7 @@ describe('PostgresModelClient', () => {
     .extend('data', z.object({ foo: z.string(), bar: z.number().optional() }))
     .extend('data2', z.number().gt(10).nullable());
 
-  it('should call query client methods accordingly', () => {
+  void it('should call query client methods accordingly', () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = new PostgresModelClient(Model.create(`create table tests ();`), fakeQueryClient);
 
@@ -63,7 +63,7 @@ describe('PostgresModelClient', () => {
     );
   });
 
-  it('should call `.create()` and perform query properly', async () => {
+  void it('should call `.create()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -98,7 +98,7 @@ describe('PostgresModelClient', () => {
     ]);
   });
 
-  it('should call `.readAll()` and perform query properly', async () => {
+  void it('should call `.readAll()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -115,7 +115,7 @@ describe('PostgresModelClient', () => {
     assert.deepStrictEqual(args, []);
   });
 
-  it('should call `.read()` and perform query properly', async () => {
+  void it('should call `.read()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -145,7 +145,7 @@ describe('PostgresModelClient', () => {
     await assert.rejects(client.read('id', 'foo'), new ModelClientError('entity_not_found'));
   });
 
-  it('should call `.update()` and perform query properly', async () => {
+  void it('should call `.update()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 
@@ -174,7 +174,7 @@ describe('PostgresModelClient', () => {
     await assert.rejects(client.update('id', 'foo', {}), new ModelClientError('entity_not_found'));
   });
 
-  it('should call `.delete()` and perform query properly', async () => {
+  void it('should call `.delete()` and perform query properly', async () => {
     const fakeQueryClient = new FakeQueryClient();
     const client = createModelClient(forms, fakeQueryClient);
 

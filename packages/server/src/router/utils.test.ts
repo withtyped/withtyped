@@ -8,8 +8,8 @@ import { matchRoute } from './utils.js';
 
 const base = 'http://fake';
 
-describe('matchRoute()', () => {
-  it('should match proper routes', () => {
+void describe('matchRoute()', () => {
+  void it('should match proper routes', () => {
     const route = new Route('/foo', '/:bar/:baz', {}, noop);
 
     assert.strictEqual(matchRoute(route, new URL('/foo/123/456', base)), true);
@@ -17,7 +17,7 @@ describe('matchRoute()', () => {
     assert.strictEqual(matchRoute(route, new URL('/foo/:123/ba_ z', base)), true);
   });
 
-  it('should not match routes', () => {
+  void it('should not match routes', () => {
     const route = new Route('/foo', '/:bar/:baz', {}, noop);
 
     assert.strictEqual(matchRoute(route, new URL('/foo/123', base)), false);
@@ -25,7 +25,7 @@ describe('matchRoute()', () => {
     assert.strictEqual(matchRoute(route, new URL('/:foo/f/f', base)), false);
   });
 
-  it('should match proper encodable routes', () => {
+  void it('should match proper encodable routes', () => {
     const route = new Route('', '/a%b^%&c/:bar/b!az', {}, noop);
 
     assert.strictEqual(matchRoute(route, new URL('/a%25b^%25&c/123/b!az', base)), true);
@@ -33,7 +33,7 @@ describe('matchRoute()', () => {
     assert.strictEqual(matchRoute(route, new URL('/a%25b^%25&c/:123/b!az', base)), true);
   });
 
-  it('should not match encodable routes', () => {
+  void it('should not match encodable routes', () => {
     const route = new Route('', '/foo^ %4/:bar/baz', {}, noop);
 
     assert.strictEqual(matchRoute(route, new URL('/foo^ %4/bar/baz', base)), false);

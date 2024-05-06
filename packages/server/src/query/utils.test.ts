@@ -13,8 +13,8 @@ class TestSql extends Sql {
   }
 }
 
-describe('Sql', () => {
-  it('should be a base class with properties', () => {
+void describe('Sql', () => {
+  void it('should be a base class with properties', () => {
     const strings = Object.assign(['a', 'b', 'c'], { raw: ['a', 'b', 'c'] });
     const args = ['foo', 'bar', 123];
     // @ts-expect-error for testing
@@ -26,8 +26,8 @@ describe('Sql', () => {
   });
 });
 
-describe('createIdentifierSqlFunction()', () => {
-  it('should call the constructor function correctly', () => {
+void describe('createIdentifierSqlFunction()', () => {
+  void it('should call the constructor function correctly', () => {
     const instance = createIdentifierSqlFunction(TestSql)('a', 'b', 'c');
 
     assert.deepStrictEqual(
@@ -38,8 +38,8 @@ describe('createIdentifierSqlFunction()', () => {
   });
 });
 
-describe('createSqlTag()', () => {
-  it('should call the constructor function correctly', () => {
+void describe('createSqlTag()', () => {
+  void it('should call the constructor function correctly', () => {
     const sql = createSqlTag(TestSql);
     const instance = sql`select ${'foo'} from bar`;
 

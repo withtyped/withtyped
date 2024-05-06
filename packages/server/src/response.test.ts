@@ -8,8 +8,8 @@ import Sinon from 'sinon';
 import { getWriteResponse, writeContextToResponse } from './response.js';
 import { createHttpContext, stubResponseWrite } from './test-utils/http.test.js';
 
-describe('writeContextToResponse()', () => {
-  it('should write correct value to response based on context', async () => {
+void describe('writeContextToResponse()', () => {
+  void it('should write correct value to response based on context', async () => {
     const { response } = createHttpContext();
 
     await writeContextToResponse(response, { status: 302, headers: { 'content-type': 'foo' } });
@@ -17,14 +17,14 @@ describe('writeContextToResponse()', () => {
     assert.strictEqual(response.getHeader('content-type'), 'foo');
   });
 
-  it('should not set status code when `code` is explicitly ignored by user', async () => {
+  void it('should not set status code when `code` is explicitly ignored by user', async () => {
     const { response } = createHttpContext();
 
     await writeContextToResponse(response, { status: 'ignore' });
     assert.strictEqual(response.statusCode, 200);
   });
 
-  it('should automatically set content-type header when json is not null', async () => {
+  void it('should automatically set content-type header when json is not null', async () => {
     const { response } = createHttpContext();
     const stub = stubResponseWrite(response);
 
@@ -34,7 +34,7 @@ describe('writeContextToResponse()', () => {
     assert.ok(stub.calledOnceWith(JSON.stringify({ foo: 'bar' }), 'utf8'));
   });
 
-  it('should allow content-type to be overwrote by user', async () => {
+  void it('should allow content-type to be overwrote by user', async () => {
     const { response } = createHttpContext();
     const stub = stubResponseWrite(response);
 
@@ -48,14 +48,14 @@ describe('writeContextToResponse()', () => {
     assert.ok(stub.calledOnceWith(JSON.stringify({ foo: 123 }), 'utf8'));
   });
 
-  it('should be ok when `stream` is set', async () => {
+  void it('should be ok when `stream` is set', async () => {
     const { response } = createHttpContext();
 
     // It is hard to test ServerResponse output with an empty IncomingMessage. Just do the sanity check here.
     assert.ok(writeContextToResponse(response, { stream: Readable.from('foo') }));
   });
 
-  it('should be ok when nothing is set', async () => {
+  void it('should be ok when nothing is set', async () => {
     const { response } = createHttpContext();
 
     await writeContextToResponse(response, {});
@@ -63,8 +63,8 @@ describe('writeContextToResponse()', () => {
   });
 });
 
-describe('getWriteResponse()', () => {
-  it('should directly write to response if chunk is buffer or string', async () => {
+void describe('getWriteResponse()', () => {
+  void it('should directly write to response if chunk is buffer or string', async () => {
     const { response } = createHttpContext();
     const stub = stubResponseWrite(response);
     const string = 'abcdefg';
@@ -73,7 +73,6 @@ describe('getWriteResponse()', () => {
     const write = getWriteResponse(response);
 
     await write(buffer);
-    // @ts-expect-error compatible with the function overload
     assert.ok(stub.calledOnceWith(buffer));
 
     stub.resetHistory();
@@ -81,7 +80,7 @@ describe('getWriteResponse()', () => {
     assert.ok(stub.calledOnceWith(string, 'utf8'));
   });
 
-  it('should stringify JSON and write to response if chunk is an object', async () => {
+  void it('should stringify JSON and write to response if chunk is an object', async () => {
     const { response } = createHttpContext();
     const stub = stubResponseWrite(response);
     const write = getWriteResponse(response);
@@ -91,7 +90,7 @@ describe('getWriteResponse()', () => {
     assert.ok(stub.calledOnceWith(JSON.stringify(object), 'utf8'));
   });
 
-  it('should throw an error if response has been destroyed', async () => {
+  void it('should throw an error if response has been destroyed', async () => {
     const { response } = createHttpContext();
     stubResponseWrite(response);
     const write = getWriteResponse(response);

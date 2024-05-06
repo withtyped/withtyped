@@ -48,8 +48,8 @@ const createTestClient = () => {
   return [testClient, queryStub] as const;
 };
 
-describe('Queryable', () => {
-  it('should properly call underlying function for `.any()`', async () => {
+void describe('Queryable', () => {
+  void it('should properly call underlying function for `.any()`', async () => {
     const [testClient, queryStub] = createTestClient();
     const result = await testClient.any(new TestSql());
 
@@ -57,7 +57,7 @@ describe('Queryable', () => {
     assert.deepStrictEqual(result, []);
   });
 
-  it('should properly call underlying function for `.many()`', async () => {
+  void it('should properly call underlying function for `.many()`', async () => {
     const [testClient, queryStub] = createTestClient();
     const rows = [{ foo: 'bar' }];
     queryStub.onFirstCall().resolves({ rowCount: 1, rows });
@@ -69,7 +69,7 @@ describe('Queryable', () => {
     assert.ok(queryStub.calledTwice);
   });
 
-  it('should properly call underlying function for `.maybeOne()`', async () => {
+  void it('should properly call underlying function for `.maybeOne()`', async () => {
     const [testClient, queryStub] = createTestClient();
     const data = { foo: 'bar' };
     const rows = [data, { bar: 'baz' }];
@@ -85,7 +85,7 @@ describe('Queryable', () => {
     assert.ok(queryStub.calledThrice);
   });
 
-  it('should properly call underlying function for `.one()`', async () => {
+  void it('should properly call underlying function for `.one()`', async () => {
     const [testClient, queryStub] = createTestClient();
     const data = { foo: 'bar' };
     const rows = [data, { bar: 'baz' }];
@@ -101,7 +101,7 @@ describe('Queryable', () => {
     assert.ok(queryStub.calledThrice);
   });
 
-  it('should properly call underlying function for `.exists()`', async () => {
+  void it('should properly call underlying function for `.exists()`', async () => {
     const [testClient, queryStub] = createTestClient();
     const rows = [{ foo: 'bar' }, { bar: 'baz' }];
     queryStub.onFirstCall().resolves({ rowCount: 2, rows });
