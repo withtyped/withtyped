@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import EventEmitter from 'node:events';
 import { describe, it } from 'node:test';
+import { promisify } from 'node:util';
 
 import { trySafe } from '@silverhand/essentials';
 import sinon from 'sinon';
@@ -157,6 +158,30 @@ void describe('request id', () => {
     const { headers } = await fetch('http://localhost:9002');
     const requestId = headers.get('custom-request-id');
 
+    assert.ok(requestId);
+    assert.match(requestId, /.+/);
+
+    await server.close();
+  });
+
+  void it('should set the request id header even if the response headers are not handled by setting the `headers` property', async () => {
+    const server = createServer({
+      composer: compose(async (context, next, http) => {
+        const promisifyEnd = promisify((callback: () => void) =>
+          http.response.end('Hello, world!', callback)
+        );
+        await promisifyEnd();
+        return next(context);
+      }),
+      requestId: { enabled: true },
+      port: 9003,
+    });
+    await server.listen();
+
+    const response = await fetch('http://localhost:9003');
+    const requestId = response.headers.get('x-request-id');
+
+    assert.equal(await response.text(), 'Hello, world!');
     assert.ok(requestId);
     assert.match(requestId, /.+/);
 
