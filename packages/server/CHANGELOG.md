@@ -1,5 +1,11 @@
 # @withtyped/server
 
+## 0.13.6
+
+### Patch Changes
+
+- 89314e4: fix request id context injection
+
 ## 0.13.5
 
 ### Patch Changes
