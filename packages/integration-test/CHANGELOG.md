@@ -1,5 +1,14 @@
 # @withtyped/integration-test
 
+## 0.7.28
+
+### Patch Changes
+
+- Updated dependencies [89314e4]
+  - @withtyped/server@0.13.6
+  - @withtyped/client@0.8.7
+  - @withtyped/postgres@0.13.0
+
 ## 0.7.27
 
 ### Patch Changes
