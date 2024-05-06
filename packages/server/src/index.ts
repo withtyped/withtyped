@@ -28,9 +28,9 @@ export type CreateServer<
   /**
    * If enabled, the server will add a 16-character request ID to the following places:
    *
-   * - The context object
+   * - The context object (`context.requestId`)
    * - The response header
-   * - The log
+   * - The console log
    *
    * The request ID will be added to the response header with the name specified in `headerName`. Default to `x-request-id`.
    */
@@ -77,6 +77,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
 ) {
   const { port = 9001, composer, queryClients, logLevel = 'info' } = config;
   const composed = composer ?? compose();
+  // eslint-disable-next-line complexity -- let's refactor this later
   const server = http.createServer(async (request, response) => {
     const requestId = config.requestId?.enabled ? nanoid(16) : undefined;
     const requestIdHeader = config.requestId?.headerName ?? 'x-request-id';
@@ -84,7 +85,7 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // Start log
     if (logLevel !== 'none') {
       console.debug(
-        requestId ? `${requestId}  ${color('in', 'blue')}` : color('in', 'blue'),
+        requestId ? `${color(requestId, 'cyan')}  ${color('in', 'blue')}` : color('in', 'blue'),
         color(request.method, 'bright'),
         request.url
       );
@@ -97,10 +98,14 @@ export default function createServer<T extends unknown[], OutputContext extends 
 
     // Run the middleware chain
     try {
-      await composed({}, async (context) => writeContextToResponse(response, context), {
-        request,
-        response,
-      });
+      await composed(
+        requestId ? { requestId } : {},
+        async (context) => writeContextToResponse(response, context),
+        {
+          request,
+          response,
+        }
+      );
 
       // End
       if (!(response.writableEnded || response.destroyed)) {
@@ -115,7 +120,9 @@ export default function createServer<T extends unknown[], OutputContext extends 
     // End log
     if (logLevel !== 'none') {
       console.debug(
-        requestId ? `${requestId} ${color('out', 'magenta')}` : color('out', 'magenta'),
+        requestId
+          ? `${color(requestId, 'cyan')} ${color('out', 'magenta')}`
+          : color('out', 'magenta'),
         color(request.method, 'bright'),
         request.url,
         response.statusCode,

@@ -128,6 +128,15 @@ void describe('createServer()', () => {
 });
 
 void describe('request id', () => {
+  void it('should generate a request id and add it to the context', async () => {
+    const composer = sinon.spy(compose());
+    // @ts-expect-error for testing
+    const { server } = createServer({ composer, requestId: { enabled: true } });
+
+    await request(server).get('/');
+    assert.ok(composer.calledOnce && composer.calledWith({ requestId: sinon.match.string }));
+  });
+
   void it('should generate a request id for each request', async () => {
     const server = createServer({ requestId: { enabled: true }, port: 9001 });
     const requestIds = new Set<string>();
