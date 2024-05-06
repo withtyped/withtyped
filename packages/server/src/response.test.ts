@@ -73,7 +73,6 @@ void describe('getWriteResponse()', () => {
     const write = getWriteResponse(response);
 
     await write(buffer);
-    // @ts-expect-error compatible with the function overload
     assert.ok(stub.calledOnceWith(buffer));
 
     stub.resetHistory();
