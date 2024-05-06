@@ -1,5 +1,24 @@
 # @withtyped/server
 
+## 0.13.4
+
+### Patch Changes
+
+- dabf274: support request id
+
+  Now it's possible to let the server generate a request id for you. This is useful for logging and debugging purposes.
+
+  ```ts
+  import { createServer } from "@withtyped/server";
+
+  const server = createServer({
+    requestId: {
+      enabled: true,
+      headerName: "some-header-name", // default is 'x-request-id'
+    },
+  });
+  ```
+
 ## 0.13.3
 
 ### Patch Changes
