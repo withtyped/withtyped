@@ -10,7 +10,7 @@ import { createHttpContext } from '../test-utils/http.test.js';
 import withBody from './with-body.js';
 import type { RequestContext } from './with-request.js';
 
-describe('withBody()', () => {
+void describe('withBody()', () => {
   const run = withBody();
   const mockContext: Readonly<RequestContext> = Object.freeze({
     request: {
@@ -20,7 +20,7 @@ describe('withBody()', () => {
     },
   });
 
-  it('should throw when `content-type` is unexpected and method is valid', async () => {
+  void it('should throw when `content-type` is unexpected and method is valid', async () => {
     const httpContext = createHttpContext();
     const promise = run(
       { ...mockContext, request: { ...mockContext.request, headers: { 'content-type': 'foo' } } },
@@ -32,7 +32,7 @@ describe('withBody()', () => {
     await assert.rejects(promise, RequestError);
   });
 
-  it('should do nothing when body is empty', async () => {
+  void it('should do nothing when body is empty', async () => {
     const httpContext = createHttpContext();
     const originalContext = {
       ...mockContext,
@@ -50,7 +50,7 @@ describe('withBody()', () => {
     await promise;
   });
 
-  it('should do nothing for certain methods even body has value', async () => {
+  void it('should do nothing for certain methods even body has value', async () => {
     const runs = [RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, undefined].map<
       [Promise<void>, HttpContext]
     >((method) => {
@@ -88,7 +88,7 @@ describe('withBody()', () => {
     await Promise.all(runs.map(async ([promise]) => promise));
   });
 
-  it('should read JSON string and convert to object', async () => {
+  void it('should read JSON string and convert to object', async () => {
     const httpContext = createHttpContext();
     const raw = '{     "foo": "bar",|   \n  "baz": 1,| \n\n"bar": [true,| false]}';
     const stringArray = raw.split('|');
@@ -110,7 +110,7 @@ describe('withBody()', () => {
     await promise;
   });
 
-  it('should read JSON string and convert to object for content-type with multiple items', async () => {
+  void it('should read JSON string and convert to object for content-type with multiple items', async () => {
     const httpContext = createHttpContext();
     const raw = '{     "foo": "bar",|   \n  "baz": 1,| \n\n"bar": [true,| false]}';
     const stringArray = raw.split('|');
@@ -132,7 +132,7 @@ describe('withBody()', () => {
     await promise;
   });
 
-  it('should throw error when request received an error event', async () => {
+  void it('should throw error when request received an error event', async () => {
     const testError = new Error('test');
     const httpContext = createHttpContext();
     const raw = '{     "foo": "bar",|   \n  "baz": 1,| \n\n"bar": [true,| false]}';
@@ -147,7 +147,7 @@ describe('withBody()', () => {
     await assert.rejects(promise, testError);
   });
 
-  it('should set body to undefined if body is not a valid JSON string', async () => {
+  void it('should set body to undefined if body is not a valid JSON string', async () => {
     const httpContext = createHttpContext();
     const raw = '{     "true,| false]}';
     const stringArray = raw.split('|');

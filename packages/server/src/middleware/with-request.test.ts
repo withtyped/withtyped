@@ -8,12 +8,12 @@ import { assertContext } from '../test-utils/middleware.test.js';
 
 import withRequest from './with-request.js';
 
-describe('withRequest()', () => {
+void describe('withRequest()', () => {
   const run = withRequest();
 
   // Need to mutate context for testing
   /* eslint-disable @silverhand/fp/no-mutation */
-  it('should set `context.request` properly with basic info', async () => {
+  void it('should set `context.request` properly with basic info', async () => {
     const httpContext = createHttpContext();
     httpContext.request.url = undefined;
     httpContext.request.method = RequestMethod.DELETE;
@@ -32,7 +32,7 @@ describe('withRequest()', () => {
     );
   });
 
-  it('should set `context.request` properly complex headers', async () => {
+  void it('should set `context.request` properly complex headers', async () => {
     const httpContext = createHttpContext(true);
     httpContext.request.url = '/status?name=ryan';
     httpContext.request.method = RequestMethod.POST;
@@ -52,7 +52,7 @@ describe('withRequest()', () => {
     );
   });
 
-  it('should return empty method if method is not in the pre-defined list', async () => {
+  void it('should return empty method if method is not in the pre-defined list', async () => {
     const httpContext = createHttpContext();
     httpContext.request.headers.host = 'localhost';
     httpContext.request.method = 'FOO';
@@ -70,11 +70,11 @@ describe('withRequest()', () => {
     );
   });
 
-  it('should throw error if no `host` header found', async () => {
+  void it('should throw error if no `host` header found', async () => {
     await assert.rejects(run({}, noop, createHttpContext()), TypeError);
   });
 
-  it('should set `context.request.id` if `context.requestId` is set', async () => {
+  void it('should set `context.request.id` if `context.requestId` is set', async () => {
     const httpContext = createHttpContext();
     httpContext.request.headers.host = 'localhost';
     await run(

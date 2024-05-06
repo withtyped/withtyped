@@ -37,7 +37,7 @@
     "@faker-js/faker": "^7.6.0",
     "@silverhand/eslint-config": "^5.0.0",
     "@silverhand/ts-config": "^5.0.0",
-    "@types/node": "^18.11.9",
+    "@types/node": "^20.12.8",
     "@types/sinon": "^10.0.13",
     "@types/supertest": "^6.0.2",
     "c8": "^7.12.0",

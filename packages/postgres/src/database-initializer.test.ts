@@ -22,7 +22,7 @@ class FakeQueryClient extends PostgresQueryClient {
   transaction = sinon.stub();
 }
 
-describe('PostgresInitializer', () => {
+void describe('PostgresInitializer', () => {
   before(() => {
     sinon.stub(PostgresQueryClient.prototype);
   });
@@ -31,7 +31,7 @@ describe('PostgresInitializer', () => {
     sinon.restore();
   });
 
-  it('should throw when no database specified in config', async () => {
+  void it('should throw when no database specified in config', async () => {
     const queryClient = new FakeQueryClient();
     // eslint-disable-next-line @silverhand/fp/no-mutation
     queryClient.config = { database: '' };
@@ -42,7 +42,7 @@ describe('PostgresInitializer', () => {
     );
   });
 
-  it('should be able to create the target database when it does not exist', async () => {
+  void it('should be able to create the target database when it does not exist', async () => {
     // @ts-expect-error Stubbed
     const transaction = new FakeTransaction();
     const queryClient = new FakeQueryClient();
@@ -62,7 +62,7 @@ describe('PostgresInitializer', () => {
     assert.ok(queryClient.connect.calledOnce);
   });
 
-  it('should throw when other error occurred during init', async () => {
+  void it('should throw when other error occurred during init', async () => {
     const queryClient = new FakeQueryClient();
     const initializer = new PostgresInitializer([], queryClient);
 
@@ -73,7 +73,7 @@ describe('PostgresInitializer', () => {
     await assert.rejects(initializer.initialize(), { code: '3D001' });
   });
 
-  it('should be able to destroy the target database', async () => {
+  void it('should be able to destroy the target database', async () => {
     const queryClient = new FakeQueryClient();
     const initializer = new PostgresInitializer([], queryClient);
 
@@ -82,7 +82,7 @@ describe('PostgresInitializer', () => {
     assert.ok(queryClient.end.calledOnce);
   });
 
-  it('should be able to initialize tables with the given raw sql and schema', async () => {
+  void it('should be able to initialize tables with the given raw sql and schema', async () => {
     // @ts-expect-error Stubbed
     const transaction = new FakeTransaction();
     const queryClient = new FakeQueryClient();

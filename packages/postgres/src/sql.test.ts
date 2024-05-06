@@ -20,8 +20,8 @@ import {
   join,
 } from './sql.js';
 
-describe('IdentifierPostgreSql', () => {
-  it('should compose raw strings only', () => {
+void describe('IdentifierPostgreSql', () => {
+  void it('should compose raw strings only', () => {
     const instance = new IdentifierPostgreSql(
       Object.assign(['foo', 'bar'], { raw: ['foo', 'bar'] }),
       ['baz']
@@ -36,24 +36,24 @@ describe('IdentifierPostgreSql', () => {
   });
 });
 
-describe('JsonPostgreSql', () => {
-  it('should not explode', () => {
+void describe('JsonPostgreSql', () => {
+  void it('should not explode', () => {
     const instance = new JsonPostgreSql(Object.assign([], { raw: [] }), []);
     assert.deepStrictEqual(instance.compose([], []), { lastIndex: 0 });
     assert.throws(() => instance.composed, new Error('Method not implemented.'));
   });
 });
 
-describe('DangerousRawPostgreSql', () => {
-  it('should not explode', () => {
+void describe('DangerousRawPostgreSql', () => {
+  void it('should not explode', () => {
     const instance = new DangerousRawPostgreSql(Object.assign([], { raw: [] }), []);
     assert.deepStrictEqual(instance.compose([], []), { lastIndex: 0 });
     assert.throws(() => instance.composed, new Error('Method not implemented.'));
   });
 });
 
-describe('sql tag', () => {
-  it('should convert query to a safe string with args', () => {
+void describe('sql tag', () => {
+  void it('should convert query to a safe string with args', () => {
     const { raw, args } = sql`
       update ${id('foo')}    
       set    ${(
@@ -74,7 +74,7 @@ describe('sql tag', () => {
   });
 });
 
-it('should recognize model as identifiers', () => {
+void it('should recognize model as identifiers', () => {
   const forms = Model.create(/* Sql */ `
     CREATE table forms (
       id VARCHAR(32) not null,
@@ -94,7 +94,7 @@ it('should recognize model as identifiers', () => {
   assert.deepStrictEqual(args, [123, 'foo']);
 });
 
-it('should recognize model as identifiers with schema', () => {
+void it('should recognize model as identifiers with schema', () => {
   const foo = Model.create(
     /* Sql */ `create table foo (id varchar(32) primary key not null, bar bigint);`,
     'baz'
@@ -117,8 +117,8 @@ it('should recognize model as identifiers with schema', () => {
   assert.deepStrictEqual(args, ['123', 'foo']);
 });
 
-describe('json utils', () => {
-  it('should be able to compose with the first argument', () => {
+void describe('json utils', () => {
+  void it('should be able to compose with the first argument', () => {
     const instance = json({ foo: 'bar' });
     assert.ok(instance instanceof JsonPostgreSql);
 
@@ -130,7 +130,7 @@ describe('json utils', () => {
     assert.deepStrictEqual(args, [JSON.stringify({ foo: 'bar' })]);
   });
 
-  it('should be able to convert to JSON class when needed', () => {
+  void it('should be able to convert to JSON class when needed', () => {
     assert.ok(jsonIfNeeded(null) === null);
     assert.ok(jsonIfNeeded('foo') === 'foo');
 
@@ -146,7 +146,7 @@ describe('json utils', () => {
     assert.strictEqual(jsonIfNeeded(json3), json3);
   });
 
-  it('should be able to compose with the first argument (jsonb)', () => {
+  void it('should be able to compose with the first argument (jsonb)', () => {
     const instance = jsonb({ foo: 'bar' });
     assert.ok(instance instanceof JsonPostgreSql);
 
@@ -158,7 +158,7 @@ describe('json utils', () => {
     assert.deepStrictEqual(args, [JSON.stringify({ foo: 'bar' })]);
   });
 
-  it('should be able to convert to JSON class when needed (jsonb)', () => {
+  void it('should be able to convert to JSON class when needed (jsonb)', () => {
     assert.ok(jsonbIfNeeded(null) === null);
     assert.ok(jsonbIfNeeded('foo') === 'foo');
 
@@ -175,8 +175,8 @@ describe('json utils', () => {
   });
 });
 
-describe('join', () => {
-  it('should be able to join sql tags', () => {
+void describe('join', () => {
+  void it('should be able to join sql tags', () => {
     const query = sql`
       select *
       from foo
@@ -187,7 +187,7 @@ describe('join', () => {
     assert.deepStrictEqual(args, ['baz', 'quux']);
   });
 
-  it('should be able to join an mixed array with sql tags and PostgresJson', () => {
+  void it('should be able to join an mixed array with sql tags and PostgresJson', () => {
     const query = sql`
       select *
       from foo

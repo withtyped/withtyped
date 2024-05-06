@@ -42,12 +42,12 @@ const midError: MiddlewareFunction<Ctx2, Ctx3> = async () => {
 
 const httpContext = createHttpContext();
 
-describe('compose()', () => {
-  it('should allow to create an empty composer', async () => {
+void describe('compose()', () => {
+  void it('should allow to create an empty composer', async () => {
     await compose()({}, noop, httpContext);
   });
 
-  it('should compose two middleware functions and return a new middleware function', async () => {
+  void it('should compose two middleware functions and return a new middleware function', async () => {
     const baseContext: Readonly<BaseContext> = Object.freeze({ status: 200, json: { foo: 'bar' } });
     await compose(mid1).and(mid2)(
       { ...baseContext, c1: '256' },
@@ -58,7 +58,7 @@ describe('compose()', () => {
     );
   });
 
-  it('should return a valid middleware function', async () => {
+  void it('should return a valid middleware function', async () => {
     await compose(compose(mid1).and(mid2))(
       { c1: '128' },
       async (context) => {
@@ -68,7 +68,7 @@ describe('compose()', () => {
     );
   });
 
-  it('should be able to chain', async () => {
+  void it('should be able to chain', async () => {
     const composed = compose(mid1).and(mid2).and(mid3);
 
     await composed.and(compose(compose())).and(composed)(
@@ -80,14 +80,14 @@ describe('compose()', () => {
     );
   });
 
-  it('should throw error originated by middleware', async () => {
+  void it('should throw error originated by middleware', async () => {
     await assert.rejects(
       compose(mid1).and(midError).and(mid3)({ c1: '128' }, noop, httpContext),
       new Error('A special error')
     );
   });
 
-  it('should disallow to call same next() twice', async () => {
+  void it('should disallow to call same next() twice', async () => {
     await assert.rejects(
       compose(midTwiceNext).and(mid2)({ c1: '128' }, noop, httpContext),
       new ComposeError('next_call_twice')

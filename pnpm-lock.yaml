@@ -37,8 +37,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
         specifier: ^10.0.13
         version: 10.0.13
@@ -98,8 +98,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       eslint:
         specifier: ^8.42.0
         version: 8.57.0
@@ -135,8 +135,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
         specifier: ^10.0.13
         version: 10.0.13
@@ -196,8 +196,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       eslint:
         specifier: ^8.42.0
         version: 8.57.0
@@ -233,8 +233,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
         specifier: ^10.0.13
         version: 10.0.13
@@ -281,8 +281,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(typescript@5.3.3)
       '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
+        specifier: ^20.12.8
+        version: 20.12.8
       '@types/sinon':
         specifier: ^10.0.13
         version: 10.0.13
@@ -801,8 +801,10 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: true
 
-  /@types/node@18.11.9:
-    resolution: {integrity: sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==}
+  /@types/node@20.12.8:
+    resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
+    dependencies:
+      undici-types: 5.26.5
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -811,7 +813,7 @@ packages:
   /@types/pg@8.6.5:
     resolution: {integrity: sha512-tOkGtAqRVkHa/PVZicq67zuujI4Oorfglsr2IbKofDwBSysnaqSx7W1mDqFqdkGE6Fbgh+PZAl0r/BWON/mozw==}
     dependencies:
-      '@types/node': 18.11.9
+      '@types/node': 20.12.8
       pg-protocol: 1.5.0
       pg-types: 2.2.0
     dev: false
@@ -839,7 +841,7 @@ packages:
     dependencies:
       '@types/cookiejar': 2.1.5
       '@types/methods': 1.1.4
-      '@types/node': 18.11.9
+      '@types/node': 20.12.8
     dev: true
 
   /@types/supertest@6.0.2:
@@ -4374,6 +4376,9 @@ packages:
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
     dev: true
+
+  /undici-types@5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
   /universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}

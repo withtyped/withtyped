@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { createDatabaseName } from '../utils/database.js';
 
-describe('Postgres data model', () => {
+void describe('Postgres data model', () => {
   const database = createDatabaseName();
   const queryClient = new PostgresQueryClient({ database });
   const initClient = new PostgresInitializer([], queryClient);
@@ -35,7 +35,7 @@ describe('Postgres data model', () => {
     await initClient.destroy();
   });
 
-  it('should be able to create table per model', async () => {
+  void it('should be able to create table per model', async () => {
     await queryClient.query(new PostgreSql(Object.assign([forms.raw], { raw: [forms.raw] }), []));
     const { rows } = await queryClient.query(
       sql`select to_regclass(${forms.tableName}) as regclass`

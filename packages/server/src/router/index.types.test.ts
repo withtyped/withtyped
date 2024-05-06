@@ -15,8 +15,8 @@ const mid1: MiddlewareFunction<RequestContext, RequestContext & { foo: string }>
   return next({ ...context, foo: 'bar' });
 };
 
-describe('router types', () => {
-  it('should be able to infer types for a complex router', () => {
+void describe('router types', () => {
+  void it('should be able to infer types for a complex router', () => {
     const subRouter = new Router<
       RequestContext & { foo: string },
       RequestContext & { foo: string }
@@ -50,7 +50,7 @@ describe('router types', () => {
     >();
   });
 
-  it('should be able to `.pack()` another router with "lower" context types', () => {
+  void it('should be able to `.pack()` another router with "lower" context types', () => {
     const subRouter = new Router<RequestContext, RequestContext>().get(
       '/bar',
       { response: z.object({ storeIds: z.string().array() }) },
@@ -81,7 +81,7 @@ describe('router types', () => {
     >();
   });
 
-  it('should forbid to `.pack()` another router with incompatible context types', () => {
+  void it('should forbid to `.pack()` another router with incompatible context types', () => {
     const subRouter = new Router<
       RequestContext & { foo: number },
       RequestContext & { foo: number }

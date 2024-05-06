@@ -9,12 +9,12 @@ import request from 'supertest';
 import createServer, { compose, RequestError } from './index.js';
 import { TestQueryClient } from './query/client.test.js';
 
-describe('createServer()', () => {
-  it('should not explode', () => {
+void describe('createServer()', () => {
+  void it('should not explode', () => {
     assert.ok(createServer());
   });
 
-  it('should be able to run a composer', async () => {
+  void it('should be able to run a composer', async () => {
     const composer = sinon.spy(compose());
     // @ts-expect-error for testing
     const { server } = createServer({ composer });
@@ -23,7 +23,7 @@ describe('createServer()', () => {
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 
-  it('should be able to catch error', async () => {
+  void it('should be able to catch error', async () => {
     const composer = sinon.spy(
       compose(() => {
         throw new Error('composer error');
@@ -36,7 +36,7 @@ describe('createServer()', () => {
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 
-  it('should be able to keep running even if a request is aborted', async () => {
+  void it('should be able to keep running even if a request is aborted', async () => {
     const composer = sinon.spy(compose());
     // @ts-expect-error for testing
     const { server } = createServer({ composer, logLevel: 'none' });
@@ -57,7 +57,7 @@ describe('createServer()', () => {
     assert.ok(composer.calledWith({}));
   });
 
-  it('should be able to parse RequestError', async () => {
+  void it('should be able to parse RequestError', async () => {
     const composer = sinon.spy(
       compose(() => {
         throw new RequestError('composer request error', 400);
@@ -70,7 +70,7 @@ describe('createServer()', () => {
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 
-  it('should be able to call listener callback', async () => {
+  void it('should be able to call listener callback', async () => {
     const listener = sinon.fake();
     const { server, listen } = createServer({ port: 3001 });
     const serverListen = sinon.stub(server, 'listen');
@@ -82,7 +82,7 @@ describe('createServer()', () => {
     assert.ok(serverListen.calledOnceWithExactly(3001));
   });
 
-  it('should be able to respond signal', async () => {
+  void it('should be able to respond signal', async () => {
     // eslint-disable-next-line unicorn/prefer-event-target
     class FakeEventEmitter extends EventEmitter {
       env = {};
@@ -126,8 +126,8 @@ describe('createServer()', () => {
   });
 });
 
-describe('request id', () => {
-  it('should generate a request id for each request', async () => {
+void describe('request id', () => {
+  void it('should generate a request id for each request', async () => {
     const server = createServer({ requestId: { enabled: true }, port: 9001 });
     const requestIds = new Set<string>();
     await server.listen();
@@ -147,7 +147,7 @@ describe('request id', () => {
     await server.close();
   });
 
-  it('should generate a request id and set it to the custom header', async () => {
+  void it('should generate a request id and set it to the custom header', async () => {
     const server = createServer({
       requestId: { enabled: true, headerName: 'Custom-Request-Id' },
       port: 9002,

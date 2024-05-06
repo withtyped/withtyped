@@ -9,7 +9,7 @@ import { createBook } from '../utils/book.js';
 
 import { router } from './router.js';
 
-describe('Router', () => {
+void describe('Router', () => {
   const server = createServer({
     composer: createComposer().and(router.routes()),
     logLevel: 'none',
@@ -25,18 +25,18 @@ describe('Router', () => {
     await server.close();
   });
 
-  it('should return OpenAPI info', async () => {
+  void it('should return OpenAPI info', async () => {
     const openapi = await client.get('/openapi.json');
     assert.ok(openapi.info.title);
     assert.ok(openapi.info.version);
   });
 
-  it('should return exact 10 books', async () => {
+  void it('should return exact 10 books', async () => {
     const { books } = await client.get('/books');
     assert.strictEqual(books.length, 10);
   });
 
-  it('should allow to create and delete a new book with random id', async () => {
+  void it('should allow to create and delete a new book with random id', async () => {
     const body = createBook();
     const book = await client.post('/books', { body });
     assert.notStrictEqual(body.id, book.id);
@@ -53,13 +53,13 @@ describe('Router', () => {
     assert.ok(books.every(({ id }) => id !== book.id));
   });
 
-  it('throws 404 error when getting a non-existing book', async () => {
+  void it('throws 404 error when getting a non-existing book', async () => {
     await assert.rejects(client.get('/books/:id', { params: { id: '1' } }), (error: unknown) => {
       return error instanceof ResponseError && error.status === 404;
     });
   });
 
-  it('should able to search book by name', async () => {
+  void it('should able to search book by name', async () => {
     const { books } = await client.get('/books');
 
     const book = books[0]!;

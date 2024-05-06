@@ -17,8 +17,8 @@ class FakePg {
   query = sinon.stub().resolves({ rows: [], rowCount: 0 });
 }
 
-describe('PostgresQueryClient', () => {
-  it('should call the inner instance methods accordingly', async () => {
+void describe('PostgresQueryClient', () => {
+  void it('should call the inner instance methods accordingly', async () => {
     const queryClient = createQueryClient();
     const fakePg = new FakePg();
     // @ts-expect-error for testing
@@ -46,7 +46,7 @@ describe('PostgresQueryClient', () => {
     assert.ok(fakePg.query.calledThrice);
   });
 
-  it('should be able to transform query result', async () => {
+  void it('should be able to transform query result', async () => {
     const queryClient = createQueryClient(undefined, { transform: { result: 'camelCase' } });
     const fakePg = new FakePg();
     // @ts-expect-error for testing
@@ -63,7 +63,7 @@ describe('PostgresQueryClient', () => {
     assert.strictEqual(rowCount, 2);
   });
 
-  it("should not call pool's `.end()` twice", async () => {
+  void it("should not call pool's `.end()` twice", async () => {
     const queryClient = createQueryClient();
     const fakePg = new FakePg();
     // @ts-expect-error for testing
@@ -76,7 +76,7 @@ describe('PostgresQueryClient', () => {
     assert.ok(fakePg.end.calledOnceWithExactly());
   });
 
-  it('should be able to create a transaction instance', async () => {
+  void it('should be able to create a transaction instance', async () => {
     const queryClient = createQueryClient();
     const fakePg = new FakePg();
     // @ts-expect-error for testing
@@ -87,8 +87,8 @@ describe('PostgresQueryClient', () => {
   });
 });
 
-describe('PostgresTransaction', () => {
-  it('should be able to execute queries', async () => {
+void describe('PostgresTransaction', () => {
+  void it('should be able to execute queries', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing
     const transaction = new PostgresTransaction(fakeClient);
@@ -108,7 +108,7 @@ describe('PostgresTransaction', () => {
     assert.ok(fakeClient.release.calledOnceWithExactly());
   });
 
-  it('should be able to catch error and release client', async () => {
+  void it('should be able to catch error and release client', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing
     const transaction = new PostgresTransaction(fakeClient);
@@ -126,7 +126,7 @@ describe('PostgresTransaction', () => {
     assert.ok(fakeClient.release.calledOnceWithExactly());
   });
 
-  it('should be able to transform the result to camelCase', async () => {
+  void it('should be able to transform the result to camelCase', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing
     const transaction = new PostgresTransaction(fakeClient, { transform: { result: 'camelCase' } });

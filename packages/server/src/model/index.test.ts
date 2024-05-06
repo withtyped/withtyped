@@ -9,7 +9,7 @@ import { type JsonArray, type JsonObject } from '../types.js';
 import type { InferModelType } from './index.js';
 import Model from './index.js';
 
-describe('Model class types', () => {
+void describe('Model class types', () => {
   const forms = Model.create(
     /* Sql */ `
     cREaTe taBle forms (
@@ -36,7 +36,7 @@ describe('Model class types', () => {
   type Equals<A, B> = A extends B ? (B extends A ? true : false) : false;
 
   // This should be always ok on runtime, but the compilation should fail if the types are not correct
-  it('should have proper types', () => {
+  void it('should have proper types', () => {
     type Expect = {
       id: string;
       remoteAddress: Nullable<string>;
@@ -54,7 +54,7 @@ describe('Model class types', () => {
   });
 });
 
-describe('Model class', () => {
+void describe('Model class', () => {
   const forms = Model.create(
     /* Sql */ `
     cREaTe taBle forms (
@@ -78,7 +78,7 @@ describe('Model class', () => {
 
   type Forms = InferModelType<typeof forms>;
 
-  it('should construct proper class', () => {
+  void it('should construct proper class', () => {
     const baseData = {
       id: 'foo',
       headers: {},
@@ -161,7 +161,7 @@ describe('Model class', () => {
     );
   });
 
-  it('should allow fields with database default value to be readonly', () => {
+  void it('should allow fields with database default value to be readonly', () => {
     const forms = Model.create(
       /* Sql */ `
       create table forms (
@@ -179,7 +179,7 @@ describe('Model class', () => {
     assert.throws(() => forms.guard('patch').parse({ id: 'baz', createdAt: new Date() }), ZodError);
   });
 
-  it('inherits schema after `.extend()` or `.exclude()`', () => {
+  void it('inherits schema after `.extend()` or `.exclude()`', () => {
     const forms = Model.create(
       /* Sql */ `
       create table forms (
@@ -196,7 +196,7 @@ describe('Model class', () => {
     );
   });
 
-  it('should throw error when table name is missing in query', () => {
+  void it('should throw error when table name is missing in query', () => {
     assert.throws(
       () =>
         Model.create(/* Sql */ `
@@ -208,7 +208,7 @@ describe('Model class', () => {
     );
   });
 
-  it('should throw error when needed', () => {
+  void it('should throw error when needed', () => {
     assert.throws(() => forms.parse(null), ZodError);
     assert.throws(
       () => forms.parse({ id: null, data: { foo: 'foo', bar: 1 }, data2: null }, 'create'),
@@ -245,7 +245,7 @@ describe('Model class', () => {
     );
   });
 
-  it('should use customized parser even for primitive columns', () => {
+  void it('should use customized parser even for primitive columns', () => {
     const baseData = {
       id: 'foo',
       headers: { bar: 'foo' },

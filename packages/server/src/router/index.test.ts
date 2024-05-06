@@ -15,8 +15,8 @@ import { zodTypeToParameters, zodTypeToSwagger } from '../test-utils/openapi.tes
 
 import Router, { createRouter } from './index.js';
 
-describe('Router', () => {
-  it('should provide a middleware function to call the provided middleware function with request context', async () => {
+void describe('Router', () => {
+  void it('should provide a middleware function to call the provided middleware function with request context', async () => {
     const [mid1, mid2, mid3] = [sinon.fake(), sinon.fake(), sinon.fake()];
     const router1 = new Router()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, mid1)
@@ -53,7 +53,7 @@ describe('Router', () => {
     );
   });
 
-  it('should be able to add general middleware functions using `.use()`', async () => {
+  void it('should be able to add general middleware functions using `.use()`', async () => {
     const mid1 = sinon.fake(async (context, next) =>
       next({ ...context, foo: 'bar' })
     ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
@@ -85,7 +85,7 @@ describe('Router', () => {
     );
   });
 
-  it('should throw error when using `.use()` after adding routes', () => {
+  void it('should throw error when using `.use()` after adding routes', () => {
     const mid1 = sinon.fake(async (context, next) =>
       next({ ...context, foo: 'bar' })
     ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
@@ -109,7 +109,7 @@ describe('Router', () => {
     );
   });
 
-  it('should throw error when using `.pack()` with a router that has middleware', () => {
+  void it('should throw error when using `.pack()` with a router that has middleware', () => {
     const mid1 = sinon.fake(async (context, next) =>
       next({ ...context, foo: 'bar' })
     ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
@@ -126,7 +126,7 @@ describe('Router', () => {
     assert.throws(() => router1.pack(router2), Error, 'Another router must not have middleware');
   });
 
-  it('should be able to pack another router after `.use().pack()` and execute the middleware functions for the packed router', async () => {
+  void it('should be able to pack another router after `.use().pack()` and execute the middleware functions for the packed router', async () => {
     const mid = sinon.fake(async (context, next) =>
       next({ ...context, bar: 123 })
     ) satisfies MiddlewareFunction<RequestContext, RequestContext & { bar: number }>;
@@ -149,7 +149,7 @@ describe('Router', () => {
     );
   });
 
-  it('should respond with parsed json when the route matches', async () => {
+  void it('should respond with parsed json when the route matches', async () => {
     const router = new Router().get(
       '/books',
       { response: z.object({ foo: z.string() }) },
@@ -166,7 +166,7 @@ describe('Router', () => {
     );
   });
 
-  it('should not call general middleware functions when no route matches', async () => {
+  void it('should not call general middleware functions when no route matches', async () => {
     const mid1 = sinon.fake(async (context, next) =>
       next({ ...context, foo: 'bar' })
     ) satisfies MiddlewareFunction<RequestContext, RequestContext & { foo: string }>;
@@ -195,7 +195,7 @@ describe('Router', () => {
     assert.strictEqual(handler.notCalled, true);
   });
 
-  it('should run multiple middleware functions in chain', async () => {
+  void it('should run multiple middleware functions in chain', async () => {
     const mid1 = sinon.fake((async (context, next) =>
       next({ ...context, foo: 'bar' })) satisfies MiddlewareFunction<
       RequestContext,
@@ -255,7 +255,7 @@ describe('Router', () => {
     assert.strictEqual(mid7.notCalled, true);
   });
 
-  it('should set status to 200 with the proper json when everything is ok', async () => {
+  void it('should set status to 200 with the proper json when everything is ok', async () => {
     const book = createBook();
     const router = new Router().copy('/books', { response: bookGuard }, async (context, next) =>
       next({ ...context, json: book })
@@ -270,7 +270,7 @@ describe('Router', () => {
     );
   });
 
-  it('should set status to 204 when no json returns', async () => {
+  void it('should set status to 204 when no json returns', async () => {
     const router = new Router().copy('/books', {}, async (context, next) => next(context));
     await router.routes()(
       createRequestContext(RequestMethod.COPY, '/books'),
@@ -281,7 +281,7 @@ describe('Router', () => {
     );
   });
 
-  it('should throw related error when input or output guard failed', async () => {
+  void it('should throw related error when input or output guard failed', async () => {
     const run = new Router()
       .post(
         '/books',
@@ -311,7 +311,7 @@ describe('Router', () => {
     );
   });
 
-  it('should throws error', async () => {
+  void it('should throws error', async () => {
     const run = createRouter()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
         throw new RequestError('Message 1');
@@ -332,7 +332,7 @@ describe('Router', () => {
     );
   });
 
-  it('should pack the given router to the original router when calling `.pack()`', () => {
+  void it('should pack the given router to the original router when calling `.pack()`', () => {
     const router1 = createRouter('/books').get(
       '/books',
       {
@@ -373,7 +373,7 @@ describe('Router', () => {
     assert.ok(!router1.findRoute('get', '/books/books/:id'));
   });
 
-  it('should throw when init router with non-normalized prefix', () => {
+  void it('should throw when init router with non-normalized prefix', () => {
     // @ts-expect-error for testing
     assert.throws(() => new Router('//'), TypeError);
     // @ts-expect-error for testing
@@ -384,7 +384,7 @@ describe('Router', () => {
     assert.throws(() => new Router('/foo/bar/'), TypeError);
   });
 
-  it('should throw when there is no response guard but a response json is provided', async () => {
+  void it('should throw when there is no response guard but a response json is provided', async () => {
     const run = new Router()
       .get('/books', {}, async (context, next) => next({ ...context, json: { books: [] } }))
       .routes();
@@ -395,7 +395,7 @@ describe('Router', () => {
     );
   });
 
-  it('should do nothing when no route matches', async () => {
+  void it('should do nothing when no route matches', async () => {
     const run = new Router()
       .get('/books', { response: z.object({ books: bookGuard.array() }) }, () => {
         throw new RequestError('Message 1');
@@ -431,7 +431,7 @@ describe('Router', () => {
     );
   });
 
-  it('should build proper OpenAPI JSON', async () => {
+  void it('should build proper OpenAPI JSON', async () => {
     const { default: Validator } = OpenAPISchemaValidator;
     const validator = new Validator({ version: 3 });
 

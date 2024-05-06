@@ -11,8 +11,8 @@ const typeLiterals = Object.freeze({
   json: 'json',
 });
 
-describe('findType()', () => {
-  it('should return proper type when matches', () => {
+void describe('findType()', () => {
+  void it('should return proper type when matches', () => {
     assert.strictEqual(findType('int64'), typeLiterals.number);
     assert.strictEqual(findType('serial'), typeLiterals.number);
     assert.strictEqual(findType('numeric'), typeLiterals.number);
@@ -23,15 +23,15 @@ describe('findType()', () => {
     assert.strictEqual(findType('jsonb'), typeLiterals.json);
   });
 
-  it('should return undefined when no match', () => {
+  void it('should return undefined when no match', () => {
     assert.strictEqual(findType('number'), undefined);
     assert.strictEqual(findType(), undefined);
     assert.strictEqual(findType(''), undefined);
   });
 });
 
-describe('parseRawConfigs()', () => {
-  it('should parse as expected', () => {
+void describe('parseRawConfigs()', () => {
+  void it('should parse as expected', () => {
     assert.deepStrictEqual(
       parseRawConfigs(`
       create table if not exists tests
@@ -85,8 +85,8 @@ describe('parseRawConfigs()', () => {
   });
 });
 
-describe('parsePrimitiveType()', () => {
-  it('should parse correctly', () => {
+void describe('parsePrimitiveType()', () => {
+  void it('should parse correctly', () => {
     assert.strictEqual(parsePrimitiveType(false, 'boolean'), false);
     assert.strictEqual(parsePrimitiveType(12_345, 'number'), 12_345);
     assert.strictEqual(parsePrimitiveType('12345', 'number'), 12_345);
@@ -98,7 +98,7 @@ describe('parsePrimitiveType()', () => {
     assert.deepStrictEqual(parsePrimitiveType(12_345, 'date'), new Date(12_345));
   });
 
-  it('should return undefined when parse failed', () => {
+  void it('should return undefined when parse failed', () => {
     assert.strictEqual(parsePrimitiveType('false', 'boolean'), undefined);
     assert.strictEqual(parsePrimitiveType('not_a_number', 'number'), undefined);
     assert.strictEqual(parsePrimitiveType(Number.NaN, 'number'), undefined);
@@ -111,8 +111,8 @@ describe('parsePrimitiveType()', () => {
   });
 });
 
-describe('camelCase()', () => {
-  it('should parse properly', () => {
+void describe('camelCase()', () => {
+  void it('should parse properly', () => {
     assert.strictEqual(camelCase(''), '');
     assert.strictEqual(camelCase('____foo_bar-baz'), 'fooBarBaz');
     assert.strictEqual(camelCase('---even_number_1_is_ok___'), 'evenNumber1IsOk');

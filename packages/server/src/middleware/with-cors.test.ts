@@ -22,7 +22,7 @@ const mockContext: (
 
 const endpointUrl = new URL('https://to.log:3000');
 
-describe('withCors()', () => {
+void describe('withCors()', () => {
   const assertHeaders = (
     context: RequestContext,
     origin: string | undefined,
@@ -41,7 +41,7 @@ describe('withCors()', () => {
     });
   };
 
-  it('should set status to 204 for preflight requests', async () => {
+  void it('should set status to 204 for preflight requests', async () => {
     await withCors()(
       mockContext(endpointUrl, { origin: 'http://localhost:3000' }),
       async (context) => {
@@ -51,7 +51,7 @@ describe('withCors()', () => {
     );
   });
 
-  it('should be adaptive for origin by default', async () => {
+  void it('should be adaptive for origin by default', async () => {
     await withCors()(
       mockContext(endpointUrl, { origin: 'http://localhost:3000' }),
       async (context) => {
@@ -63,7 +63,7 @@ describe('withCors()', () => {
     });
   });
 
-  it('should return no origin header if match failed', async () => {
+  void it('should return no origin header if match failed', async () => {
     await Promise.all([
       withCors({ allowedOrigin: 'http://localhost' })(mockContext(endpointUrl), async (context) => {
         // eslint-disable-next-line unicorn/no-useless-undefined
@@ -86,7 +86,7 @@ describe('withCors()', () => {
     ]);
   });
 
-  it('should show proper origin', async () => {
+  void it('should show proper origin', async () => {
     const withCorsRegExp = withCors({ allowedOrigin: /https?:\/\/logto.io/ });
     await Promise.all(
       ['http://logto.io', 'https://logto.io:2000'].map(async (origin) =>
@@ -104,7 +104,7 @@ describe('withCors()', () => {
     );
   });
 
-  it('should show proper headers', async () => {
+  void it('should show proper headers', async () => {
     const withCorsRegExp = withCors({ allowedHeaders: /content-.*/ });
     await withCorsRegExp(
       mockContext(endpointUrl, {
@@ -124,7 +124,7 @@ describe('withCors()', () => {
     );
   });
 
-  it('should show proper methods', async () => {
+  void it('should show proper methods', async () => {
     await withCors({ allowedMethods: ['GET', 'DELETE'] })(
       mockContext(endpointUrl),
       async (context) => {
@@ -133,7 +133,7 @@ describe('withCors()', () => {
     );
   });
 
-  it('should show proper max-age and allow-credentials header', async () => {
+  void it('should show proper max-age and allow-credentials header', async () => {
     await withCors({ maxAge: 100, allowCredentials: true })(
       mockContext(endpointUrl),
       async (context) => {
@@ -142,7 +142,7 @@ describe('withCors()', () => {
     );
   });
 
-  it('should return only origin header for non-preflight requests', async () => {
+  void it('should return only origin header for non-preflight requests', async () => {
     await withCors({ allowCredentials: true })(
       mockContext(endpointUrl, { origin: 'http://localhost:3000' }, RequestMethod.POST),
       async (context) => {
