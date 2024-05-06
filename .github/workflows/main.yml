@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node and pnpm
         uses: silverhand-io/actions-node-pnpm-run-steps@v3
         with:
-          node-version: 20
+          node-version: 20.9 # temporary workaround, will fix soon
 
       - name: Build
         run: pnpm -r build --sourcemap
