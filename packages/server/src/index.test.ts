@@ -125,3 +125,41 @@ describe('createServer()', () => {
     }, 0);
   });
 });
+
+describe('request id', () => {
+  it('should generate a request id for each request', async () => {
+    const server = createServer({ requestId: { enabled: true }, port: 9001 });
+    const requestIds = new Set<string>();
+    await server.listen();
+
+    await Promise.all(
+      Array.from({ length: 20 }).map(async () => {
+        const { headers } = await fetch('http://localhost:9001');
+        const requestId = headers.get('x-request-id');
+
+        if (requestId) {
+          requestIds.add(requestId);
+        }
+      })
+    );
+
+    assert.strictEqual(requestIds.size, 20);
+    await server.close();
+  });
+
+  it('should generate a request id and set it to the custom header', async () => {
+    const server = createServer({
+      requestId: { enabled: true, headerName: 'Custom-Request-Id' },
+      port: 9002,
+    });
+    await server.listen();
+
+    const { headers } = await fetch('http://localhost:9002');
+    const requestId = headers.get('custom-request-id');
+
+    assert.ok(requestId);
+    assert.match(requestId, /.+/);
+
+    await server.close();
+  });
+});
