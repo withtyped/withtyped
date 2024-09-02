@@ -1,5 +1,12 @@
 # @withtyped/postgres
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [d41bdb7]
+  - @withtyped/server@0.14.0
+
 ## 0.13.0
 
 ### Patch Changes
