@@ -1,5 +1,13 @@
 # @withtyped/server
 
+## 0.14.0
+
+### Minor Changes
+
+- d41bdb7: add error details to the RequestError body
+
+  Append `RequestError` original error details to the error response body. This will help to provide more error context to the client.
+
 ## 0.13.6
 
 ### Patch Changes

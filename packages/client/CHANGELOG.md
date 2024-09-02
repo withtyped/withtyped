@@ -1,5 +1,12 @@
 # @withtyped/client
 
+## 0.8.8
+
+### Patch Changes
+
+- Updated dependencies [d41bdb7]
+  - @withtyped/server@0.14.0
+
 ## 0.8.7
 
 ### Patch Changes
