@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { promisify } from 'node:util';
 
-import { trySafe } from '@silverhand/essentials';
+import { conditional, trySafe } from '@silverhand/essentials';
 import { color, contentTypes, log } from '@withtyped/shared';
 import { nanoid } from 'nanoid';
 
@@ -61,6 +61,7 @@ export const handleError = async (response: http.ServerResponse, error: unknown)
 
   await getWriteResponse(response)({
     message: requestError?.message ?? 'Internal server error.',
+    ...conditional(requestError?.original ? { error: requestError.original } : undefined),
   });
 
   await promisifyEnd(response)();

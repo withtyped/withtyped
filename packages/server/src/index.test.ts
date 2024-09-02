@@ -71,6 +71,21 @@ void describe('createServer()', () => {
     assert.ok(composer.calledOnce && composer.calledWith({}));
   });
 
+  void it('should be able to parse RequestError with error details', async () => {
+    const Composer = sinon.spy(
+      compose(() => {
+        throw new RequestError('composer request error', 422, { code: 'error_code' });
+      })
+    );
+
+    // @ts-expect-error for testing
+    const { server } = createServer({ composer: Composer, logLevel: 'none' });
+    await request(server)
+      .get('/')
+      .expect(422, { message: 'composer request error', error: { code: 'error_code' } });
+    assert.ok(Composer.calledOnce && Composer.calledWith({}));
+  });
+
   void it('should be able to call listener callback', async () => {
     const listener = sinon.fake();
     const { server, listen } = createServer({ port: 3001 });
