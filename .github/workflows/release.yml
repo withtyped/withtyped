@@ -29,10 +29,9 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Setup Node and pnpm
-        uses: silverhand-io/actions-node-pnpm-run-steps@v4
+        uses: silverhand-io/actions-node-pnpm-run-steps@v5
         with:
-          # Remove until https://github.com/sinonjs/sinon/issues/2590 is resolved
-          node-version: 20.11.1
+          pnpm-version: 9
 
       - name: Configure Git user
         run: |
