@@ -1,3 +1,4 @@
+import { trySafe } from '@silverhand/essentials';
 import { Transaction, QueryClient } from '@withtyped/server';
 import type { QueryResult } from '@withtyped/server';
 import { camelCase } from '@withtyped/server/model';
@@ -70,8 +71,21 @@ export class PostgresTransaction extends Transaction<PostgreSql> {
       const result = await this.client.query<Result, Args>(text, args);
       return this.#transformer.transform(result);
     } catch (error: unknown) {
-      await this.client.query('rollback');
-      this.client.release();
+      await trySafe(
+        async () => {
+          await this.client.query('rollback');
+          this.client.release();
+        },
+        (rollbackError) => {
+          log.warn('Failed to roll back the transaction:', rollbackError);
+          // The connection is broken (e.g. it died before the rollback could run); passing an
+          // error makes `pg` destroy it instead of returning it to the pool. The release is
+          // guarded so it can never mask the original error rethrown below.
+          trySafe(() => {
+            this.client.release(rollbackError instanceof Error ? rollbackError : true);
+          });
+        }
+      );
       throw error;
     }
   }
