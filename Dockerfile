@@ -1,11 +1,11 @@
 # Build stage
-FROM node:18-alpine as builder
+FROM node:20-alpine AS builder
 WORKDIR /etc/sample
 ENV CI=true
 COPY . .
 
 # Install toolchain
-RUN npm add --location=global pnpm@^8.6
+RUN npm add --location=global pnpm@^9
 
 # Install dependencies and build
 RUN pnpm i
@@ -19,7 +19,7 @@ RUN NODE_ENV=production pnpm i
 RUN rm -rf pnpm-*.yaml
 
 # Seal stage
-FROM node:18-alpine as app
+FROM node:20-alpine AS app
 WORKDIR /etc/sample
 COPY --from=builder /etc/sample .
 EXPOSE 9001
