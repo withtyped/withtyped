@@ -126,6 +126,43 @@ void describe('PostgresTransaction', () => {
     assert.ok(fakeClient.release.calledOnceWithExactly());
   });
 
+  void it('should destroy the client when the rollback itself fails', async () => {
+    const fakeClient = new FakePoolClient();
+    // @ts-expect-error for testing
+    const transaction = new PostgresTransaction(fakeClient);
+
+    await transaction.start();
+
+    const query = sql`select * from samurai;`;
+    const error = new Error('Some transaction error.');
+    const rollbackError = new Error('Connection terminated unexpectedly.');
+    fakeClient.query.onSecondCall().rejects(error);
+    fakeClient.query.onThirdCall().rejects(rollbackError);
+    // The original statement error is rethrown, not the rollback error.
+    await assert.rejects(transaction.query(query), error);
+
+    assert.ok(fakeClient.query.calledWithExactly('rollback'));
+    assert.ok(fakeClient.release.calledOnceWithExactly(rollbackError));
+  });
+
+  void it('should rethrow the original error even when the client cannot be released', async () => {
+    const fakeClient = new FakePoolClient();
+    // @ts-expect-error for testing
+    const transaction = new PostgresTransaction(fakeClient);
+
+    await transaction.start();
+
+    const query = sql`select * from samurai;`;
+    const error = new Error('Some transaction error.');
+    fakeClient.query.onSecondCall().rejects(error);
+    fakeClient.query.onThirdCall().rejects(new Error('Connection terminated unexpectedly.'));
+    fakeClient.release.throws(
+      new Error('Release called on client which has already been released to the pool.')
+    );
+
+    await assert.rejects(transaction.query(query), error);
+  });
+
   void it('should be able to transform the result to camelCase', async () => {
     const fakeClient = new FakePoolClient();
     // @ts-expect-error for testing
