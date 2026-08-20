@@ -1,5 +1,12 @@
 # @withtyped/sample
 
+## 0.3.30
+
+### Patch Changes
+
+- Updated dependencies [7761cef]
+  - @withtyped/postgres@1.0.1
+
 ## 0.3.29
 
 ### Patch Changes
