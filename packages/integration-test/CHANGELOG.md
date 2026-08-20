@@ -1,5 +1,12 @@
 # @withtyped/integration-test
 
+## 0.7.30
+
+### Patch Changes
+
+- Updated dependencies [7761cef]
+  - @withtyped/postgres@1.0.1
+
 ## 0.7.29
 
 ### Patch Changes
